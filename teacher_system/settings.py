@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     # 三方应用
     # 自建应用
     'accounts',
-    'accessments',
+    'assessments',
 ]
 
 MIDDLEWARE = [
