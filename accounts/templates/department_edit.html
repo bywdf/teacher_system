@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% block title %}部门管理{% endblock title %}
+{% block title_d %}编辑{% endblock title_d %}
+
 {% block content %}
 <form method='post'>
   {% csrf_token %}
@@ -19,8 +22,7 @@
                   </div> 
 
                   <button type="submit" class="btn btn-primary">提交</button> 
-            <div>
-            
+            <div>           
     
             </div>
         </div>

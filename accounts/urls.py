@@ -12,6 +12,12 @@ urlpatterns = [
     path('department/multi/', department.department_multi),   
     
     # 学科管理
-    
+    path('subject/list/', subject.subject_list),
+    path('subject/add/', subject.subject_add),
+    path('subject/delete/', subject.subject_delete),
+    path('subject/edit/', subject.subject_edit),
+    path('subject/detail/', subject.subject_detail),
+    path('subject/multi/', subject.subject_multi),   
+      
     # 账户管理
 ]
