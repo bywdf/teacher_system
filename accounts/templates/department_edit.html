@@ -1,31 +1,28 @@
 {% extends "base.html" %}
-
-{% block title %}部门管理{% endblock title %}
-{% block title_d %}编辑{% endblock title_d %}
-
+{% block title %}
+  部门管理
+{% endblock title %}
+{% block title_d %}
+  编辑
+{% endblock title_d %}
 {% block content %}
-<form method='post'>
-  {% csrf_token %}
-        <div class='box'>
-
-          <div class="panel panel-default">
-            <!-- Default panel contents -->
-            <div class="panel-heading">
-              <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-              修改部门
-            </div>
-
-            <div class='panel-body'>
-                <div class="form-group">
-                    <label>原来：{{ row_object.title }}</label>
-                    <input type="text" class="form-control" placeholder="修改为" name='title'>
-                  </div> 
-
-                  <button type="submit" class="btn btn-primary">提交</button> 
-            <div>           
-    
-            </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="box">
+      <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">
+          <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+          修改部门
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>原来：{{ row_object.title }}</label>
+            <input type="text" class="form-control" placeholder="修改为" name="title">
+          </div>
+          <button type="submit" class="btn btn-primary">提交</button>
         </div>
       </div>
-  
-{% endblock content %} 
+    </div>
+  </form>
+{% endblock content %}

@@ -1,0 +1,6 @@
+{
+  "html.format.enable": true,
+  "django.format.enable": true,
+  "django.format.indent": "    ",
+  "django.format.wrapAttributes": "force-aligned"
+}

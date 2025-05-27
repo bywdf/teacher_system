@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    学年管理
+{% endblock title %}
+{% block title_d %}
+    全部学年列表
+{% endblock title_d %}
+{% block content %}
+    <div class="box">
+        <div style='margin-bottom: 10px;margin-top: 10px'>
+            <input type="button"
+                   value="新建学年1"
+                   class='btn btn-success'
+                   data-toggle="modal"
+                   data-target="#myModal">
+            <input id='btnAdd' type="button" value="新建学年2" class='btn btn-success'>
+        </div>
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                学年列表
+            </div>
+            <!-- Table -->
+            <table class="table table-bsubjected">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in queryset %}
+                        <tr uid="{{ obj.id }}">
+                            <td>{{ obj.id }}</td>
+                            {% comment %} <td>{{ obj.name }}</td> {% endcomment %}
+                            <td>{{ obj.name }}</td>
+                            <td>
+                                <input uid="{{ obj.id }}"
+                                       type="button"
+                                       class='btn btn-primary btn-xs btn-edit'
+                                       value='编辑'>
+                                <input uid="{{ obj.id }}"
+                                       type="button"
+                                       class='btn btn-danger btn-xs btn-delete'
+                                       value="删除">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- 分页标签 -->
+        <div class="box-footer">
+            <ul class="pagination" style="float:right; margin-top:10px;">
+                {{ page_string }}
+            </ul>
+        </div>
+    </div>
+    <!-- 新建/编辑 订单(模态对话框) -->
+    <div class="modal fade"
+         id="myModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">新建</h4>
+                </div>
+                <div class="modal-body">
+                    <form id='formAdd'>
+                        <div class='clearfix'>
+                            {% for field in form %}
+                                <!-- <div class='col-xs-6'>栅格根据实际情况自己调整 6是半格-->
+                                <div class='col-xs-12'>
+                                    <div class='form-group' style='position: relative;margin-bottom: 25px;'>
+                                        <label>{{ field.label }}</label>
+                                        {{ field }}
+                                        <span class='error-msg' style='color: red;position: absolute;'></span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+                    <button id='btnSave' type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 删除对话框 (模态对话框)-->
+    <div class="modal fade"
+         id="deleteModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                <h4>是否确定删除？</h4>
+                <p style='margin: 10px 0px;'>删除后，所有关联的相关数据都会被删除，您确定删除吗？</p>
+                <p style='text-align: right;'>
+                    <button id='btnConfirmDelete' type="button" class="btn btn-danger">确 定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block js %}
+    <script type='text/javascript'>
+        var DELETE_ID;
+        var EDIT_ID;
+
+        $(function(){
+            bindBtnAddEvent();
+            bindBtnSaveEvent();
+            bindBtnDeleteEvent();
+            bindBtnConfirmDeleteEvent();
+            bindBtnEditEvent();
+        })
+
+        function bindBtnAddEvent(){
+            $('#btnAdd').click(function(){
+                // 将在编辑的ID设置为空
+                EDIT_ID = undefined;
+
+                // 清除错误信息
+                $('.error-msg').empty();
+
+                // 清空对话框中的数据
+                $("#formAdd")[0].reset();
+
+                $("#myModalLabel").text("新建");
+                // 点击新建按钮，显示对话框
+                $('#myModal').modal('show');
+            });
+        }
+
+        function bindBtnSaveEvent(){
+            $('#btnSave').click(function(){
+                //alert('保存成功');
+                // 清除错误信息
+                $('.error-msg').empty();
+
+                if (EDIT_ID){
+                    // 编辑
+                    doEdit();
+                } else {
+                    // 添加
+                    doAdd();
+                }      
+            });
+        }
+
+        function doEdit(){
+            $.ajax({
+                url:"/assessments/termyear/edit/" + "?uid=" + EDIT_ID,      // -> /assessments/termyear/edit/?uid=123
+                type:"post",
+                data:$('#formAdd').serialize(),
+                dataType:'JSON',
+                success:function(res){
+                    // console.log(res);
+                   if(res.status){
+
+                        // 清空表单 $('#formAdd')是jQuery对象-->$('#formAdd')[0]是DOM对象
+                        $('#formAdd')[0].reset();
+
+                        // 关闭对话框
+                        $("#myModal").modal('hide');
+
+                        // 刷新页面
+                        location.reload();
+
+                    } else {
+                            if (res.tips){
+                                alert(res.tips);
+                            } else {
+                                //把错误信息显示在对话框中
+                                $.each(res.error, function(name,errorList){
+                                    $('#id_'+name).next().text(errorList[0]);
+                                })
+                            }
+                    } 
+                }
+            })
+        }
+
+        function doAdd(){
+            // 向后台提交数据
+            $.ajax({
+                url:"/assessments/termyear/add/",
+                type:"post",
+                data:$('#formAdd').serialize(),
+                dataType:'JSON',
+                success:function(res){
+                    // console.log(res);
+                   if(res.status){
+                        alert('创建成功');
+                        // 清空表单 $('#formAdd')是jQuery对象-->$('#formAdd')[0]是DOM对象
+                        $('#formAdd')[0].reset();
+
+                        // 关闭对话框
+                        $("#myModal").modal('hide');
+
+                        // 刷新页面
+                        location.reload();
+
+                    }else{
+                        //把错误信息显示在对话框中
+                        $.each(res.error, function(name,errorList){
+                            $('#id_'+name).next().text(errorList[0]);
+                        })
+                    } 
+                }
+            })
+        }
+
+
+
+        function bindBtnDeleteEvent(){
+            $('.btn-delete').click(function(){
+                // alert('点击了删除')
+                // 显示删除对话框
+                $('#deleteModal').modal('show');
+
+                // 获取当前行的ID，并赋值给全局变量
+                var uid = $(this).attr('uid');
+                DELETE_ID = uid; // 新增此行，确保uid赋值给全局变量
+                console.log(uid);
+            });
+        }
+
+        function bindBtnConfirmDeleteEvent(){
+            $('#btnConfirmDelete').click(function(){
+                // 点击确认删除按钮，将全局变量中设置的那个要删除的ID发送到后台
+                $.ajax({
+                    url:'/assessments/termyear/delete/',   // /assessments/termyear/ + 'DELETE_ID' +delete/
+                    type:'GET',
+                    data:{
+                        uid:DELETE_ID
+                    },
+                    dataType:'JSON',
+                    // res是ajax请求后台后回调的获取的json数据
+                    success:function(res){
+                        if(res.status){
+                            // alert('删除成功');
+
+                            // 隐藏删除框
+                            // $("#deleteModal").modal('hide');
+
+                            // 在页面上将当前一行数据删除（js）
+                            // $("tr[uid='" + DELETE_ID + "']").remove();
+
+                            // 要删除的ID置空
+                            //  DELETE_ID = 0;   
+                            
+                            // 更简单的思路，页面刷新
+                            location.reload();
+
+                        }else{
+                            //删除失败
+                            alert(res.error);
+                        }
+                    }
+                })
+            });
+        }
+
+        function bindBtnEditEvent(){
+            $('.btn-edit').click(function(){
+
+
+                // 清除错误信息
+                $('.error-msg').empty();
+
+                // 清空对话框中的数据
+                $("#formAdd")[0].reset();
+                
+                var uid = $(this).attr('uid');
+                EDIT_ID = uid; 
+
+                
+                // 发送Ajax去后端获取当前行的相关数据  /assessments/termyear/detail/?uid=123
+                $.ajax({
+                        url:"/assessments/termyear/detail/",
+                        type:'get',
+                        data:{
+                            uid: uid
+                        },
+                        dataType:'JSON',
+                        success: function(res){
+                            if(res.status){
+                                // 将数据赋值到对话框中的标签
+                                $.each(res.data, function(name, value){
+                                    $("#id_" + name).val(value);
+                                });
+
+                                // 修改对话框标题
+                                $("#myModalLabel").text("编辑");
+
+                                // 点击编辑，显示对话框
+                                $('#myModal').modal('show');
+
+                            }else{
+                                alert(res.error);
+                            }
+                        }
+                    })
+            });
+        }
+
+    </script>
+{% endblock js %}

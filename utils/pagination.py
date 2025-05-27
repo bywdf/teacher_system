@@ -4,7 +4,7 @@
 # 导入
 from app01.utils.pagination import Pagination
 
-# 在试图函数中
+# 在视图函数中
 def pretty_list(request):
 
     # 1.根据自己的实际情况去筛选自己的数据
