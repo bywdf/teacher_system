@@ -1,13 +1,20 @@
 from django.urls import path
-from assessments.views import termyear
+from assessments.views import semester, assessdepart
+
+app_name = 'assessments'
 
 urlpatterns = [
     # 学年管理
-    path('termyear/list/', termyear.termyear_list, name='termyear_list'),
-    path('termyear/add/', termyear.termyear_add, name='termyear_add'),
-    path('termyear/delete/', termyear.termyear_delete, name='termyear_delete'),
-    path('termyear/detail/', termyear.termyear_detail, name='termyear_detail'),
-    path('termyear/edit/', termyear.termyear_edit, name='termyear_edit'),
+    path('semester/list/', semester.semester_list, name='semester_list'),
+    path('semester/add/', semester.semester_add, name='semester_add'),
+    path('semester/delete/', semester.semester_delete, name='semester_delete'),
+    path('semester/detail/', semester.semester_detail, name='semester_detail'),
+    path('semester/edit/', semester.semester_edit, name='semester_edit'),
     
-    # 
+    # 考核分组管理
+    path('assessdepart/list/', assessdepart.assessdepart_list, name='assessdepart_list'),
+    path('assessdepart/add/', assessdepart.assessdepart_add, name='assessdepart_add'),
+    path('assessdepart/delete/', assessdepart.assessdepart_delete, name='assessdepart_delete'),
+    path('assessdepart/detail/', assessdepart.assessdepart_detail, name='assessdepart_detail'),
+    path('assessdepart/edit/', assessdepart.assessdepart_edit, name='assessdepart_edit'),
 ]
