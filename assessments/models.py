@@ -29,7 +29,8 @@ class Semester(models.Model):
         ('last', '上学期'),
         ('next', '下学期'),
     )
-    semester_type = models.CharField(max_length=20, choices=Semester_Choices,verbose_name='学期')
+    semester_type = models.CharField(
+        max_length=20, choices=Semester_Choices, verbose_name='学期')
 
     class Meta:
         unique_together = ('year', 'semester_type')
@@ -46,6 +47,8 @@ class TermType(models.Model):
         ('semester', '学期总评'),
     )
     term_type = models.CharField(max_length=20, choices=Term_Choices)
+    start_date = models.DateField()  # 考核开始日期
+    end_date = models.DateField()   # 考核结束日期
 
     def __str__(self):
         return self.get_term_type_display()
@@ -53,8 +56,6 @@ class TermType(models.Model):
 
 class TeacherBase(models.Model):
     '''文化课教师教师考核表(公共部分)'''
-    start_date = models.DateField()  # 考核开始日期
-    end_date = models.DateField()   # 考核结束日期
     week = models.IntegerField()  # 考核周期(周数)
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
@@ -92,7 +93,7 @@ class TeacherBase(models.Model):
         # 验证周数
         if not hasattr(self, 'week') or self.week <= 0:
             raise ValidationError("考核周数必须为正整数")
-        
+
         # 空值安全处理
         workloads = [
             self.class_hours or 0,
@@ -100,11 +101,12 @@ class TeacherBase(models.Model):
             self.extra_work_hours or 0
         ]
         self.total_workload = sum(workloads)
-        
+
         # 工作量计算（带边界保护）
         weekly_workload = self.total_workload / self.week
-        self.workload_score = max(0, min(10, 4.5 + (weekly_workload - 10) * 0.1))
-        
+        self.workload_score = max(
+            0, min(10, 4.5 + (weekly_workload - 10) * 0.1))
+
         # 总分计算
         scores = [
             self.workload_score,
@@ -113,7 +115,7 @@ class TeacherBase(models.Model):
             self.group_score or 0
         ]
         self.total_score = round(sum(scores), 3)
-        
+
         super().save(*args, **kwargs)
 
 
@@ -150,8 +152,6 @@ class TeacherFinalAccess(TeacherBase):
 
 class TeacherSemesterAccess(models.Model):
     '''文化课教师学期总评成绩'''
-    start_date = models.DateField()  # 考核开始日期
-    end_date = models.DateField()   # 考核结束日期
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
@@ -174,20 +174,40 @@ class TeacherSemesterAccess(models.Model):
         unique_together = ('teacher', 'semester')  # 添加唯一约束
         verbose_name = '文化课教师学期总评成绩'
         verbose_name_plural = '文化课教师学期总评成绩'
-        
 
     def save(self, *args, **kwargs):
         # 使用防御性编程处理空值
         mid = self.mid_score.total_score if self.mid_score else 0
         final = self.final_score.total_score if self.final_score else 0
-        
+
         # 总成绩是期中期末直接相加,保留三位小数
         self.total_score = mid + final
         super().save(*args, **kwargs)
 
 
-class MusicTeacherAccess(models.Model):
+class ArtTeacherBase(models.Model):
     '''艺术教师考核成绩'''
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    class_hours = models.FloatField(verbose_name='课堂教学节数', blank=True, null=True)
+    major_hours = models.FloatField(verbose_name='专业课培训节数', blank=True, null=True)
+    extra_work_hours = models.FloatField(verbose_name='额外工作量', blank=True, null=True)
+    total_workload = models.FloatField(
+        verbose_name='总工作量节数', blank=True, null=True)
+    workload_score = models.FloatField(
+        verbose_name='课时工作量成绩', blank=True, null=True)
+    teach_book = models.FloatField(verbose_name='常规教学薄成绩', blank=True, null=True)
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
     class Meta:
+        abstract = True
         verbose_name = '艺术教师考核成绩'
         verbose_name_plural = '艺术教师考核成绩'
+     
