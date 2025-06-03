@@ -1,9 +1,17 @@
 from django.urls import path
-from accounts.views import account, department, subject
+from accounts.views import user, department, subject, account
 
 app_name = 'accounts'
 
 urlpatterns = [
+    # 用户管理
+    path('user/list/', user.user_list, name='user_list'),
+    path('user/add/', user.user_add, name='user_add'),
+    path('user/<int:nid>/delete/', user.user_delete, name='user_delete'),
+    path('user/<int:nid>/edit/', user.user_edit, name='user_edit'),
+    # path('user/multi/', user.user_multi, name='user_multi'),
+    path('user/<int:nid>/reset/', user.user_reset, name='user_reset'),
+    
     # 部门管理
     path('department/list/', department.department_list, name='department_list'),
     path('department/add/', department.department_add, name='department_add'),

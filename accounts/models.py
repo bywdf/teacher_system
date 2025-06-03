@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Department(models.Model):
-    '''年级（部门）'''
+    """年级（部门）"""
     title = models.CharField(max_length=100, verbose_name="年级（部门）")
 
     def __str__(self):
@@ -13,7 +13,7 @@ class Department(models.Model):
 
 
 class Subject(models.Model):
-    '''任教学科'''
+    """任教学科"""
     title = models.CharField(max_length=100, verbose_name="学科")
 
     def __str__(self):
