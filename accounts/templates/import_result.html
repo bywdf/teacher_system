@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row">
+    <div class="box">
+      <h1>导入结果</h1>
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <a href="{% url 'accounts:user_list' %}">返回导入页面</a>
+    </div>
+  </div>
+{% endblock content %}

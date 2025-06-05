@@ -29,48 +29,129 @@
             </div>
           </div>
         </div>
+        <div class="box-body">
+          <div id="example2_wrapper"
+               class="dataTables_wrapper form-inline dt-bootstrap">
+            <div class="row">
+              <div class="col-sm-6"></div>
+              <div class="col-sm-6"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <!-- Table -->
+                <table id="example2"
+                       class="table table-bordered table-hover dataTable"
+                       role="grid"
+                       aria-describedby="example2_info">
+                  <thead>
+                    <tr role="row">
+                      <th>ID</th>
+                      <th>用户名</th>
+                      <th>姓名</th>
+                      <th>性别</th>
+                      <th>学科</th>
+                      <th>所在年级（部门）</th>
+                      <th>手机号</th>
+                      <th>重置密码</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for obj in queryset %}
+                      <tr role="row">
+                        <th scope="row">{{ obj.id }}</th>
+                        <td>{{ obj.username }}</td>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.get_gender_display }}</td>
+                        <td>{{ obj.subject }}</td>
+                        <td>{{ obj.department.title }}</td>
+                        <td>{{ obj.phone }}</td>
+                        <td>
+                          <a href="{% url 'accounts:user_reset' obj.id %}">重置密码</a>
+                        </td>
+                        <td>
+                          {% comment %} <a class="btn  btn-primary btn-xs" href="/user/{{ obj.id }}/edit/">编辑</a>
+                          <a class="btn btn-danger btn-xs" href="/user/{{ obj.id }}/delete/">删除</a> {% endcomment %}
+                          <a class="btn  btn-primary btn-xs"
+                             href="{% url "accounts:user_edit" obj.id %}">编辑</a>
+                          <a class="btn btn-danger btn-xs"
+                             href="javascript:void(0);"
+                             onclick="deleteItem('{{ obj.id }}', this);">删除</a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <!--End Table -->
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="dataTables_info"
+                     id="example2_info"
+                     role="status"
+                     aria-live="polite">每页展示10条数据</div>
+              </div>
+              <div class="col-sm-7">
+                <div class="dataTables_paginate paging_simple_numbers"
+                     id="example2_paginate">
+                  <ul class="pagination">
+                    {{ page_string }}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="box-body">
-        <!-- Table -->
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>用户名</th>
-              <th>姓名</th>
-              <th>性别</th>
-              <th>学科</th>
-              <th>所在年级（部门）</th>
-              <th>手机号</th>
-              <th>重置密码</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for obj in queryset %}
-              <tr>
-                <th scope="row">{{ obj.id }}</th>
-                <td>{{ obj.username }}</td>
-                <td>{{ obj.name }}</td>
-                <td>{{ obj.get_gender_display }}</td>
-                <td>{{ obj.subject }}</td>
-                <td>{{ obj.depart.title }}</td>
-                <td>{{ obj.phone }}</td>
-                <td><a href="{% url 'accounts:user_reset' obj.id %}">重置密码</a></td>
-                <td>
-                  {% comment %} <a class="btn  btn-primary btn-xs" href="/user/{{ obj.id }}/edit/">编辑</a>
-                  <a class="btn btn-danger btn-xs" href="/user/{{ obj.id }}/delete/">删除</a> {% endcomment %}
-                  <a class="btn  btn-primary btn-xs"
-                     href="{% url "accounts:user_edit" obj.id %}">编辑</a>
-                  <a class="btn btn-danger btn-xs"
-                     href="{% url "accounts:user_delete" obj.id %}">删除</a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="box">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            批量上传
+          </div>
+          <div class="panel-body">
+            <form method="post"
+                  enctype="multipart/form-data"
+                  action="{% url "accounts:import_users" %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label>选择Excel文件:</label>
+                <input type="file" name="excel_file" required>
+              </div>
+              <button type="submit" class="btn btn-primary">导入</button>
+            </form>
+          </div>
+        </div>
       </div>
-      <div class="box-footer"></div>
     </div>
   </div>
 {% endblock content %}
+{% block js %}
+  <script>
+    function deleteItem(id, element) {
+      if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
+        // 构建删除URL
+        const deleteUrl = `/accounts/user/delete/?nid=${id}`;
+
+        // 创建临时表单用于提交删除请求（防止URL参数被篡改）
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = deleteUrl;
+
+        // 添加CSRF令牌（如果使用Django等需要CSRF保护的框架）
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (csrfToken) {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = csrfToken.value;
+          form.appendChild(csrfInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+{% endblock js %}

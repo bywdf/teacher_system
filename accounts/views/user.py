@@ -1,15 +1,15 @@
 from django.shortcuts import render, redirect
 from django import forms
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-
-
+from django.contrib import messages
+from openpyxl import load_workbook
 
 from accounts import models
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 from utils.encrypt import md5
+
+from accounts.forms import ImportUsersForm
 
 
 
@@ -48,7 +48,7 @@ class UserModelForm(BootStrapModelForm):
     
     class Meta:
         model = models.User
-        fields = ['username', 'name', 'gender', 'phone', 'email', 'idnumber', 'department', 'subject', 'password', 'confirm_password']
+        fields = ['username', 'name', 'gender', 'phone', 'department', 'subject', 'password']
         widgets = {
             'password': forms.PasswordInput(render_value=True),
         }
@@ -84,7 +84,7 @@ def user_add(request):
 class UserEditModelForm(BootStrapModelForm):
     class Meta:
         model = models.User
-        fields = ['username']
+        fields = ['username', 'name', 'gender', 'phone', 'department', 'subject']
 
 
 def user_edit(request, nid):
@@ -102,14 +102,15 @@ def user_edit(request, nid):
     form = UserEditModelForm(data=request.POST, instance=row_object)
     if form.is_valid():
         form.save()
-        return redirect('/user/list/')
+        return redirect('accounts:user_list')
     return render(request, 'change.html', {'form': form, 'title': title})
 
 
-def user_delete(request, nid):
+def user_delete(request):
     """删除用户"""
+    nid = request.GET.get('nid')
     models.User.objects.filter(id=nid).delete()
-    return redirect('/user/list/')
+    return redirect('accounts:user_list')
 
 
 class UserRestModelForm(BootStrapModelForm):
@@ -158,5 +159,95 @@ def user_reset(request, nid):
     form =  UserRestModelForm(data=request.POST, instance=row_object)
     if form.is_valid():
         form.save()
-        return redirect('/user/list')
+        return redirect('accounts:user_list')
     return render(request, 'change.html', {'form': form, 'title': title})
+
+
+
+def import_users(request):
+    if request.method == 'POST':
+        form = ImportUsersForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+            
+            # 验证文件类型
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                messages.error(request, "错误：只支持 .xlsx 或 .xls 格式文件")
+                return render(request, 'import_users.html', {'form': form})
+            
+            try:
+                wb = load_workbook(excel_file)
+                ws = wb.active
+                
+                success_count = 0
+                skip_count = 0
+                skip_list = []
+                error_list = []
+                
+                # 创建学科名称到实例的映射（提高性能）
+                subjects = {subject.title: subject for subject in models.Subject.objects.all()}
+                # 创建部门名称到实例的映射（提高性能）
+                departments = {dept.title: dept for dept in models.Department.objects.all()}
+                
+                # 从第二行开始读取（假设第一行是标题）
+                for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                    # 跳过空行
+                    if not any(row):
+                        continue
+                    
+                    try:
+                        username, name, subject_name, dept_name, phone = row[:5]
+                        
+                        # 检查用户是否存在
+                        if models.User.objects.filter(username=username).exists():
+                            skip_count += 1
+                            skip_list.append(f"{username}（已存在）")
+                            continue
+                        
+                        # 获取或创建学科实例
+                        subject_instance = subjects.get(subject_name)
+                        if not subject_instance:
+                            # 如果学科不存在，设置为空值
+                            subject_instance = None
+                        
+                        # 获取或创建部门实例
+                        dept_instance = departments.get(dept_name)
+                        if not dept_instance:
+                            # 如果部门不存在，设置为空值
+                            dept_instance = None
+                    
+                        
+                        # 创建新用户
+                        models.User.objects.create(
+                            username=username,
+                            password=md5('123456'),
+                            name=name,
+                            subject=subject_instance,
+                            department=dept_instance,
+                            phone=phone
+                        )
+                        success_count += 1
+                        
+                    except Exception as e:
+                        error_list.append(f"第 {row_index} 行错误: {str(e)}")
+                        continue
+                
+                # 生成结果消息
+                result_msg = f"导入完成！成功: {success_count}条"
+                if skip_count > 0:
+                    result_msg += f", 跳过: {skip_count}条"
+                if skip_list:
+                    messages.warning(request, f"跳过的用户: {', '.join(skip_list[:5])}" + ("..." if len(skip_list) > 5 else ""))
+                if error_list:
+                    messages.error(request, f"错误行: {', '.join(error_list[:3])}" + ("..." if len(error_list) > 3 else ""))
+                
+                messages.success(request, result_msg)
+                return render(request, 'import_result.html')  # 重定向回导入页面显示消息
+            
+            except Exception as e:
+                messages.error(request, f"处理文件时出错: {str(e)}")
+    
+    else:
+        form = ImportUsersForm()
+    
+    return render(request, 'import_result.html', {'form': form})

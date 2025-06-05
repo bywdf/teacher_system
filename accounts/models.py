@@ -25,13 +25,13 @@ class User(AbstractUser):
         max_length=100, unique=True, verbose_name="用户名")
     name = models.CharField(max_length=100, verbose_name="姓名")
     idnumber = models.CharField(
-        max_length=18, unique=True, verbose_name="身份证号")
+        max_length=18, unique=True, verbose_name="身份证号", blank=True, null=True)
     gender_choices = (
         (1, '男'),
         (2, '女'),
     )
     gender = models.SmallIntegerField(
-        verbose_name='性别', choices=gender_choices)
+        verbose_name='性别', choices=gender_choices, default=1)
     email = models.EmailField(
         verbose_name="邮箱", unique=True,  blank=True, null=True)
     phone = models.CharField(max_length=11, unique=True, verbose_name="电话")

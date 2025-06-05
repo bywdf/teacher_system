@@ -7,9 +7,9 @@ urlpatterns = [
     # 用户管理
     path('user/list/', user.user_list, name='user_list'),
     path('user/add/', user.user_add, name='user_add'),
-    path('user/<int:nid>/delete/', user.user_delete, name='user_delete'),
+    path('user/delete/', user.user_delete, name='user_delete'),
     path('user/<int:nid>/edit/', user.user_edit, name='user_edit'),
-    # path('user/multi/', user.user_multi, name='user_multi'),
+    path('user/import/', user.import_users, name='import_users'),
     path('user/<int:nid>/reset/', user.user_reset, name='user_reset'),
     
     # 部门管理
