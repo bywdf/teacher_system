@@ -1,11 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
 <html>
   <head>
+    <meta name="description" content="沂南一中教师增值评价系统，沂南一中教师成长专业档案">
+    <meta name="keywords" content="沂南一中，教师，增值评价，专业档案">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>教师增值评价系统</title>
@@ -39,7 +37,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Logo -->
         <a href="#" class="logo">
           <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini"><b>A</b>LT</span>
+          <span class="logo-mini"><b>YN</b>YZ</span>
           <!-- logo for regular state and mobile devices -->
           <span class="logo-lg"><b>数据</b>后台管理</span>
         </a>
@@ -235,20 +233,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <ul class="sidebar-menu" data-widget="tree">
             <li class="header">菜单</li>
             <!-- Optionally, you can add icons to the links -->
-            <li class="active">
+            <li>
               <a href={% url "index" %}><i class="fa fa-dashboard"></i> <span>首页</span></a>
             </li>
-            <li>
-              <a href="#"><i class="fa fa-link"></i> <span>Another Link</span></a>
-            </li>
-            <li>
-              <a href={% url "accounts:user_list" %}><i class="fa fa-link"></i> <span>用户管理</span></a>
-            </li>
-            <li>
-              <a href={% url "accounts:department_list" %}><i class="fa fa-link"></i> <span>部门管理</span></a>
-            </li>
-            <li>
-              <a href={% url "accounts:subject_list" %}><i class="fa fa-link"></i> <span>学科管理</span></a>
+            <li class="treeview">
+              <a href="#"><i class="fa fa-cogs"></i> <span>系统管理</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li>
+                  <a href={% url "accounts:user_list" %}><i class="fa fa-circle-o"></i>用户管理</a>
+                </li>
+                <li>
+                  <a href={% url "accounts:department_list" %}><i class="fa fa-circle-o"></i>部门管理</a>
+                </li>
+                <li>
+                  <a href={% url "accounts:subject_list" %}><i class="fa fa-circle-o"></i>学科管理</a>
+                </li>
+              </ul>
             </li>
             <li>
               <a href={% url "assessments:semester_list" %}><i class="fa fa-link"></i> <span>学年管理</span></a>
@@ -256,20 +260,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li>
               <a href={% url "assessments:assessdepart_list" %}><i class="fa fa-link"></i> <span>考核部门管理</span></a>
             </li>
-            <li class="treeview">
-              <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="#">Link in level 2</a>
-                </li>
-                <li>
-                  <a href="#">Link in level 2</a>
-                </li>
-              </ul>
+            <li>
+              <a href={% url "assessments:cultura_mid_list" %}><i class="fa fa-link"></i> <span>文化课教师期中考核管理</span></a>
             </li>
           </ul>
           <!-- /.sidebar-menu -->
@@ -407,4 +399,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
     {% block js %}
     {% endblock js %}
   </body>
+  <script>
+  $(function () {
+    // 菜单激活
+    var currentUrl = window.location.href;
+    $('.sidebar-menu a').each(function() {
+      if (this.href === currentUrl) {
+        $(this).parent().addClass('active'); // 激活当前子链接
+        $(this).closest('.treeview').addClass('active menu-open'); // 激活父菜单并展开
+      }
+    });
+  })
+  </script>
 </html>

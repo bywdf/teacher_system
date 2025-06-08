@@ -47,11 +47,10 @@ class TermType(models.Model):
         ('semester', '学期总评'),
     )
     term_type = models.CharField(max_length=20, choices=Term_Choices)
-    start_date = models.DateField()  # 考核开始日期
-    end_date = models.DateField()   # 考核结束日期
-
+    
     def __str__(self):
         return self.get_term_type_display()
+        
 
 
 class TeacherBase(models.Model):
@@ -61,6 +60,7 @@ class TeacherBase(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         Teacher, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -191,6 +191,7 @@ class ArtTeacherBase(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         Teacher, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -295,6 +296,7 @@ class PeTeacherBase(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         Teacher, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -406,6 +408,7 @@ class ItTeacherbase(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         Teacher, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -500,4 +503,235 @@ class ItTeacherSemester(models.Model):
         # 总成绩是期中成绩、期末成绩相加
         self.total_score = round(mid + final, 3)
 
+        super().save(*args, **kwargs)
+
+
+class GroupLeaderBase(models.Model):
+    """组长考核成绩"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    plan_summary_score = models.FloatField(
+        verbose_name='计划或总结得分', blank=True, null=True)
+    teach_level_score = models.FloatField(
+        verbose_name='教学水平(教学常规薄本评价)得分', blank=True, null=True)
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        scores = [
+            self.plan_summary_score or 0,
+            self.teach_level_score or 0
+        ]
+        self.total_score = round(sum(scores), 3)
+        super().save(*args, **kwargs)
+
+
+class GroupLeaderMidAssess(GroupLeaderBase):
+    """组长期中考核成绩"""
+    class Meta:
+        verbose_name = '组长期中考核成绩'
+        verbose_name_plural = '组长期中考核成绩'
+
+
+class GroupLeaderFinalAssess(GroupLeaderBase):
+    """组长期末考核成绩"""
+    class Meta:
+        verbose_name = '组长期末考核成绩'
+        verbose_name_plural = '组长期末考核成绩'
+
+
+class GroupLeaderSemester(models.Model):
+    """组长学期总评成绩"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    mid_score = models.ForeignKey(GroupLeaderMidAssess, on_delete=models.SET_NULL,
+                                  verbose_name='期中成绩', blank=True, null=True, related_name='mid_score')
+    final_score = models.ForeignKey(GroupLeaderFinalAssess, on_delete=models.SET_NULL,
+                                    verbose_name='期末成绩', blank=True, null=True, related_name='final_score')
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
+
+    class Meta:
+        verbose_name = '组长学期总评成绩'
+        verbose_name_plural = '组长学期总评成绩'
+
+    def save(self, *args, **kwargs):       # 计算总成绩
+        mid = self.mid_score.total_score or 0
+        final = self.final_score.total_score or 0
+        # 总成绩是期中成绩、期末成绩相加
+        self.total_score = round(mid + final, 3)
+
+        super().save(*args, **kwargs)
+
+
+class HeaderTeacherBase(models.Model):
+    """班主任考核底板"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    class_number = models.IntegerField(verbose_name='班级')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    manage_score = models.FloatField(
+        verbose_name='常规管理考核成绩', blank=True, null=True)
+    safety_score = models.FloatField(
+        verbose_name='闭环式安全管理考核成绩', blank=True, null=True)
+    class_score = models.FloatField(
+        verbose_name='班级教学考核成绩', blank=True, null=True)
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        scores = [
+            self.manage_score or 0,
+            self.safety_score or 0,
+            self.class_score or 0
+        ]
+        self.total_score = round(sum(scores), 3)
+        super().save(*args, **kwargs)
+
+
+class HeaderTeacherMidAssess(HeaderTeacherBase):
+    """班主任中期考核成绩"""
+    class Meta:
+        verbose_name = '班主任中期考核成绩'
+        verbose_name_plural = '班主任中期考核成绩'
+
+
+class HeaderTeacherFinalAssess(HeaderTeacherBase):
+    """班主任期末考核成绩"""
+    class Meta:
+        verbose_name = '班主任期末考核成绩'
+        verbose_name_plural = '班主任期末考核成绩'
+
+
+class HeaderTeacherSemester(models.Model):
+    """班主任学期总评成绩"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    mid_score = models.ForeignKey(HeaderTeacherMidAssess, on_delete=models.SET_NULL,
+                                  verbose_name='期中成绩', blank=True, null=True, related_name='mid_score')
+    final_score = models.ForeignKey(HeaderTeacherFinalAssess, on_delete=models.SET_NULL,
+                                    verbose_name='期末成绩', blank=True, null=True, related_name='final_score')
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
+
+    class Meta:
+        verbose_name = '班主任学期总评成绩'
+        verbose_name_plural = '班主任学期总评成绩'
+
+    def save(self, *args, **kwargs):       # 计算总成绩
+        mid = self.mid_score.total_score or 0
+        final = self.final_score.total_score or 0
+        # 总成绩是期中成绩、期末成绩相加
+        self.total_score = round(mid + final, 3)
+        super().save(*args, **kwargs)
+
+
+class EduAdmin(models.Model):
+    """教务员考核表"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
+    # 考勤得分
+    attend_score = models.FloatField(verbose_name='考勤得分', blank=True, null=True)
+    # 出勤工作量折算
+    attend_workload = models.FloatField(verbose_name='出勤工作量折算', blank=True, null=True)
+    # 民主评议得分
+    democratic_score = models.FloatField(verbose_name='民主评议得分', blank=True, null=True)
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
+
+    class Meta:
+        verbose_name = '教务员考核表'
+        verbose_name_plural = '教务员考核表'
+    def save(self, *args, **kwargs):
+        scores = [
+            self.attend_score or 0,
+            self.attend_workload or 0,
+            self.democratic_score or 0
+        ]
+        self.total_score = round(sum(scores), 3)
+        super().save(*args, **kwargs)
+        
+        
+class  DeputyHeadTeacher(models.Model):
+    """副班主任考核表"""
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, verbose_name='学期')
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+    assess_depart = models.ForeignKey(
+        AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
+    class_number = models.IntegerField(verbose_name='班级', blank=True, null=True)
+    # 问卷评价得分
+    questionnaire_score = models.FloatField(verbose_name='问卷评价得分', blank=True, null=True)
+    # 工作过程评价
+    work_process_score = models.FloatField(verbose_name='工作过程评价', blank=True, null=True)
+    # 工作心得
+    work_experience_score = models.FloatField(verbose_name='工作心得', blank=True, null=True)
+    # 民主评议得分
+    democratic_score = models.FloatField(verbose_name='民主评议得分', blank=True, null=True)
+    # 班级边缘生帮扶评价
+    edge_student_score = models.FloatField(verbose_name='班级边缘生帮扶评价', blank=True, null=True)
+    class_score = models.FloatField(verbose_name='班级综合管理考核成绩', blank=True, null=True)
+    total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
+    rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
+
+    class Meta:
+        verbose_name = '副班主任考核表'
+        verbose_name_plural = '副班主任考核表'
+        
+    def save(self, *args, **kwargs):
+        scores = [
+            self.questionnaire_score or 0,
+            self.work_process_score or 0,
+            self.work_experience_score or 0,
+            self.democratic_score or 0,
+            self.edge_student_score or 0,
+            self.class_score or 0
+        ]
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)

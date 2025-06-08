@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from openpyxl import load_workbook
 
 from assessments.models import AssessDepart
 from utils.bootstrap import BootStrapModelForm
@@ -75,3 +76,29 @@ def  assessdepart_edit(request):
         form.save()
         return JsonResponse({"status": True})
     return JsonResponse({'status': False, 'error': form.errors})
+
+
+def assessdepart_import(request):
+    '''Excel表格批量导入考核部门'''
+    # django.core.files.uploadedfile.InMemoryUploadedFile
+
+    # 1.获取用户上传的对象文件
+    file_object = request.FILES.get("exc")
+    # print(type(file_object))
+
+    # 2.对象传递给openpyxl，由openpyxl读取文件的内容
+    wb = load_workbook(file_object)
+    sheet = wb.worksheets[0]
+
+    # 3.循环获取每一行数据
+    for row in sheet.iter_rows(min_row=2):
+        text = row[0].value
+
+        exists = AssessDepart.objects.filter(name=text).exists()
+        if not exists:
+            AssessDepart.objects.create(name=text)
+
+    # with open(file_object.title, mode='wb') as f:
+    #     for chunk in file_object:
+    #         f.write(chunk)
+    return redirect("assessments:assessdepart_list")

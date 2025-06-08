@@ -9,7 +9,7 @@
 {% block content %}
   <div class="box">
     <div style="margin-bottom: 10px;margin-top: 10px">
-      <input id="btnAdd" type="button" value="新建考核部门" class='btn btn-success'>
+      <input id="btnAdd" type="button" value="新建考核部门" class="btn btn-success">
     </div>
     <div class="panel panel-default">
       <!-- Default panel contents -->
@@ -35,11 +35,11 @@
               <td>
                 <input uid="{{ obj.id }}"
                        type="button"
-                       class='btn btn-primary btn-xs btn-edit'
+                       class="btn btn-primary btn-xs btn-edit"
                        value='编辑'>
                 <input uid="{{ obj.id }}"
                        type="button"
-                       class='btn btn-danger btn-xs btn-delete'
+                       class="btn btn-danger btn-xs btn-delete"
                        value="删除">
               </td>
             </tr>
@@ -52,6 +52,26 @@
       <ul class="pagination" style="float:right; margin-top:10px;">
         {{ page_string }}
       </ul>
+    </div>
+  </div>
+  <div class="box">
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">
+        <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+        批量上传
+      </div>
+      <div class="panel-body">
+        <form method="post"
+              enctype="multipart/form-data"
+              action="{% url "assessments:assessdepart_import" %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <input type="file" name="exc" required="required">
+          </div>
+          <input type="submit" value="上传" class="btn btn-info btn-sm">
+        </form>
+      </div>
     </div>
   </div>
   <!-- 新建/编辑 订单(模态对话框) -->
@@ -100,9 +120,9 @@
     <div class="modal-dialog" role="document">
       <div class="alert alert-danger alert-dismissible fade in" role="alert">
         <h4>是否确定删除？</h4>
-        <p style='margin: 10px 0px;'>删除后，所有关联的相关数据都会被删除，您确定删除吗？</p>
-        <p style='text-align: right;'>
-          <button id='btnConfirmDelete' type="button" class="btn btn-danger">确 定</button>
+        <p style="margin: 10px 0px;">删除后，所有关联的相关数据都会被删除，您确定删除吗？</p>
+        <p style="text-align: right;">
+          <button id="btnConfirmDelete" type="button" class="btn btn-danger">确 定</button>
           <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
         </p>
       </div>

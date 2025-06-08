@@ -1,5 +1,5 @@
 from django.urls import path
-from assessments.views import semester, assessdepart
+from assessments.views import semester, assessdepart, culturassess
 
 app_name = 'assessments'
 
@@ -17,4 +17,8 @@ urlpatterns = [
     path('assessdepart/delete/', assessdepart.assessdepart_delete, name='assessdepart_delete'),
     path('assessdepart/detail/', assessdepart.assessdepart_detail, name='assessdepart_detail'),
     path('assessdepart/edit/', assessdepart.assessdepart_edit, name='assessdepart_edit'),
+    path('assessdepart/import/', assessdepart.assessdepart_import, name='assessdepart_import'),
+    
+    # 文化课教师考核管理
+    path('cultura/midlist/', culturassess.cultura_mid_list, name='cultura_mid_list'),
 ]
