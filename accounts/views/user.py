@@ -26,7 +26,7 @@ def user_list(request):
         data_dict['name__contains']= search_data 
     
     # 根据搜索条件去数据库获取
-    queryset = models.User.objects.filter(**data_dict)
+    queryset = models.UserInfo.objects.filter(**data_dict)
     
     # 分页
     page_object = Pagination(request, queryset)
@@ -47,7 +47,7 @@ class UserModelForm(BootStrapModelForm):
         )
     
     class Meta:
-        model = models.User
+        model = models.UserInfo
         fields = ['username', 'name', 'gender', 'phone', 'department', 'subject', 'password']
         widgets = {
             'password': forms.PasswordInput(render_value=True),
@@ -83,7 +83,7 @@ def user_add(request):
 
 class UserEditModelForm(BootStrapModelForm):
     class Meta:
-        model = models.User
+        model = models.UserInfo
         fields = ['username', 'name', 'gender', 'phone', 'department', 'subject']
 
 
@@ -91,7 +91,7 @@ def user_edit(request, nid):
     """编辑用户"""
     # 对象 / None
     title = '编辑用户'
-    row_object = models.User.objects.filter(id=nid).first()
+    row_object = models.UserInfo.objects.filter(id=nid).first()
     if not row_object:
         return render(request,'error.html', {"msg":"数据不存在"})
 
@@ -109,7 +109,7 @@ def user_edit(request, nid):
 def user_delete(request):
     """删除用户"""
     nid = request.GET.get('nid')
-    models.User.objects.filter(id=nid).delete()
+    models.UserInfo.objects.filter(id=nid).delete()
     return redirect('accounts:user_list')
 
 
@@ -120,7 +120,7 @@ class UserRestModelForm(BootStrapModelForm):
         )
     
     class Meta:
-        model = models.User
+        model = models.UserInfo
         fields = ['password', 'confirm_password']
         widgets = {
             'password': forms.PasswordInput(render_value=True),
@@ -131,7 +131,7 @@ class UserRestModelForm(BootStrapModelForm):
         md5_pwd = md5(pwd)
         
         # 去数据库校验新输入的密码和之前的密码是否是一样的
-        exists = models.User.objects.filter(id=self.instance.pk, password=md5_pwd).exists()
+        exists = models.UserInfo.objects.filter(id=self.instance.pk, password=md5_pwd).exists()
         if exists:
             raise ValidationError('密码不能与之前的相同')
         return md5(pwd)
@@ -147,7 +147,7 @@ class UserRestModelForm(BootStrapModelForm):
 def user_reset(request, nid):
     """重置密码"""
    
-    row_object = models.User.objects.filter(id=nid).first()
+    row_object = models.UserInfo.objects.filter(id=nid).first()
     if not row_object:
         return render(request,'error.html', {"msg":"数据不存在"})
     
@@ -199,7 +199,7 @@ def import_users(request):
                         username, name, subject_name, dept_name, phone = row[:5]
                         
                         # 检查用户是否存在
-                        if models.User.objects.filter(username=username).exists():
+                        if models.UserInfo.objects.filter(username=username).exists():
                             skip_count += 1
                             skip_list.append(f"{username}（已存在）")
                             continue
@@ -218,7 +218,7 @@ def import_users(request):
                     
                         
                         # 创建新用户
-                        models.User.objects.create(
+                        models.UserInfo.objects.create(
                             username=username,
                             password=md5('123456'),
                             name=name,

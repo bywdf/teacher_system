@@ -1,17 +1,9 @@
 from django.db import models
 from django.forms import ValidationError
 
-from accounts.models import User
+from accounts.models import UserInfo
 
 # Create your models here.
-
-
-class Teacher(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='teacher_profile')
-
-    def __str__(self):
-        return self.user.name()
 
 
 class AssessDepart(models.Model):
@@ -41,15 +33,10 @@ class Semester(models.Model):
 
 class TermType(models.Model):
     '''学期考核分类表'''
-    Term_Choices = (
-        ('mid', '期中考试'),
-        ('final', '期末考试'),
-        ('semester', '学期总评'),
-    )
-    term_type = models.CharField(max_length=20, choices=Term_Choices)
-    
+    name = models.CharField(max_length=50, verbose_name='学期考核类型', unique=True)
+
     def __str__(self):
-        return self.get_term_type_display()
+        return self.name
         
 
 
@@ -62,7 +49,7 @@ class TeacherBase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     class_hours = models.IntegerField(
@@ -122,6 +109,7 @@ class TeacherBase(models.Model):
 class TeacherMidAssess(TeacherBase):
     '''文化课教师期中考核成绩'''
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')  # 添加唯一约束
         verbose_name = '文化课教师期中考核成绩'
         verbose_name_plural = '文化课教师期中考核成绩'
 
@@ -134,6 +122,7 @@ class TeacherFinalAssess(TeacherBase):
         verbose_name='监考成绩', blank=True, null=True)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')  # 添加唯一约束
         verbose_name = '文化课教师期末考核成绩'
         verbose_name_plural = '文化课教师期末考核成绩'
 
@@ -157,7 +146,7 @@ class TeacherSemesterAssess(models.Model):
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(TeacherMidAssess, on_delete=models.SET_NULL,
@@ -193,7 +182,7 @@ class ArtTeacherBase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     class_hours = models.FloatField(
@@ -231,6 +220,7 @@ class ArtTeacherBase(models.Model):
 class ArtTeacherMidAssess(ArtTeacherBase):
     '''艺术教师期中考核成绩'''
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '艺术教师期中考核成绩'
         verbose_name_plural = '艺术教师期中考核成绩'
 
@@ -242,6 +232,7 @@ class ArtTeacherFinalAssess(ArtTeacherBase):
         verbose_name='监考成绩', blank=True, null=True)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '音乐美术教师期末考核成绩'
         verbose_name_plural = '音乐美术教师期末考核成绩'
 
@@ -262,7 +253,7 @@ class ArtTeacherSemesterAssess(models.Model):
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(ArtTeacherMidAssess, on_delete=models.SET_NULL,
@@ -276,7 +267,7 @@ class ArtTeacherSemesterAssess(models.Model):
     is_published = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('teacher', 'semester')  # 添加唯一约束
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '艺术教师学期总评成绩'
         verbose_name_plural = '艺术教师学期总评成绩'
 
@@ -298,7 +289,7 @@ class PeTeacherBase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     class_hours = models.FloatField(
@@ -340,6 +331,7 @@ class PeTeacherBase(models.Model):
 class PeTeacherMidAssess(PeTeacherBase):
     '''体育教师期中考核成绩'''
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '体育教师期中考核成绩'
         verbose_name_plural = '体育教师期中考核成绩'
 
@@ -356,6 +348,7 @@ class PeTeacherFinalAssess(PeTeacherBase):
         verbose_name='监考成绩', blank=True, null=True)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '体育教师期末考核成绩'
         verbose_name_plural = '体育教师期末考核成绩'
 
@@ -374,7 +367,7 @@ class PeTeacherFinalAssess(PeTeacherBase):
 class PeTeacherSemester(models.Model):
     '''体育教师学期总评成绩'''
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
@@ -391,6 +384,7 @@ class PeTeacherSemester(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '体育教师学期总评成绩'
         verbose_name_plural = '体育教师学期总评成绩'
 
@@ -410,7 +404,7 @@ class ItTeacherbase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     class_hours = models.FloatField(
@@ -449,6 +443,7 @@ class ItTeacherbase(models.Model):
 class ItTeacherMidAssess(ItTeacherbase):
     '''信息技术教师期中考核成绩'''
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '信息技术教师期中考核成绩'
         verbose_name_plural = '信息技术教师期中考核成绩'
 
@@ -461,6 +456,7 @@ class ItTeacherFinalAssess(ItTeacherbase):
         verbose_name='监考成绩', blank=True, null=True)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '信息技术教师期末考核成绩'
         verbose_name_plural = '信息技术教师期末考核成绩'
 
@@ -481,7 +477,7 @@ class ItTeacherSemester(models.Model):
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(ItTeacherMidAssess, on_delete=models.SET_NULL,
@@ -494,6 +490,7 @@ class ItTeacherSemester(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '信息技术教师学期总评成绩'
         verbose_name_plural = '信息技术教师学期总评成绩'
 
@@ -514,7 +511,7 @@ class GroupLeaderBase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     plan_summary_score = models.FloatField(
@@ -539,6 +536,7 @@ class GroupLeaderBase(models.Model):
 class GroupLeaderMidAssess(GroupLeaderBase):
     """组长期中考核成绩"""
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '组长期中考核成绩'
         verbose_name_plural = '组长期中考核成绩'
 
@@ -546,6 +544,7 @@ class GroupLeaderMidAssess(GroupLeaderBase):
 class GroupLeaderFinalAssess(GroupLeaderBase):
     """组长期末考核成绩"""
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '组长期末考核成绩'
         verbose_name_plural = '组长期末考核成绩'
 
@@ -557,7 +556,7 @@ class GroupLeaderSemester(models.Model):
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(GroupLeaderMidAssess, on_delete=models.SET_NULL,
@@ -570,6 +569,7 @@ class GroupLeaderSemester(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '组长学期总评成绩'
         verbose_name_plural = '组长学期总评成绩'
 
@@ -590,7 +590,7 @@ class HeaderTeacherBase(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     class_number = models.IntegerField(verbose_name='班级')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
@@ -619,6 +619,7 @@ class HeaderTeacherBase(models.Model):
 class HeaderTeacherMidAssess(HeaderTeacherBase):
     """班主任中期考核成绩"""
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '班主任中期考核成绩'
         verbose_name_plural = '班主任中期考核成绩'
 
@@ -626,6 +627,7 @@ class HeaderTeacherMidAssess(HeaderTeacherBase):
 class HeaderTeacherFinalAssess(HeaderTeacherBase):
     """班主任期末考核成绩"""
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '班主任期末考核成绩'
         verbose_name_plural = '班主任期末考核成绩'
 
@@ -637,7 +639,7 @@ class HeaderTeacherSemester(models.Model):
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(HeaderTeacherMidAssess, on_delete=models.SET_NULL,
@@ -650,6 +652,7 @@ class HeaderTeacherSemester(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '班主任学期总评成绩'
         verbose_name_plural = '班主任学期总评成绩'
 
@@ -666,7 +669,7 @@ class EduAdmin(models.Model):
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)
@@ -682,6 +685,7 @@ class EduAdmin(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester')
         verbose_name = '教务员考核表'
         verbose_name_plural = '教务员考核表'
     def save(self, *args, **kwargs):
@@ -699,7 +703,7 @@ class  DeputyHeadTeacher(models.Model):
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     teacher = models.ForeignKey(
-        Teacher, on_delete=models.CASCADE, verbose_name='教师')
+        UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     assess_time = models.CharField(max_length=50, verbose_name='考核时间', blank=True, null=True)

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css %}
+  <link href="{% static 'select2/css/select2.min.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+  <div class="box">
+    <div class="panel panel-default">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.teacher }}  <!-- 自动渲染为可搜索的下拉框 -->
+        <!-- 其他字段 -->
+        <button type="submit" class="btn btn-primary">提交</button>
+      </form>
+    </div>
+  </div>
+{% endblock content %}
+{% block js %}
+  <script src="{% static 'select2/js/select2.full.min.js' %}"></script>
+  <script>
+    $(document).ready(function() {
+      $('.select2').select2();  // 初始化Select2组件
+    });
+  </script>
+{% endblock js %}

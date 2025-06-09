@@ -21,4 +21,6 @@ urlpatterns = [
     
     # 文化课教师考核管理
     path('cultura/midlist/', culturassess.cultura_mid_list, name='cultura_mid_list'),
+    path('cultura/midadd/', culturassess.cultura_mid_add, name='cultura_mid_add'),
+    path('cultura/middelete/', culturassess.cultura_mid_delete, name='cultura_mid_delete'),
 ]

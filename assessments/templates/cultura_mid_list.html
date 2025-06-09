@@ -11,7 +11,7 @@
       <div class="box">
         <div class="box-header">
           <div style="margin-bottom: 10px" class="clearfix">
-            <a class="btn btn-success" href={% url "accounts:user_add" %}>
+            <a class="btn btn-success" href={% url "assessments:cultura_mid_add" %}>
               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               新建考核
             </a>
@@ -54,7 +54,7 @@
                       <th>学科</th>
                       <th>课时节数</th>
                       <th>值班节数折算</th>
-                      <th>额外工作节数数折算</th>
+                      <th>额外工作节数折算</th>
                       <th>总工作量节数</th>
                       <th>课时工作量成绩</th>
                       <th>教师个人成绩</th>
@@ -71,7 +71,7 @@
                       <tr role="row">
                         <th scope="row">{{ obj.id }}</th>
                         <td>{{ obj.semester }}</td>
-                        <td>{{ obj.get_term_type_display }}</td>
+                        <td>{{ obj.term_type }}</td>
                         <td>{{ obj.assess_time }}</td>
                         <td>{{ obj.assess_depart }}</td>
                         <td>{{ obj.teacher.name }}</td>
@@ -88,8 +88,7 @@
                         <td>{{ obj.rank }}</td>
                         <td>{{ obj.remark }}</td>
                         <td>
-                          <a class="btn  btn-primary btn-xs"
-                             href="{% url "accounts:cultur_mid_edit" obj.id %}">编辑</a>
+                          <a class="btn  btn-primary btn-xs" href="#">编辑</a>
                           <a class="btn btn-danger btn-xs"
                              href="javascript:void(0);"
                              onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -148,7 +147,7 @@
     function deleteItem(id, element) {
       if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
         // 构建删除URL
-        const deleteUrl = `/accounts/user/delete/?nid=${id}`;
+        const deleteUrl = `/assessments/cultura/middelete/?nid=${id}`;
 
         // 创建临时表单用于提交删除请求（防止URL参数被篡改）
         const form = document.createElement('form');

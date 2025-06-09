@@ -63,7 +63,7 @@
         <div class="panel-body">
             <form method="post"
                   enctype="multipart/form-data"
-                  action="/accounts/subject/multi/">
+                  action="{% url 'accounts:subject_multi' %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <input type="file" name="exc" required="required">

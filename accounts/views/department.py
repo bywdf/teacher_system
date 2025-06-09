@@ -55,9 +55,9 @@ def department_multi(request):
     for row in sheet.iter_rows(min_row=2):
         text = row[0].value
 
-        exists = models.Department.objects.filter(name=text).exists()
+        exists = models.Department.objects.filter(title=text).exists()
         if not exists:
-            models.Department.objects.create(name=text)
+            models.Department.objects.create(title=text)
 
     # with open(file_object.title, mode='wb') as f:
     #     for chunk in file_object:
