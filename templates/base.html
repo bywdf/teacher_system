@@ -27,6 +27,10 @@
     <!-- DataTables -->
     <link rel="stylesheet"
           href="{% static "adminlte/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" %}">
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet"
+          href="{% static 'adminlte/plugins/iCheck/square/blue.css' %}">
+    <!-- AdminLTE Skins -->
     <link rel="stylesheet"
           href="{% static 'adminlte/dist/css/skins/skin-blue.min.css' %}">
     {% block css %}
@@ -393,6 +397,8 @@
     <!-- DataTables -->
     <script src="{% static "adminlte/bower_components/datatables.net/js/jquery.dataTables.min.js" %}"></script>
     <script src="{% static "adminlte/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
+    <!--iCheck-->
+    <script src="{% static 'adminlte/plugins/iCheck/icheck.min.js' %}"></script>
     <!-- 引入 AdminLTE 的依赖插件-->
     <script src="{% static "adminlte/bower_components/jquery-slimscroll/jquery.slimscroll.min.js" %}"></script>
     <script src="{% static "adminlte/bower_components/fastclick/lib/fastclick.js" %}"></script>

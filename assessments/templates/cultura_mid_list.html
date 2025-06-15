@@ -63,6 +63,7 @@
                       <th>总成绩</th>
                       <th>名次</th>
                       <th>备注</th>
+                      <th>公示完成</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -85,10 +86,12 @@
                         <td>{{ obj.class_score }}</td>
                         <td>{{ obj.group_score }}</td>
                         <td>{{ obj.total_score }}</td>
-                        <td>{{ obj.rank }}</td>
+                        <td>{{ obj.rank | default:"" }}</td>
                         <td>{{ obj.remark }}</td>
+                        <td>{{ obj.is_published | default:"否" }}</td>
                         <td>
-                          <a class="btn  btn-primary btn-xs" href="#">编辑</a>
+                          <a class="btn  btn-primary btn-xs"
+                             href="{% url "assessments:cultura_mid_edit" obj.id %}">编辑</a>
                           <a class="btn btn-danger btn-xs"
                              href="javascript:void(0);"
                              onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -123,12 +126,12 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-            批量上传
+            批量上传文化课教师期中考核数据
           </div>
           <div class="panel-body">
             <form method="post"
                   enctype="multipart/form-data"
-                  action="{% url "accounts:import_users" %}">
+                  action="{% url "assessments:cultura_mid_import" %}">
               {% csrf_token %}
               <div class="form-group">
                 <label>选择Excel文件:</label>
@@ -136,6 +139,13 @@
               </div>
               <button type="submit" class="btn btn-primary">导入</button>
             </form>
+            {% if messages %}
+              <div class="mt-3">
+                {% for message in messages %}
+                  <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
