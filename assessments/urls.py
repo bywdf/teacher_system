@@ -26,6 +26,8 @@ urlpatterns = [
     path('cultura/middelete/', cultura_mid.cultura_mid_delete, name='cultura_mid_delete'),
     path('cultura/midedit/<int:pk>', cultura_mid.cultura_mid_edit, name='cultura_mid_edit'),
     path('cultura/midimport/', cultura_mid.cultura_mid_import, name='cultura_mid_import'),
+    path('cultura/mid/export/', cultura_mid.cultura_mid_export, name='cultura_mid_export'),
+
     
     
 ]

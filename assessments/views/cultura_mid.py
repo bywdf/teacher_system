@@ -1,17 +1,20 @@
-from openpyxl import load_workbook
-from assessments.forms import BatchImportForm
-from django.contrib import messages
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
+import datetime
+
 from django.shortcuts import render, redirect, get_object_or_404
-from assessments.models import TeacherMidAssess, AssessDepart, Semester, TermType
+from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.db.models import Q
+from django.db import transaction
 
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from accounts.models import UserInfo
-from django.db.models import Q, F
-from django.http import JsonResponse
-from django.db import transaction
-import datetime
+from assessments.models import TeacherMidAssess, AssessDepart, Semester, TermType
+from accounts.models import UserInfo, Subject
 
 
 def teacher_autocomplete(request):
@@ -26,16 +29,56 @@ def teacher_autocomplete(request):
 class MidAssessModelForm(BootStrapModelForm):
     class Meta:
         model = TeacherMidAssess
-        # 排除字段
+        # 字段，所有字段
         fields = '__all__'
 
 
 def cultura_mid_list(request):
-    queryset = TeacherMidAssess.objects.all().order_by('id')
+    # 获取所有可选数据
+    semesters = Semester.objects.order_by('-id')
+    term_types = TermType.objects.all()
+    assess_departs = AssessDepart.objects.all()
+    subjects = Subject.objects.all()
+
+    # 初始化查询条件
+    semester_id = request.GET.get('semester')
+    term_type_id = request.GET.get('term_type')
+    assess_depart_id = request.GET.get('assess_depart')
+    teacher_name = request.GET.get('teacher_name')
+    subject_id = request.GET.get('subject')  # 新增学科参数
+
+    # 构建查询条件
+    query = Q()
+    if semester_id and semester_id != 'all':
+        query &= Q(semester_id=semester_id)
+    if term_type_id and term_type_id != 'all':
+        query &= Q(term_type_id=term_type_id)
+    if assess_depart_id and assess_depart_id != 'all':
+        query &= Q(assess_depart_id=assess_depart_id)
+    if teacher_name:
+        query &= Q(teacher__name__icontains=teacher_name)
+    if subject_id and subject_id != 'all':
+        query &= Q(teacher__subject_id=subject_id)
+
+    # 应用查询条件
+    queryset = TeacherMidAssess.objects.filter(
+        query).order_by('-semester_id', 'rank')
+
     page_object = Pagination(request, queryset)
+
     content = {
         'queryset': page_object.page_queryset,
         'page_string': page_object.html(),
+        'semesters': semesters,
+        'term_types': term_types,
+        'assess_departs': assess_departs,
+        'subjects': subjects,
+        'selected_semester': semester_id if semester_id else 'all',
+        'selected_term_type': term_type_id if term_type_id else 'all',
+        'selected_assess_depart': assess_depart_id if assess_depart_id else 'all',
+        'teacher_name': teacher_name if teacher_name else '',
+        'selected_subject': subject_id if subject_id else 'all',
+
     }
     return render(request, 'cultura_mid_list.html', content)
 
@@ -92,7 +135,7 @@ def cultura_mid_import(request):
         if not excel_file:
             messages.error(request, "请选择Excel文件")
             return redirect('assessments:cultura_mid_list')
-        
+
         try:
             wb = load_workbook(excel_file)
             ws = wb.active
@@ -100,33 +143,33 @@ def cultura_mid_import(request):
             success_count = 0
             created_count = 0
             updated_count = 0
-            
+
             # 学期映射字典
             semester_map = {}
             for sem in Semester.objects.all():
                 key = f"{sem.year}{sem.get_semester_type_display()}"
                 semester_map[key] = sem
-            
+
             # 考核类型映射
             term_type_map = {tt.name: tt for tt in TermType.objects.all()}
-            
+
             # 部门映射
             depart_map = {ad.name: ad for ad in AssessDepart.objects.all()}
-            
+
             # 教师映射 (姓名->对象)
             teacher_map = {t.name: t for t in UserInfo.objects.all()}
-            
+
             for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                 try:
                     # 跳过空行
                     if not any(row):
                         continue
-                    
+
                     # 解析学期 (格式: "2023-2024上学期")
                     semester_str = row[0]
                     if not semester_str:
                         raise ValueError("学期不能为空")
-                    
+
                     if semester_str not in semester_map:
                         # 尝试创建新学期
                         year = semester_str[:-3]  # 去掉后3个字符(学期名)
@@ -136,41 +179,43 @@ def cultura_mid_import(request):
                             semester_type=semester_type
                         )
                         semester_map[semester_str] = sem
-                    
+
                     # 获取其他关联对象
                     term_type_name = row[1]
                     if not term_type_name:
                         raise ValueError("考核类型不能为空")
-                    
+
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        term_type = TermType.objects.create(name=term_type_name)
+                        term_type = TermType.objects.create(
+                            name=term_type_name)
                         term_type_map[term_type_name] = term_type
-                    
+
                     depart_name = row[3]
                     if not depart_name:
                         raise ValueError("考核部门不能为空")
-                    
+
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(name=depart_name)
+                        assess_depart = AssessDepart.objects.create(
+                            name=depart_name)
                         depart_map[depart_name] = assess_depart
-                    
+
                     teacher_name = row[4]
                     if not teacher_name:
                         raise ValueError("教师姓名不能为空")
-                    
+
                     teacher = teacher_map.get(teacher_name)
                     if not teacher:
                         raise ValueError(f"教师 '{teacher_name}' 不存在")
-                    
+
                     # 转换字段值
                     def safe_float(value, default=0.0):
                         try:
                             return float(value) if value is not None else default
                         except (TypeError, ValueError):
                             return default
-                    
+
                     # 创建或更新记录
                     obj, created = TeacherMidAssess.objects.update_or_create(
                         teacher=teacher,
@@ -189,26 +234,142 @@ def cultura_mid_import(request):
                             'week': int(row[12]) if len(row) > 12 and row[12] is not None else 10
                         }
                     )
-                    
+
                     success_count += 1
                     if created:
                         created_count += 1
                     else:
                         updated_count += 1
-                    
+
                 except Exception as e:
                     errors.append(f"第 {row_num} 行错误: {str(e)}")
-            
+
             if errors:
-                messages.warning(request, f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条")
+                messages.warning(
+                    request, f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条")
                 for error in errors[:5]:  # 最多显示5条错误
                     messages.error(request, error)
                 if len(errors) > 5:
                     messages.info(request, f"还有 {len(errors)-5} 条错误未显示...")
             else:
-                messages.success(request, f"成功导入 {success_count} 条数据（新增:{created_count}, 更新:{updated_count}）")
-                
+                messages.success(
+                    request, f"成功导入 {success_count} 条数据（新增:{created_count}, 更新:{updated_count}）")
+
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
-    
-    return redirect('assessments:cultura_mid_list') 
+
+    return redirect('assessments:cultura_mid_list')
+
+
+def cultura_mid_export(request):
+    # 获取筛选参数
+    semester_id = request.GET.get('semester')
+    term_type_id = request.GET.get('term_type')
+    assess_depart_id = request.GET.get('assess_depart')
+    teacher_name = request.GET.get('teacher_name')
+    subject_id = request.GET.get('subject')
+
+    # 构建查询条件
+    query = Q()
+    if semester_id and semester_id != 'all':
+        query &= Q(semester_id=semester_id)
+    if term_type_id and term_type_id != 'all':
+        query &= Q(term_type_id=term_type_id)
+    if assess_depart_id and assess_depart_id != 'all':
+        query &= Q(assess_depart_id=assess_depart_id)
+    if teacher_name:
+        query &= Q(teacher__name__icontains=teacher_name)
+    if subject_id and subject_id != 'all':
+        query &= Q(teacher__subject_id=subject_id)
+
+    # 获取数据
+    queryset = TeacherMidAssess.objects.filter(query).select_related(
+        'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
+    ).order_by('id')
+
+    # 创建工作簿和工作表
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "教师期中考核数据"
+
+    # 设置表头
+    headers = [
+        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
+        '教师学科', '课时数', '值班数折合', '额外工作折合', '总工作量节数', '工作量成绩', '个人成绩', '班级成绩',
+        '教研组成绩', '总成绩', '名次', '备注', '周数'
+    ]
+
+    # 添加表头行
+    ws.append(headers)
+
+    # 设置表头样式
+    header_font = Font(bold=True, size=12)
+    header_alignment = Alignment(horizontal='center', vertical='center')
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = border
+
+    # 添加数据行
+    for row_num, obj in enumerate(queryset, start=2):
+        data = [
+            row_num - 1,
+            obj.semester.__str__(),
+            obj.term_type.name,
+            obj.assess_time,
+            obj.assess_depart.name,
+            obj.teacher.name,
+            obj.teacher.subject.title if obj.teacher.subject else '',
+            obj.class_hours,
+            obj.duty_hours,
+            obj.extra_work_hours,
+            obj.total_workload,
+            obj.workload_score,
+            obj.personal_score,
+            obj.class_score,
+            obj.group_score,
+            obj.total_score,
+            obj.rank,
+            obj.remark,
+            obj.week
+        ]
+
+        ws.append(data)
+
+        # 设置数据行样式
+        for cell in ws[row_num]:
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = border
+
+    # 自动调整列宽
+    for column in ws.columns:
+        max_length = 0
+        column_letter = get_column_letter(column[0].column)
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column_letter].width = adjusted_width
+
+    # 设置文件名
+    filename = f"教师期中考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+
+    # 准备响应
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    # 保存工作簿到响应
+    wb.save(response)
+
+    return response
