@@ -13,27 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import TeacherMidAssess, AssessDepart, Semester, TermType
+from assessments.models import TeacherFinalAssess, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
 
 
-def teacher_autocomplete(request):
-    query = request.GET.get('q', '')
-    # 根据姓名或用户名模糊查询教师
-    teachers = UserInfo.objects.filter(
-        Q(name__icontains=query) | Q(username__icontains=query)
-    ).values('id', 'name', 'username')[:10]  # 最多返回10条结果
-    return JsonResponse(list(teachers), safe=False)
-
-
-class MidAssessModelForm(BootStrapModelForm):
+class EndAssessModelForm(BootStrapModelForm):
     class Meta:
-        model = TeacherMidAssess
+        model = TeacherFinalAssess
         # 字段，所有字段
         fields = '__all__'
 
 
-def cultura_mid_list(request):
+def cultura_end_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -61,8 +52,8 @@ def cultura_mid_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = TeacherMidAssess.objects.filter(
-        query).order_by('id')
+    queryset = TeacherFinalAssess.objects.filter(
+        query).order_by('-semester_id', 'rank')
 
     page_object = Pagination(request, queryset)
 
@@ -80,27 +71,27 @@ def cultura_mid_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'cultura_mid_list.html', content)
+    return render(request, 'cultura_end_list.html', content)
 
 
-def cultura_mid_delete(request):
+def cultura_end_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    TeacherMidAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:cultura_mid_list')
+    TeacherFinalAssess.objects.filter(id=nid).delete()
+    return redirect('assessments:cultura_end_list')
 
 
-def cultura_mid_edit(request, pk):
+def cultura_end_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(TeacherMidAssess, pk=pk)
+    instance = get_object_or_404(TeacherFinalAssess, pk=pk)
     # 创建表单实例，绑定现有数据
-    form = MidAssessModelForm(request.POST or None, instance=instance)
+    form = EndAssessModelForm(request.POST or None, instance=instance)
 
     if request.method == 'POST':
         if form.is_valid():
             # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
             form.save()
-            return redirect('assessments:cultura_mid_list')  # 重定向到列表页
+            return redirect('assessments:cultura_end_list')  # 重定向到列表页
         # 若表单验证失败，保留错误信息并重新渲染页面
 
     # 渲染编辑页面，传递表单和对象
@@ -109,31 +100,31 @@ def cultura_mid_edit(request, pk):
         'title': '编辑考核记录',
         'instance': instance
     }
-    return render(request, 'cultura_mid_change.html', context)
+    return render(request, 'cultura_end_change.html', context)
 
 
-def cultura_mid_add(request):
+def cultura_end_add(request):
     """添加"""
-    form = MidAssessModelForm()
+    form = EndAssessModelForm()
     # 获取所有教师数据
     teachers = UserInfo.objects.all()
     if request.method == 'POST':
-        form = MidAssessModelForm(request.POST)
+        form = EndAssessModelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('assessments:cultura_mid_list')
-    return render(request, 'cultura_mid_change.html', {'form': form})
+            return redirect('assessments:cultura_end_list')
+    return render(request, 'cultura_end_change.html', {'form': form})
 
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def cultura_mid_import(request):
+def cultura_end_import(request):
     """批量导入考核成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_mid_list')
+            return redirect('assessments:cultura_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -216,21 +207,23 @@ def cultura_mid_import(request):
                             return default
 
                     # 创建或更新记录
-                    obj, created = TeacherMidAssess.objects.update_or_create(
+                    obj, created = TeacherFinalAssess.objects.update_or_create(
                         teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
                         defaults={
                             'assess_time': row[2] or datetime.date.today().isoformat(),
                             'assess_depart': assess_depart,
-                            'class_hours': safe_float(row[5]),
-                            'duty_hours': safe_float(row[6]),
-                            'extra_work_hours': safe_float(row[7]),
-                            'personal_score': safe_float(row[8]),
-                            'class_score': safe_float(row[9]),
-                            'group_score': safe_float(row[10]),
-                            'remark': row[11] or "",
-                            'week': int(row[12]) if len(row) > 12 and row[12] is not None else 10
+                            'attend_score':safe_float(row[5]),
+                            'class_hours': safe_float(row[6]),
+                            'duty_hours': safe_float(row[7]),
+                            'extra_work_hours': safe_float(row[8]),
+                            'invigilation_score': safe_float(row[9]),
+                            'personal_score': safe_float(row[10]),
+                            'class_score': safe_float(row[11]),
+                            'group_score': safe_float(row[12]),
+                            'remark': row[13] or "",
+                            'week': int(row[14]) if len(row) > 14 and row[14] is not None else 10
                         }
                     )
 
@@ -257,10 +250,10 @@ def cultura_mid_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_mid_list')
+    return redirect('assessments:cultura_end_list')
 
 
-def cultura_mid_export(request):
+def cultura_end_export(request):
     """导出教师期中考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
@@ -283,7 +276,7 @@ def cultura_mid_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset = TeacherMidAssess.objects.filter(query).select_related(
+    queryset = TeacherFinalAssess.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
@@ -294,9 +287,9 @@ def cultura_mid_export(request):
 
     # 设置表头
     headers = [
-        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
-        '教师学科', '课时数', '值班数折合', '额外工作折合', '总工作量节数', '工作量成绩', '个人成绩', '班级成绩',
-        '教研组成绩', '总成绩', '名次', '备注', '周数'
+        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名','教师学科', '考勤得分',
+        '课时数', '值班数折合', '额外工作折合', '总工作量节数', '工作量成绩', '监考成绩',
+        '个人成绩', '班级成绩','教研组成绩', '总成绩', '名次', '备注', '周数'
     ]
 
     # 添加表头行
@@ -327,11 +320,13 @@ def cultura_mid_export(request):
             obj.assess_depart.name,
             obj.teacher.name,
             obj.teacher.subject.title if obj.teacher.subject else '',
+            obj.attend_score,
             obj.class_hours,
             obj.duty_hours,
             obj.extra_work_hours,
             obj.total_workload,
             obj.workload_score,
+            obj.invigilation_score,
             obj.personal_score,
             obj.class_score,
             obj.group_score,
@@ -362,7 +357,7 @@ def cultura_mid_export(request):
         ws.column_dimensions[column_letter].width = adjusted_width
 
     # 设置文件名
-    filename = f"教师期中考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"教师期末考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
 
     # 准备响应
     response = HttpResponse(
@@ -376,14 +371,14 @@ def cultura_mid_export(request):
 
 
 
-def cultura_mid_update_rank(request):
-    """更新教师期中考核数据的名次并将公示状态改为应经公示"""
+def cultura_end_update_rank(request):
+    """更新教师期末考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_mid_list')
+            return redirect('assessments:cultura_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -444,7 +439,7 @@ def cultura_mid_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = TeacherMidAssess.objects.get(
+                        assess = TeacherFinalAssess.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -458,7 +453,7 @@ def cultura_mid_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except TeacherMidAssess.DoesNotExist:
+                    except TeacherFinalAssess.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -482,4 +477,4 @@ def cultura_mid_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_mid_list')
+    return redirect('assessments:cultura_end_list')

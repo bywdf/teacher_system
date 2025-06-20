@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+  {% if instance %}
+    编辑考核记录
+  {% else %}
+    新建考核记录
+  {% endif %}
+{% endblock title %}
+{% block title_d %}
+  文化课教师期中考核
+{% endblock title_d %}
+{% block content %}
+  <div class="box">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ title }}</h3>
+      </div>
+      <div class="panel-body">
+        <form method="post" novalidate id="teacherForm">
+          {% csrf_token %}
+          <!-- 教师搜索组件 -->
+          <div class="form-group">
+            <label>{{ form.teacher.label }}</label>
+            <div class="input-group">
+              <input type="text"
+                     id="teacherSearch"
+                     class="form-control"
+                     placeholder="搜索教师姓名/用户名">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="fa fa-search"></i></span>
+              </div>
+            </div>
+            <!-- 搜索结果下拉菜单 -->
+            <ul class="list-group mt-2" id="teacherList">
+              <!-- 动态加载的教师列表 -->
+              {% for teacher in teachers %}
+                <li class="list-group-item teacher-item" data-id="{{ teacher.id }}">{{ teacher.name }}（用户名：{{ teacher.username }}）</li>
+              {% endfor %}
+            </ul>
+            <!-- 隐藏的教师ID字段 -->
+            {{ form.teacher }}
+            <!-- 错误提示 -->
+            <span class="text-red">{{ form.teacher.errors.0 }}</span>
+          </div>
+          <!-- 学期与考核类型 -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.semester.label }}</label>
+                {{ form.semester }}
+                <span class="text-red">{{ form.semester.errors.0 }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.term_type.label }}</label>
+                {{ form.term_type }}
+                <span class="text-red">{{ form.term_type.errors.0 }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- 考核周数与时间 -->
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.week.label }}</label>
+                {{ form.week }}
+                <span class="text-red">{{ form.week.errors.0 }}</span>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>{{ form.assess_time.label }}</label>
+                {{ form.assess_time }}
+              </div>
+            </div>
+          </div>
+          <!-- 考核部门 -->
+          <div class="form-group">
+            <label>{{ form.assess_depart.label }}</label>
+            {{ form.assess_depart }}
+            <span class="text-red">{{ form.assess_depart.errors.0 }}</span>
+          </div>
+          <!-- 工作量部分 -->
+          <h4 class="mt-4">工作量统计</h4>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.class_hours.label }}</label>
+                {{ form.class_hours }}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.duty_hours.label }}</label>
+                {{ form.duty_hours }}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.extra_work_hours.label }}</label>
+                {{ form.extra_work_hours }}
+              </div>
+            </div>
+          </div>
+          <!--总课时工作量和工作量成绩-->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.total_workload.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ form.instance.total_workload|default:'' }}"
+                       readonly>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.workload_score.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ form.instance.workload_score|default:'' }}"
+                       readonly>
+              </div>
+            </div>
+          </div>
+          <!-- 成绩部分 -->
+          <h4 class="mt-4">教学成绩</h4>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.personal_score.label }}</label>
+                {{ form.personal_score }}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.class_score.label }}</label>
+                {{ form.class_score }}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{ form.group_score.label }}</label>
+                {{ form.group_score }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ form.total_score.label }}</label>
+            <input type="text"
+                   class="form-control"
+                   value="{{ form.instance.total_score|default:'' }}"
+                   readonly>
+          </div>
+          <!-- 是否公布开关 -->
+          <div class="form-group">
+            <label>{{ form.is_published.label }}</label>
+            <div class="switch">
+              {{ form.is_published }}
+              <label for="{{ form.is_published.id_for_label }}"></label>
+            </div>
+            <small class="text-muted">勾选后将在系统中公布此考核结果</small>
+          </div>
+          <!-- 备注 -->
+          <div class="form-group">
+            <label>{{ form.remark.label }}</label>
+            {{ form.remark }}
+          </div>
+          <!-- 提交按钮 -->
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-save"></i> 保存考核成绩
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block js %}
+  <script>
+$(function () {
+     // 教师搜索功能（AJAX 版本）
+    $('#teacherSearch').on('input', function () {
+        const searchText = $(this).val().trim();
+        if (searchText.length < 2) {  // 输入至少2个字符再搜索
+            $('#teacherList').hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'assessments:teacher_autocomplete' %}",
+            type: "GET",
+            data: { q: searchText },
+            success: function (data) {
+                const html = data.map(teacher => 
+                    `<li class="list-group-item teacher-item" data-id="${teacher.id}">
+                        ${teacher.name}（用户名：${teacher.username}）
+                    </li>`
+                ).join('');
+                $('#teacherList').html(html).show(); // 显示搜索结果
+            },
+            error: function () {
+                $('#teacherList').html('').hide(); // 清空结果
+            }
+        });
+    });
+
+     // 点击选择教师
+    $('#teacherList').on('click', '.teacher-item', function () {
+        const teacherId = $(this).data('id');
+        const teacherName = $(this).text();
+        $('#id_teacher').val(teacherId); // 填充隐藏字段（字段名需与模型一致）
+        $('#teacherSearch').val(teacherName).blur(); // 填充搜索框并失去焦点
+        $('#teacherList').hide(); // 隐藏下拉列表
+    });
+
+    // 开关样式初始化
+    $('.switch input[type="checkbox"]').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        increaseArea: '20%' // optional
+    });
+
+    // 自动计算工作量（保存模型的时候后端可以自动计算）
+    //const calculateWorkload = () => {
+        //const classHours = parseFloat($('#id_class_hours').val() || 0);
+        //const dutyHours = parseFloat($('#id_duty_hours').val() || 0);
+        //const extraHours = parseFloat($('#id_extra_work_hours').val() || 0);
+       // const total = classHours + dutyHours + extraHours;
+        //$('[name="total_workload"]').val(total.toFixed(2));
+    //};
+
+    // 监听输入事件
+    $('#id_class_hours, #id_duty_hours, #id_extra_work_hours').on('change', calculateWorkload);
+});
+  </script>
+{% endblock js %}

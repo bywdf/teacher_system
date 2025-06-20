@@ -8,7 +8,7 @@
   {% endif %}
 {% endblock title %}
 {% block title_d %}
-  文化课教师期中考核
+  文化课教师期末考核
 {% endblock title_d %}
 {% block content %}
   <div class="box">
@@ -82,6 +82,12 @@
             {{ form.assess_depart }}
             <span class="text-red">{{ form.assess_depart.errors.0 }}</span>
           </div>
+          <!-- 考勤得分 -->
+          <div class="form-group">
+            <label>{{ form.attend_score.label }}</label>
+            {{ form.attend_score }}
+            <span class="text-red">{{ form.attend_score.errors.0 }}</span>
+          </div>
           <!-- 工作量部分 -->
           <h4 class="mt-4">工作量统计</h4>
           <div class="row">
@@ -104,15 +110,35 @@
               </div>
             </div>
           </div>
+          <!--总课时工作量和工作量成绩-->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.total_workload.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ form.instance.total_workload|default:'' }}"
+                       readonly>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.workload_score.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ form.instance.workload_score|default:'' }}"
+                       readonly>
+              </div>
+            </div>
+          </div>
+          <!-- 监考成绩 -->
           <div class="form-group">
-            <label>{{ form.total_workload.label }}</label>
-            <input type="text"
-                   class="form-control"
-                   value="{{ form.instance.total_workload|default:'' }}"
-                   readonly>
+            <label>{{ form.invigilation_score.label }}</label>
+            {{ form.invigilation_score }}
+            <span class="text-red">{{ form.invigilation_score.errors.0 }}</span>
           </div>
           <!-- 成绩部分 -->
-          <h4 class="mt-4">考核成绩</h4>
+          <h4 class="mt-4">教学成绩</h4>
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -133,6 +159,7 @@
               </div>
             </div>
           </div>
+          <!-- 总成绩 -->
           <div class="form-group">
             <label>{{ form.total_score.label }}</label>
             <input type="text"

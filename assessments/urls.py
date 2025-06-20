@@ -1,5 +1,5 @@
 from django.urls import path
-from assessments.views import cultura_mid, semester, assessdepart
+from assessments.views import cultura_mid, semester, assessdepart, cultura_end
 
 app_name = 'assessments'
 
@@ -27,7 +27,14 @@ urlpatterns = [
     path('cultura/midedit/<int:pk>', cultura_mid.cultura_mid_edit, name='cultura_mid_edit'),
     path('cultura/midimport/', cultura_mid.cultura_mid_import, name='cultura_mid_import'),
     path('cultura/mid/export/', cultura_mid.cultura_mid_export, name='cultura_mid_export'),
-
-    
+    path('cultura_mid/update_rank/', cultura_mid.cultura_mid_update_rank, name='cultura_mid_update_rank'),
+    # 文化科期末考核管理
+    path('cultura/endllist/', cultura_end.cultura_end_list, name='cultura_end_list'),
+    path('cultura/endadd/', cultura_end.cultura_end_add, name='cultura_end_add'),
+    path('cultura/enddelete/', cultura_end.cultura_end_delete, name='cultura_end_delete'),
+    path('cultura/endedit/<int:pk>', cultura_end.cultura_end_edit, name='cultura_end_edit'),
+    path('cultura/endimport/', cultura_end.cultura_end_import, name='cultura_end_import'),
+    path('cultura_end/update_rank/', cultura_end.cultura_end_update_rank, name='cultura_end_update_rank'),
+    path('cultura/end/export/', cultura_end.cultura_end_export, name='cultura_end_export'),   
     
 ]
