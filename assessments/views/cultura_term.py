@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import TeacherFinalAssess, AssessDepart, Semester, TermType
+from assessments.models import  TeacherSemesterAssess, AssessDepart, Semester, TermType, TeacherMidAssess, TeacherFinalAssess
 from accounts.models import UserInfo, Subject
 
 
 class EndAssessModelForm(BootStrapModelForm):
     class Meta:
-        model = TeacherFinalAssess
+        model = TeacherSemesterAssess
         # 字段，所有字段
         fields = '__all__'
 
 
-def cultura_end_list(request):
+def cultura_term_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,8 +52,8 @@ def cultura_end_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = TeacherFinalAssess.objects.filter(
-        query).order_by('id', 'rank')
+    queryset = TeacherSemesterAssess.objects.filter(
+        query).order_by('id')
 
     page_object = Pagination(request, queryset)
 
@@ -71,19 +71,19 @@ def cultura_end_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'cultura_end_list.html', content)
+    return render(request, 'cultura_term_list.html', content)
 
 
-def cultura_end_delete(request):
+def cultura_term_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    TeacherFinalAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:cultura_end_list')
+    TeacherSemesterAssess.objects.filter(id=nid).delete()
+    return redirect('assessments:cultura_term_list')
 
 
-def cultura_end_edit(request, pk):
+def cultura_term_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(TeacherFinalAssess, pk=pk)
+    instance = get_object_or_404(TeacherSemesterAssess, pk=pk)
     # 创建表单实例，绑定现有数据
     form = EndAssessModelForm(request.POST or None, instance=instance)
 
@@ -91,7 +91,7 @@ def cultura_end_edit(request, pk):
         if form.is_valid():
             # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
             form.save()
-            return redirect('assessments:cultura_end_list')  # 重定向到列表页
+            return redirect('assessments:cultura_term_list')  # 重定向到列表页
         # 若表单验证失败，保留错误信息并重新渲染页面
 
     # 渲染编辑页面，传递表单和对象
@@ -100,10 +100,10 @@ def cultura_end_edit(request, pk):
         'title': '编辑考核记录',
         'instance': instance
     }
-    return render(request, 'cultura_end_change.html', context)
+    return render(request, 'assess_change.html', context)
 
 
-def cultura_end_add(request):
+def cultura_term_add(request):
     """添加"""
     form = EndAssessModelForm()
     # 获取所有教师数据
@@ -112,19 +112,19 @@ def cultura_end_add(request):
         form = EndAssessModelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('assessments:cultura_end_list')
-    return render(request, 'cultura_end_change.html', {'form': form})
+            return redirect('assessments:cultura_term_list')
+    return render(request, 'assess_change.html', {'form': form})
 
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def cultura_end_import(request):
-    """批量导入考核成绩"""
+def cultura_term_import(request):
+    """批量导入考核成绩并自动关联期中期末成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_end_list')
+            return redirect('assessments:cultura_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -134,20 +134,23 @@ def cultura_end_import(request):
             created_count = 0
             updated_count = 0
 
-            # 学期映射字典
-            semester_map = {}
-            for sem in Semester.objects.all():
-                key = f"{sem.year}{sem.get_semester_type_display()}"
-                semester_map[key] = sem
-
-            # 考核类型映射
+            # 预加载基础数据映射（优化查询性能）
+            semester_map = {f"{sem.year}{sem.get_semester_type_display()}": sem 
+                           for sem in Semester.objects.all()}
             term_type_map = {tt.name: tt for tt in TermType.objects.all()}
-
-            # 部门映射
             depart_map = {ad.name: ad for ad in AssessDepart.objects.all()}
-
-            # 教师映射 (姓名->对象)
             teacher_map = {t.name: t for t in UserInfo.objects.all()}
+            
+            # 预加载期中期末成绩映射（教师-学期 -> 成绩对象）
+            mid_assess_map = {}
+            for mid in TeacherMidAssess.objects.all():
+                key = (mid.teacher_id, mid.semester_id)
+                mid_assess_map[key] = mid
+                
+            final_assess_map = {}
+            for final in TeacherFinalAssess.objects.all():
+                key = (final.teacher_id, final.semester_id)
+                final_assess_map[key] = final
 
             for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                 try:
@@ -155,75 +158,88 @@ def cultura_end_import(request):
                     if not any(row):
                         continue
 
-                    # 解析学期 (格式: "2023-2024上学期")
-                    semester_str = row[0]
+                    # 解析必要字段（假设Excel列顺序：学期、考核类型、考核时间、部门、教师、备注）
+                    semester_str = row[0].strip() if row[0] else ""
+                    term_type_name = row[1].strip() if row[1] else ""
+                    assess_time = row[2] if row[2] else datetime.date.today().isoformat()
+                    depart_name = row[3].strip() if row[3] else ""
+                    teacher_name = row[4].strip() if row[4] else ""
+                    remark = row[5] if row[5] else ""
+
+                    # 基础字段校验
                     if not semester_str:
                         raise ValueError("学期不能为空")
+                    if not term_type_name:
+                        raise ValueError("考核类型不能为空")
+                    if not depart_name:
+                        raise ValueError("考核部门不能为空")
+                    if not teacher_name:
+                        raise ValueError("教师姓名不能为空")
 
+                    # 处理学期（支持自动创建不存在的学期）
                     if semester_str not in semester_map:
-                        # 尝试创建新学期
-                        year = semester_str[:-3]  # 去掉后3个字符(学期名)
+                        year = semester_str[:-3]  # 假设格式为"2023-2024上学期"，取前部分作为学年
                         semester_type = 'last' if '上' in semester_str else 'next'
                         sem, created = Semester.objects.get_or_create(
                             year=year,
                             semester_type=semester_type
                         )
                         semester_map[semester_str] = sem
+                    semester = semester_map[semester_str]
 
-                    # 获取其他关联对象
-                    term_type_name = row[1]
-                    if not term_type_name:
-                        raise ValueError("考核类型不能为空")
-
+                    # 处理考核类型（自动创建不存在的类型）
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        term_type = TermType.objects.create(
-                            name=term_type_name)
+                        term_type = TermType.objects.create(name=term_type_name)
                         term_type_map[term_type_name] = term_type
 
-                    depart_name = row[3]
-                    if not depart_name:
-                        raise ValueError("考核部门不能为空")
-
+                    # 处理考核部门（自动创建不存在的部门）
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(
-                            name=depart_name)
+                        assess_depart = AssessDepart.objects.create(name=depart_name)
                         depart_map[depart_name] = assess_depart
 
-                    teacher_name = row[4]
-                    if not teacher_name:
-                        raise ValueError("教师姓名不能为空")
-
+                    # 处理教师（必须已存在）
                     teacher = teacher_map.get(teacher_name)
                     if not teacher:
-                        raise ValueError(f"教师 '{teacher_name}' 不存在")
+                        raise ValueError(f"教师 '{teacher_name}' 不存在于系统中")
 
-                    # 转换字段值
-                    def safe_float(value, default=0.0):
-                        try:
-                            return float(value) if value is not None else default
-                        except (TypeError, ValueError):
-                            return default
-
-                    # 创建或更新记录
-                    obj, created = TeacherFinalAssess.objects.update_or_create(
+                    # ------------------- 关键修改：关联期中期末成绩 -------------------
+                    # 构建查找键（教师ID+学期ID）
+                    key = (teacher.id, semester.id)
+                    
+                    # 查找期中成绩
+                    mid_assess = mid_assess_map.get(key)
+                    if not mid_assess:
+                        # 尝试通过查询获取（处理映射未加载的情况）
+                        mid_assess = TeacherMidAssess.objects.filter(
+                            teacher=teacher, 
+                            semester=semester
+                        ).first()
+                        if mid_assess:
+                            mid_assess_map[key] = mid_assess  # 更新映射缓存
+                    
+                    # 查找期末成绩
+                    final_assess = final_assess_map.get(key)
+                    if not final_assess:
+                        final_assess = TeacherFinalAssess.objects.filter(
+                            teacher=teacher, 
+                            semester=semester
+                        ).first()
+                        if final_assess:
+                            final_assess_map[key] = final_assess  # 更新映射缓存
+                    
+                    # ------------------- 创建或更新学期总评记录 -------------------
+                    obj, created = TeacherSemesterAssess.objects.update_or_create(
                         teacher=teacher,
-                        semester=semester_map[semester_str],
+                        semester=semester,
                         term_type=term_type,
                         defaults={
-                            'assess_time': row[2] or datetime.date.today().isoformat(),
+                            'assess_time': assess_time,
                             'assess_depart': assess_depart,
-                            'attend_score':safe_float(row[5]),
-                            'class_hours': safe_float(row[6]),
-                            'duty_hours': safe_float(row[7]),
-                            'extra_work_hours': safe_float(row[8]),
-                            'invigilation_score': safe_float(row[9]),
-                            'personal_score': safe_float(row[10]),
-                            'class_score': safe_float(row[11]),
-                            'group_score': safe_float(row[12]),
-                            'remark': row[13] or "",
-                            'week': int(row[14]) if len(row) > 14 and row[14] is not None else 10
+                            'mid_score': mid_assess,
+                            'final_score': final_assess,
+                            'remark': remark,
                         }
                     )
 
@@ -236,9 +252,10 @@ def cultura_end_import(request):
                 except Exception as e:
                     errors.append(f"第 {row_num} 行错误: {str(e)}")
 
+            # 处理导入结果反馈
             if errors:
-                messages.warning(
-                    request, f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条")
+                msg = f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条"
+                messages.warning(request, msg)
                 for error in errors[:5]:  # 最多显示5条错误
                     messages.error(request, error)
                 if len(errors) > 5:
@@ -250,11 +267,11 @@ def cultura_end_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_end_list')
+    return redirect('assessments:cultura_term_list')
 
 
-def cultura_end_export(request):
-    """导出教师期中考核数据"""
+def cultura_term_export(request):
+    """导出教师学期考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
     term_type_id = request.GET.get('term_type')
@@ -276,7 +293,7 @@ def cultura_end_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset = TeacherFinalAssess.objects.filter(query).select_related(
+    queryset = TeacherSemesterAssess.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
@@ -287,9 +304,8 @@ def cultura_end_export(request):
 
     # 设置表头
     headers = [
-        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名','教师学科', '考勤得分',
-        '课时数', '值班数折合', '额外工作折合', '总工作量节数', '工作量成绩', '监考成绩',
-        '个人成绩', '班级成绩','教研组成绩', '总成绩', '名次', '备注', '周数'
+        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名','教师学科', 
+        '期中成绩', '期末成绩', '学期成绩', '名次', '备注'    
     ]
 
     # 添加表头行
@@ -320,20 +336,12 @@ def cultura_end_export(request):
             obj.assess_depart.name,
             obj.teacher.name,
             obj.teacher.subject.title if obj.teacher.subject else '',
-            obj.attend_score,
-            obj.class_hours,
-            obj.duty_hours,
-            obj.extra_work_hours,
-            obj.total_workload,
-            obj.workload_score,
-            obj.invigilation_score,
-            obj.personal_score,
-            obj.class_score,
-            obj.group_score,
+            obj.mid_score.total_score if obj.mid_score else '',
+            obj.final_score.total_score if obj.final_score else '',
             obj.total_score,
             obj.rank,
             obj.remark,
-            obj.week
+       
         ]
 
         ws.append(data)
@@ -371,14 +379,14 @@ def cultura_end_export(request):
 
 
 
-def cultura_end_update_rank(request):
-    """更新教师期末考核数据的名次并将公示状态改为应经公示"""
+def cultura_term_update_rank(request):
+    """更新教师学期考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_end_list')
+            return redirect('assessments:cultura_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -439,7 +447,7 @@ def cultura_end_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = TeacherFinalAssess.objects.get(
+                        assess = TeacherSemesterAssess.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -453,7 +461,7 @@ def cultura_end_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except TeacherFinalAssess.DoesNotExist:
+                    except TeacherSemesterAssess.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -477,4 +485,4 @@ def cultura_end_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_end_list')
+    return redirect('assessments:cultura_term_list')

@@ -1,5 +1,5 @@
 from django.urls import path
-from assessments.views import cultura_mid, semester, assessdepart, cultura_end
+from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid
 
 app_name = 'assessments'
 
@@ -36,5 +36,21 @@ urlpatterns = [
     path('cultura/endimport/', cultura_end.cultura_end_import, name='cultura_end_import'),
     path('cultura_end/update_rank/', cultura_end.cultura_end_update_rank, name='cultura_end_update_rank'),
     path('cultura/end/export/', cultura_end.cultura_end_export, name='cultura_end_export'),   
+    # 文化科教师学期考核管理
+    path('cultura/termlist/', cultura_term.cultura_term_list, name='cultura_term_list'),
+    path('cultura/termadd/', cultura_term.cultura_term_add, name='cultura_term_add'),
+    path('cultura/termdelete/', cultura_term.cultura_term_delete, name='cultura_term_delete'),
+    path('cultura/termedit/<int:pk>', cultura_term.cultura_term_edit, name='cultura_term_edit'),
+    path('cultura/termimport/', cultura_term.cultura_term_import, name='cultura_term_import'),
+    path('cultura_term/update_rank/', cultura_term.cultura_term_update_rank, name='cultura_term_update_rank'),
+    path('cultura/term/export/', cultura_term.cultura_term_export, name='cultura_term_export'),
     
+    #音乐教师期中考核管理
+    path('music/midlist/', music_mid.music_mid_list, name='music_mid_list'),
+    path('music/midadd/', music_mid.music_mid_add, name='music_mid_add'),
+    path('music/middelete/', music_mid.music_mid_delete, name='music_mid_delete'),
+    path('music/midedit/<int:pk>',music_mid.music_mid_edit, name='music_mid_edit'),
+    path('music/midimport/', music_mid.music_mid_import, name='music_mid_import'),
+    path('music/mid/export/', music_mid.music_mid_export, name='music_mid_export'),
+    path('music_mid/update_rank/', music_mid.music_mid_update_rank, name='music_mid_update_rank'),
 ]
