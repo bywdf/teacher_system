@@ -1,0 +1,81 @@
+.table th, .table td {
+    padding: 10px 8px;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.dataTables_wrapper .table th, 
+.dataTables_wrapper .table td {
+    padding: 10px 6px;
+}
+
+@media (min-width: 768px) {
+    .dataTables_wrapper .table-responsive {
+        overflow-x: visible;
+    }
+}
+
+/* 表格标题自动换行 */
+.table th {
+    white-space: normal;  /* 允许标题换行 */
+    word-wrap: break-word;  /* 长单词自动换行 */
+    vertical-align: middle;  /* 垂直居中对齐 */
+    text-align: center;  /* 水平居中对齐 */
+}
+
+/* 限制标题最大高度，避免占用过多空间 */
+.table th {
+    max-height: 60px;  /* 根据需要调整最大高度 */
+    overflow: hidden;  /* 超出部分隐藏 */
+}
+
+/* 优化表格整体样式 */
+.table th, .table td {
+    padding: 8px 10px;  /* 统一内边距 */
+    border: 1px solid #ddd;  /* 统一边框 */
+}
+
+/* 自定义表头样式 */
+th.header-attendance {
+    background-color: #d9edf7; /* 淡蓝色背景 */
+    position: relative;
+}
+
+th.header-invigilation {
+    background-color: #fcf8e3; /* 淡黄色背景 */
+    position: relative;
+}
+
+th.header-workload {
+    background-color: #dff0d8; /* 淡绿色背景 */
+    position: relative;
+}
+
+th.header-teaching {
+    background-color: #f2dede; /* 淡红色背景 */
+    position: relative;
+}
+
+th.header-total {
+    background-color: #e8e8e8; /* 淡灰色背景 */
+    font-weight: bold;
+    position: relative;
+}
+
+/* 添加图标 */
+th.header-attendance::before,
+th.header-invigilation::before,
+th.header-workload::before,
+th.header-teaching::before,
+th.header-total::before {
+    font-family: 'FontAwesome';
+    margin-right: 5px;
+}
+
+th.header-attendance::before { content: '\f007'; } /* 用户图标 */
+th.header-invigilation::before { content: '\f02d'; } /* 书本图标 */
+th.header-workload::before { content: '\f0ae'; } /* 任务图标 */
+th.header-teaching::before { content: '\f19d'; } /* 毕业帽图标 */
+th.header-total::before { content: '\f080'; } /* 总计图标 */

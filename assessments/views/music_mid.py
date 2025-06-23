@@ -97,10 +97,16 @@ def music_mid_edit(request, pk):
     # 渲染编辑页面，传递表单和对象
     context = {
         'form': form,
-        'title': '编辑考核记录',
-        'instance': instance
+        'title': '考核记录',
+        'instance': instance,
+        'title': '添加考核记录',
+        'show_workload_fields':True,
+        'show_major_hours':True,
+        'show_duty_hours':True,
+        'show_teach_book':True,
+        'show_activity_hours':True, 
     }
-    return render(request, 'music_mid_change.html', context)
+    return render(request, 'assess_change.html', context)
 
 
 def music_mid_add(request):
@@ -113,7 +119,18 @@ def music_mid_add(request):
         if form.is_valid():
             form.save()
             return redirect('assessments:music_mid_list')
-    return render(request, 'music_mid_change.html', {'form': form})
+        
+    content = {
+        'form': form,
+        'title': '添加考核记录',
+        'show_workload_fields':True,
+        'show_major_hours':True,
+        'show_duty_hours':True,
+        'show_teach_book':True,
+        'show_activity_hours':True,        
+    }
+    
+    return render(request, 'assess_change.html', content)
 
 
 # 下面是批量导入需要的功能
@@ -202,7 +219,7 @@ def music_mid_import(request):
                     # 转换字段值
                     def safe_float(value, default=0.0):
                         try:
-                            return float(value) if value is not None else default
+                            return round(value, 3) if value is not None else default
                         except (TypeError, ValueError):
                             return default
 
@@ -215,13 +232,13 @@ def music_mid_import(request):
                             'assess_time': row[2] or datetime.date.today().isoformat(),
                             'assess_depart': assess_depart,
                             'class_hours': safe_float(row[5]),
-                            'duty_hours': safe_float(row[6]),
-                            'extra_work_hours': safe_float(row[7]),
-                            'personal_score': safe_float(row[8]),
-                            'class_score': safe_float(row[9]),
-                            'group_score': safe_float(row[10]),
-                            'remark': row[11] or "",
-                            'week': int(row[12]) if len(row) > 12 and row[12] is not None else 10
+                            'major_hours': safe_float(row[6]),
+                            'activity_hours': safe_float(row[7]),
+                            'extra_work_hours': safe_float(row[8]),
+                            'total_workload': safe_float(row[9]),
+                            'workload_score': safe_float(row[10]),
+                            'teach_book': safe_float(row[11]),
+                            'remark': row[12] or "",                            
                         }
                     )
 
@@ -286,15 +303,15 @@ def music_mid_export(request):
     # 设置表头
     headers = [
         '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
-        '教师学科', '课时数', '值班数折合', '额外工作折合', '总工作量节数', '工作量成绩', '个人成绩', '班级成绩',
-        '教研组成绩', '总成绩', '名次', '备注', '周数'
+        '教师学科', '课堂节数', '专业课节数折合', '艺体活动与竞赛培训节数折算', '额外工作折算', '总工作量节数', '个人成课时工作量成绩', '常规教学薄成绩',
+        '总成绩', '名次', '备注', 
     ]
 
     # 添加表头行
     ws.append(headers)
 
     # 设置表头样式
-    header_font = Font(bold=True, size=12)
+    header_font = Font(bold=True, size=10)
     header_alignment = Alignment(horizontal='center', vertical='center')
     border = Border(
         left=Side(style='thin'),
@@ -319,17 +336,15 @@ def music_mid_export(request):
             obj.teacher.name,
             obj.teacher.subject.title if obj.teacher.subject else '',
             obj.class_hours,
-            obj.duty_hours,
+            obj.major_hours,
+            obj.activity_hours,
             obj.extra_work_hours,
             obj.total_workload,
             obj.workload_score,
-            obj.personal_score,
-            obj.class_score,
-            obj.group_score,
+            obj.teach_book,
             obj.total_score,
             obj.rank,
-            obj.remark,
-            obj.week
+            obj.remark,           
         ]
 
         ws.append(data)
@@ -364,7 +379,6 @@ def music_mid_export(request):
     wb.save(response)
 
     return response
-
 
 
 def music_mid_update_rank(request):

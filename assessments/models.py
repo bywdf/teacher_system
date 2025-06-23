@@ -86,6 +86,14 @@ class TeacherBase(models.Model):
     class Meta:
         abstract = True       
 
+
+class TeacherMidAssess(TeacherBase):
+    '''文化课教师期中考核成绩'''
+    class Meta:
+        unique_together = ('teacher', 'semester', 'term_type')  # 添加唯一约束
+        verbose_name = '文化课教师期中考核成绩'
+        verbose_name_plural = '文化课教师期中考核成绩'
+        
     def save(self, *args, **kwargs):
         # 验证周数
         if not hasattr(self, 'week') or self.week <= 0:
@@ -97,9 +105,9 @@ class TeacherBase(models.Model):
             self.duty_hours or 0,
             self.extra_work_hours or 0
         ]
-        self.total_workload = sum(workloads)
-
-        # 工作量计算（带边界保护）
+        self.total_workload = sum(workloads)    
+              
+         # 工作量计算（带边界保护）
         weekly_workload = self.total_workload / self.week
         self.workload_score = max(
             0, min(10, 4.5 + (weekly_workload - 10) * 0.1))
@@ -113,16 +121,7 @@ class TeacherBase(models.Model):
         ]
         self.total_score = round(sum(scores), 3)
 
-        super().save(*args, **kwargs)
-
-
-class TeacherMidAssess(TeacherBase):
-    '''文化课教师期中考核成绩'''
-    class Meta:
-        unique_together = ('teacher', 'semester', 'term_type')  # 添加唯一约束
-        verbose_name = '文化课教师期中考核成绩'
-        verbose_name_plural = '文化课教师期中考核成绩'
-    
+        super().save(*args, **kwargs) 
     
     def __str__(self):
         # 返回格式："期中成绩(教师姓名, 学期): 总分"
@@ -146,23 +145,34 @@ class TeacherFinalAssess(TeacherBase):
         return f"期末成绩({self.teacher.name}, {self.semester}): {self.total_score or 0}"    
 
     def save(self, *args, **kwargs):
-
-        # 确保所有分数字段都有值，避免 NoneType 错误
-        self.attend_score = self.attend_score or 0
-        self.workload_score = self.workload_score or 0
-        self.personal_score = self.personal_score or 0
-        self.class_score = self.class_score or 0
-        self.group_score = self.group_score or 0
-        self.invigilation_score = self.invigilation_score or 0
-
-        self.total_score = (
-            self.attend_score +
-            self.workload_score +
-            self.personal_score +
-            self.class_score +
-            self.group_score +
-            self.invigilation_score
-        )
+        
+        # 验证周数
+        if not hasattr(self, 'week') or self.week <= 0:
+            raise ValidationError("考核周数必须为正整数")
+        
+         # 空值安全处理
+        workloads = [
+            self.class_hours or 0,
+            self.duty_hours or 0,
+            self.extra_work_hours or 0
+        ]
+        self.total_workload = sum(workloads)    
+              
+         # 工作量计算（带边界保护）
+        weekly_workload = self.total_workload / self.week
+        self.workload_score = max(
+            0, min(10, 4.5 + (weekly_workload - 10) * 0.1))
+            
+        # 总分计算
+        scores = [
+            self.workload_score,
+            self.personal_score or 0,
+            self.class_score or 0,
+            self.group_score or 0,
+            self.attend_score or 0,
+            self.invigilation_score or 0
+        ]
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)
 
 
@@ -237,16 +247,7 @@ class ArtTeacherBase(models.Model):
     class Meta:
         abstract = True
         verbose_name = '音乐美术教师考核底版'
-        verbose_name_plural = '音乐美术教师考核底版'
-
-    def save(self, *args, **kwargs):
-        scores = [
-            self.workload_score,
-            self.teach_book or 0
-        ]
-        self.total_score = round(sum(scores), 3)
-
-        super().save(*args, **kwargs)
+        verbose_name_plural = '音乐美术教师考核底版'   
 
 
 class MusicTeacherMidAssess(ArtTeacherBase):
@@ -255,6 +256,16 @@ class MusicTeacherMidAssess(ArtTeacherBase):
         unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '音乐教师期中考核成绩'
         verbose_name_plural = '音乐教师期中考核成绩'
+    
+    def save(self, *args, **kwargs):
+        
+        scores = [
+            self.workload_score or 0,
+            self.teach_book or 0
+        ]
+        self.total_score = round(sum(scores), 3)
+
+        super().save(*args, **kwargs)
 
 
 class MusicTeacherFinalAssess(ArtTeacherBase):
@@ -269,12 +280,16 @@ class MusicTeacherFinalAssess(ArtTeacherBase):
         verbose_name_plural = '音乐教师期末考核成绩'
 
     def save(self, *args, **kwargs):
-        # 计算总成绩时包含考勤和监考得分
-        self.total_score = (
-            self.attend_score +
-            self.workload_score +
-            self.invigilation_score
-        )
+        
+        # 防御性编程处理空值
+        scores = [
+            self.attend_score or 0,
+            self.workload_score or 0,
+            self.invigilation_score or 0,
+            self.teach_book or 0
+        ]
+        # 计算总成绩
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)
 
 
@@ -319,6 +334,16 @@ class ArtTeacherMidAssess(ArtTeacherBase):
         unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '美术教师期中考核成绩'
         verbose_name_plural = '美术教师期中考核成绩'
+        
+    def save(self, *args, **kwargs):
+        # 防御性处理空值
+        scores = [
+            self.workload_score or 0,
+            self.teach_book or 0
+        ]
+        self.total_score = round(sum(scores), 3)
+        # 保存
+        super().save(*args, **kwargs)
 
 
 class ArtTeacherFinalAssess(ArtTeacherBase):
@@ -333,12 +358,16 @@ class ArtTeacherFinalAssess(ArtTeacherBase):
         verbose_name_plural = '美术教师期末考核成绩'
 
     def save(self, *args, **kwargs):
-        # 计算总成绩时包含考勤和监考得分
-        self.total_score = (
-            self.attend_score +
-            self.workload_score +
-            self.invigilation_score
-        )
+        
+        # 防御性编程处理空值
+        scores = [
+            self.attend_score or 0,
+            self.workload_score or 0,
+            self.invigilation_score or 0,
+            self.teach_book or 0
+        ]
+        # 计算总成绩
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)
 
 

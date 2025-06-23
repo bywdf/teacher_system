@@ -4,7 +4,7 @@
   {% if instance %}
     编辑{{ title }}
   {% else %}
-    新建{{ title }}
+    {{ title }}
   {% endif %}
 {% endblock title %}
 {% block title_d %}
@@ -60,24 +60,15 @@
               </div>
             </div>
           </div>
-          <!-- 考核周数与时间 (仅适用于部分教师类型) -->
-          {% if show_week_field %}
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>{{ form.week.label }}</label>
-                  {{ form.week }}
-                  <span class="text-red">{{ form.week.errors.0 }}</span>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="form-group">
-                  <label>{{ form.assess_time.label }}</label>
-                  {{ form.assess_time }}
-                </div>
+          <!-- 时间 (仅适用于部分教师类型) -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.assess_time.label }}</label>
+                {{ form.assess_time }}
               </div>
             </div>
-          {% endif %}
+          </div>
           <!-- 班级字段 (仅适用于班主任和副班主任) -->
           {% if show_class_field %}
             <div class="form-group">
@@ -117,6 +108,15 @@
                   <div class="form-group">
                     <label>{{ form.major_hours.label }}</label>
                     {{ form.major_hours }}
+                  </div>
+                </div>
+              {% endif %}
+              <!-- 艺体活动与竞赛培训节数折算 (艺术、体育) -->
+              {% if show_activity_hours %}
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>{{ form.activity_hours.label }}</label>
+                    {{ form.activity_hours }}
                   </div>
                 </div>
               {% endif %}
@@ -164,24 +164,19 @@
                 </div>
               </div>
             </div>
-            <!-- 总课时工作量和工作量成绩 -->
+            <!-- 总课时工作量,手动导入 -->
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>{{ form.total_workload.label }}</label>
-                  <input type="text"
-                         class="form-control"
-                         value="{{ form.instance.total_workload|default:'' }}"
-                         readonly>
+                  {{ form.total_workload }}
                 </div>
               </div>
+              <!-- 音体美信息的工作量成绩因为是和组内最高分算，去掉了instance等属性，手动导入 -->
               <div class="col-md-6">
                 <div class="form-group">
                   <label>{{ form.workload_score.label }}</label>
-                  <input type="text"
-                         class="form-control"
-                         value="{{ form.instance.workload_score|default:'' }}"
-                         readonly>
+                  {{ form.workload_score }}
                 </div>
               </div>
             </div>
@@ -297,6 +292,26 @@
             <div class="form-group">
               <label>{{ form.attend_workload.label }}</label>
               {{ form.attend_workload }}
+            </div>
+          {% endif %}
+          <!-- 期中成绩 -->
+          {% if show_mid_score %}
+            <div class="form-group">
+              <label>{{ form.mid_score.label }}</label>
+              <input type="text"
+                     class="form-control"
+                     value="{% if form.instance.mid_score %}{{ form.instance.mid_score.total_score }}{% else %}-{% endif %}"
+                     readonly>
+            </div>
+          {% endif %}
+          <!-- 期末成绩 -->
+          {% if show_final_score %}
+            <div class="form-group">
+              <label>{{ form.final_score.label }}</label>
+              <input type="text"
+                     class="form-control"
+                     value="{% if form.instance.final_score %}{{ form.instance.final_score.total_score }}{% else %}-{% endif %}"
+                     readonly>
             </div>
           {% endif %}
           <!-- 总成绩 -->

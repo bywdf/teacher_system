@@ -211,7 +211,7 @@ def cultura_mid_import(request):
                     # 转换字段值
                     def safe_float(value, default=0.0):
                         try:
-                            return float(value) if value is not None else default
+                            return round(value, 3) if value is not None else default
                         except (TypeError, ValueError):
                             return default
 

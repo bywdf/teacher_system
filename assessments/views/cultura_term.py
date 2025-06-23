@@ -82,38 +82,81 @@ def cultura_term_delete(request):
 
 
 def cultura_term_edit(request, pk):
-    # 获取要编辑的对象，若不存在则返回404
     instance = get_object_or_404(TeacherSemesterAssess, pk=pk)
-    # 创建表单实例，绑定现有数据
     form = EndAssessModelForm(request.POST or None, instance=instance)
 
     if request.method == 'POST':
         if form.is_valid():
-            # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
-            form.save()
-            return redirect('assessments:cultura_term_list')  # 重定向到列表页
-        # 若表单验证失败，保留错误信息并重新渲染页面
+            # 保存前自动关联期中期末成绩
+            teacher = form.cleaned_data['teacher']
+            semester = form.cleaned_data['semester']
+            
+            # 查找对应的期中成绩
+            mid_assess = TeacherMidAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 查找对应的期末成绩
+            final_assess = TeacherFinalAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 设置关联
+            instance.mid_score = mid_assess
+            instance.final_score = final_assess
+            
+            # 计算总成绩
+            instance.total_score = (mid_assess.total_score if mid_assess else 0) + \
+                                 (final_assess.total_score if final_assess else 0)
+            
+            instance.save()
+            return redirect('assessments:cultura_term_list')
 
-    # 渲染编辑页面，传递表单和对象
     context = {
         'form': form,
-        'title': '编辑考核记录',
-        'instance': instance
+        'title': '考核记录',
+        'instance': instance,
+        'show_mid_score': True,
+        'show_final_score': True
     }
     return render(request, 'assess_change.html', context)
 
 
 def cultura_term_add(request):
-    """添加"""
     form = EndAssessModelForm()
-    # 获取所有教师数据
     teachers = UserInfo.objects.all()
     if request.method == 'POST':
         form = EndAssessModelForm(request.POST)
         if form.is_valid():
-            form.save()
+            # 保存前自动关联期中期末成绩
+            teacher = form.cleaned_data['teacher']
+            semester = form.cleaned_data['semester']
+            
+            # 查找对应的期中成绩
+            mid_assess = TeacherMidAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 查找对应的期末成绩
+            final_assess = TeacherFinalAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 创建实例并设置关联
+            instance = form.save(commit=False)
+            instance.mid_score = mid_assess
+            instance.final_score = final_assess
+            instance.total_score = (mid_assess.total_score if mid_assess else 0) + \
+                                 (final_assess.total_score if final_assess else 0)
+            instance.save()
+            
             return redirect('assessments:cultura_term_list')
-    return render(request, 'assess_change.html', {'form': form})
+    
+    return render(request, 'assess_change.html', {'form': form, 'title': '新建考核','show_mid_score': True, 'show_final_score': True})
 
 
 # 下面是批量导入需要的功能
@@ -340,8 +383,7 @@ def cultura_term_export(request):
             obj.final_score.total_score if obj.final_score else '',
             obj.total_score,
             obj.rank,
-            obj.remark,
-       
+            obj.remark,       
         ]
 
         ws.append(data)

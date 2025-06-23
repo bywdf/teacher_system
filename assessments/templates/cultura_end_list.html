@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% load static %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/custom_table.css' %}">
+{% endblock css %}
 {% block title %}
   期末文化科教师综合管理考核成绩
 {% endblock title %}
