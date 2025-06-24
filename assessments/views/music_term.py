@@ -343,7 +343,7 @@ def music_term_export(request):
     # 创建工作簿和工作表
     wb = Workbook()
     ws = wb.active
-    ws.title = "教师期中考核数据"
+    ws.title = "教师学期考核数据"
 
     # 设置表头
     headers = [
@@ -407,7 +407,7 @@ def music_term_export(request):
         ws.column_dimensions[column_letter].width = adjusted_width
 
     # 设置文件名
-    filename = f"教师期末考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"教师学期考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
 
     # 准备响应
     response = HttpResponse(

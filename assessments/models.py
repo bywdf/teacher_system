@@ -431,7 +431,8 @@ class PeTeacherBase(models.Model):
     extra_work_hours = models.FloatField(
         verbose_name='额外工作量', blank=True, null=True)
     total_workload = models.FloatField(
-        verbose_name='工作量成绩', blank=True, null=True)
+        verbose_name='总工作量节数', blank=True, null=True)
+    workload_score = models.FloatField(verbose_name='工作量成绩', blank=True, null=True)
     teach_book = models.FloatField(
         verbose_name='常规教学薄成绩', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
@@ -454,8 +455,8 @@ class PeTeacherMidAssess(PeTeacherBase):
         
     def save(self, *args, **kwargs):
         scores = [
-            self.total_workload or 0,
-            self.major_hours or 0,            
+            self.workload_score or 0,
+            self.teach_book or 0,            
         ]
         # 计算总成绩
         self.total_score = round(sum(scores), 3)
@@ -481,19 +482,20 @@ class PeTeacherFinalAssess(PeTeacherBase):
         verbose_name_plural = '体育教师期末考核成绩'
 
     def save(self, *args, **kwargs):
-        
-        # 成绩列表
+        # 确保覆盖任何手动输入的总成绩
+        self.calculate_total_score()
+        super().save(*args, **kwargs)
+    
+    def calculate_total_score(self):
         scores = [
-            self.total_workload or 0,
             self.attend_score or 0,
+            self.workload_score or 0,
             self.student_awards or 0,
             self.ncee_awards or 0,
             self.invigilation_score or 0,
             self.teach_book or 0
         ]
         self.total_score = round(sum(scores), 3)
-        super().save(*args, **kwargs)
-
 
 class PeTeacherSemester(models.Model):
     '''体育教师学期总评成绩'''

@@ -102,7 +102,6 @@ def art_mid_edit(request, pk):
         'title': '添加考核记录',
         'show_workload_fields':True,
         'show_major_hours':True,
-        'show_duty_hours':True,
         'show_teach_book':True,
         'show_activity_hours':True, 
     }
@@ -125,7 +124,6 @@ def art_mid_add(request):
         'title': '添加考核记录',
         'show_workload_fields':True,
         'show_major_hours':True,
-        'show_duty_hours':True,
         'show_teach_book':True,
         'show_activity_hours':True,        
     }

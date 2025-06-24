@@ -99,10 +99,8 @@ def music_mid_edit(request, pk):
         'form': form,
         'title': '考核记录',
         'instance': instance,
-        'title': '添加考核记录',
         'show_workload_fields':True,
         'show_major_hours':True,
-        'show_duty_hours':True,
         'show_teach_book':True,
         'show_activity_hours':True, 
     }
@@ -125,7 +123,6 @@ def music_mid_add(request):
         'title': '添加考核记录',
         'show_workload_fields':True,
         'show_major_hours':True,
-        'show_duty_hours':True,
         'show_teach_book':True,
         'show_activity_hours':True,        
     }

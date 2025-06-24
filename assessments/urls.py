@@ -1,5 +1,9 @@
 from django.urls import path
-from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid, music_end, music_term, art_mid, art_end, art_term
+from assessments.views import semester, assessdepart
+from assessments.views import cultura_mid, cultura_end, cultura_term
+from assessments.views import music_mid, music_end, music_term, art_mid, art_end, art_term
+from assessments.views import pe_mid, pe_end
+
 
 app_name = 'assessments'
 
@@ -94,4 +98,21 @@ urlpatterns = [
     path('art/termimport/', art_term.art_term_import, name='art_term_import'),
     path('art/term/export/', art_term.art_term_export, name='art_term_export'),
     path('art_term/update_rank/', art_term.art_term_update_rank, name='art_term_update_rank'),
+    
+    # 体育教师期中考核管理
+    path('pe/midlist/', pe_mid.pe_mid_list, name='pe_mid_list'),
+    path('pe/midadd/', pe_mid.pe_mid_add, name='pe_mid_add'),
+    path('pe/middelete/', pe_mid.pe_mid_delete, name='pe_mid_delete'),
+    path('pe/midedit/<int:pk>', pe_mid.pe_mid_edit, name='pe_mid_edit'),
+    path('pe/midimport/', pe_mid.pe_mid_import, name='pe_mid_import'),
+    path('pe/mid/export/', pe_mid.pe_mid_export, name='pe_mid_export'),
+    path('pe_mid/update_rank/', pe_mid.pe_mid_update_rank, name='pe_mid_update_rank'),
+    # 体育期末考核管理
+    path('pe/endlist/', pe_end.pe_end_list, name='pe_end_list'),
+    path('pe/endadd/', pe_end.pe_end_add, name='pe_end_add'),
+    path('pe/enddelete/', pe_end.pe_end_delete, name='pe_end_delete'),
+    path('pe/endedit/<int:pk>', pe_end.pe_end_edit, name='pe_end_edit'),
+    path('pe/endimport/', pe_end.pe_end_import, name='pe_end_import'),
+    path('pe/end/export/', pe_end.pe_end_export, name='pe_end_export'),
+    path('pe_end/update_rank/', pe_end.pe_end_update_rank, name='pe_end_update_rank'),
 ]

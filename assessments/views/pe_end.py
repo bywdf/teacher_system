@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import MusicTeacherFinalAssess, AssessDepart, Semester, TermType
+from assessments.models import PeTeacherFinalAssess, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
 
 
-class MidAssessModelForm(BootStrapModelForm):
+class AssessModelForm(BootStrapModelForm):
     class Meta:
-        model = MusicTeacherFinalAssess
+        model = PeTeacherFinalAssess
         # 字段，所有字段
         fields = '__all__'
 
 
-def music_end_list(request):
+def pe_end_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,7 +52,7 @@ def music_end_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = MusicTeacherFinalAssess.objects.filter(
+    queryset = PeTeacherFinalAssess.objects.filter(
         query).order_by('id')
 
     page_object = Pagination(request, queryset)
@@ -71,27 +71,27 @@ def music_end_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'music_end_list.html', content)
+    return render(request, 'pe_end_list.html', content)
 
 
-def music_end_delete(request):
+def pe_end_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    MusicTeacherFinalAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:music_end_list')
+    PeTeacherFinalAssess.objects.filter(id=nid).delete()
+    return redirect('assessments:pe_end_list')
 
 
-def music_end_edit(request, pk):
+def pe_end_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(MusicTeacherFinalAssess, pk=pk)
+    instance = get_object_or_404(PeTeacherFinalAssess, pk=pk)
     # 创建表单实例，绑定现有数据
-    form = MidAssessModelForm(request.POST or None, instance=instance)
+    form = AssessModelForm(request.POST or None, instance=instance)
 
     if request.method == 'POST':
         if form.is_valid():
             # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
             form.save()
-            return redirect('assessments:music_end_list')  # 重定向到列表页
+            return redirect('assessments:pe_end_list')  # 重定向到列表页
         # 若表单验证失败，保留错误信息并重新渲染页面
 
     # 渲染编辑页面，传递表单和对象
@@ -102,23 +102,25 @@ def music_end_edit(request, pk):
         'show_workload_fields':True,
         'show_major_hours':True,
         'show_teach_book':True,
-        'show_activity_hours':True, 
+        'show_kejiancao_hours':True, 
         'show_attend_score':True,
         'show_invigilation_score':True,
+        'show_student_awards':True,
+        'show_ncee_awards':True,
     }
     return render(request, 'assess_change.html', context)
 
 
-def music_end_add(request):
+def pe_end_add(request):
     """添加"""
-    form = MidAssessModelForm()
+    form = AssessModelForm()
     # 获取所有教师数据
     teachers = UserInfo.objects.all()
     if request.method == 'POST':
-        form = MidAssessModelForm(request.POST)
+        form = AssessModelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('assessments:music_end_list')
+            return redirect('assessments:pe_end_list')
         
     content = {
         'form': form,
@@ -126,9 +128,11 @@ def music_end_add(request):
         'show_workload_fields':True,
         'show_major_hours':True,
         'show_teach_book':True,
-        'show_activity_hours':True,
+        'show_kejiancao_hours':True,
         'show_attend_score':True,
-        'show_invigilation_score':True,        
+        'show_invigilation_score':True,
+        'show_student_awards':True,
+        'show_ncee_awards':True,    
     }
     
     return render(request, 'assess_change.html', content)
@@ -136,13 +140,13 @@ def music_end_add(request):
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def music_end_import(request):
+def pe_end_import(request):
     """批量导入考核成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:music_end_list')
+            return redirect('assessments:pe_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -225,7 +229,7 @@ def music_end_import(request):
                             return default
 
                     # 创建或更新记录
-                    obj, created = MusicTeacherFinalAssess.objects.update_or_create(
+                    obj, created = PeTeacherFinalAssess.objects.update_or_create(
                         teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
@@ -235,16 +239,20 @@ def music_end_import(request):
                             'attend_score': safe_float(row[5]),
                             'class_hours': safe_float(row[6]),
                             'major_hours': safe_float(row[7]),
-                            'activity_hours': safe_float(row[8]),
+                            'kejiancao_hours': safe_float(row[8]),
                             'extra_work_hours': safe_float(row[9]),
                             'total_workload': safe_float(row[10]),
                             'workload_score': safe_float(row[11]),
-                            'invigilation_score': safe_float(row[12]),
-                            'teach_book': safe_float(row[13]),
-                            'remark': row[14] or "",                            
+                            'student_awards': safe_float(row[12]),
+                            'ncee_awards': safe_float(row[13]),
+                            'invigilation_score': safe_float(row[14]),
+                            'teach_book': safe_float(row[15]),
+                            'remark': row[16] or "", 
                         }
                     )
-
+                    
+                    obj.save() # 强制保存，重新计算总分
+                    
                     success_count += 1
                     if created:
                         created_count += 1
@@ -268,10 +276,10 @@ def music_end_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:music_end_list')
+    return redirect('assessments:pe_end_list')
 
 
-def music_end_export(request):
+def pe_end_export(request):
     """导出教期末考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
@@ -294,7 +302,7 @@ def music_end_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset = MusicTeacherFinalAssess.objects.filter(query).select_related(
+    queryset = PeTeacherFinalAssess.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
@@ -306,8 +314,8 @@ def music_end_export(request):
     # 设置表头
     headers = [
         '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
-        '教师学科', '出勤成绩', '课堂节数', '专业课节数折合', '艺体活动与竞赛培训节数折算', '额外工作折算',
-        '总工作量节数', '个人成课时工作量成绩', '监考得分', '常规教学薄成绩',
+        '教师学科', '出勤成绩', '课堂节数', '专业课节数折合', '课间操、非工作日学校安排折算', '额外工作折算',
+        '总工作量节数', '工作量成绩', '学生获奖赋分', '高考加分','监考得分', '常规教学薄成绩',
         '总成绩', '名次', '备注', 
     ]
 
@@ -342,10 +350,12 @@ def music_end_export(request):
             obj.attend_score,
             obj.class_hours,
             obj.major_hours,
-            obj.activity_hours,
+            obj.kejiancao_hours,
             obj.extra_work_hours,
             obj.total_workload,
             obj.workload_score,
+            obj.student_awards,
+            obj.ncee_awards,
             obj.invigilation_score,
             obj.teach_book,
             obj.total_score,
@@ -387,14 +397,14 @@ def music_end_export(request):
     return response
 
 
-def music_end_update_rank(request):
+def pe_end_update_rank(request):
     """更新教师期末考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:music_end_list')
+            return redirect('assessments:pe_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -455,7 +465,7 @@ def music_end_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = MusicTeacherFinalAssess.objects.get(
+                        assess = PeTeacherFinalAssess.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -469,7 +479,7 @@ def music_end_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except MusicTeacherFinalAssess.DoesNotExist:
+                    except PeTeacherFinalAssess.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -493,4 +503,4 @@ def music_end_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:music_end_list')
+    return redirect('assessments:pe_end_list')

@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="{% static 'css/custom_table.css' %}">
 {% endblock css %}
 {% block title %}
-  期中 音乐教师综合管理考核成绩
+  期末 体育教师综合管理考核成绩
 {% endblock title %}
 {% block title_d %}
   全部列表
@@ -15,7 +15,7 @@
       <div class="box">
         <div class="box-header">
           <div style="margin-bottom: 10px" class="clearfix">
-            <a class="btn btn-success" href={% url "assessments:music_mid_add" %}>
+            <a class="btn btn-success" href={% url "assessments:pe_end_add" %}>
               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               新建考核
             </a>
@@ -90,7 +90,7 @@
                 </button>
                 <a href="?" class="btn btn-default" style="margin-left: 5px;">重置</a>
                 <!-- 新增导出按钮 -->
-                <a href="{% url 'assessments:music_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                <a href="{% url 'assessments:pe_end_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
                    class="btn btn-success"
                    style="margin-left: 5px">
                   <span class="glyphicon glyphicon-export"></span> 导出Excel
@@ -122,12 +122,16 @@
                         <th>考核部门</th>
                         <th>姓名</th>
                         <th>学科</th>
+                        <th>考勤得分</th>
                         <th>课堂教学节数</th>
                         <th>专业课节数折算</th>
-                        <th>艺体活动与竞赛培训节数折算</th>
+                        <th>课间操、非工作日学校安排折算</th>
                         <th>额外工作节数折算</th>
                         <th>总工作量节数</th>
-                        <th>课时工作量成绩</th>
+                        <th>工作量成绩</th>
+                        <th>学生获奖赋分</th>
+                        <th>高考加分</th>
+                        <th>监考</th>
                         <th>常规教学薄成绩</th>
                         <th>总成绩</th>
                         <th>名次</th>
@@ -146,12 +150,16 @@
                           <td>{{ obj.assess_depart }}</td>
                           <td>{{ obj.teacher.name }}</td>
                           <td>{{ obj.teacher.subject }}</td>
+                          <td>{{ obj.attend_score }}</td>
                           <td>{{ obj.class_hours }}</td>
                           <td>{{ obj.major_hours }}</td>
-                          <td>{{ obj.activity_hours }}</td>
+                          <td>{{ obj.kejiancao_hours }}</td>
                           <td>{{ obj.extra_work_hours }}</td>
                           <td>{{ obj.total_workload }}</td>
                           <td>{{ obj.workload_score }}</td>
+                          <td>{{ obj.student_awards }}</td>
+                          <td>{{ obj.ncee_awards }}</td>
+                          <td>{{ obj.invigilation_score }}</td>
                           <td>{{ obj.teach_book }}</td>
                           <td>{{ obj.total_score }}</td>
                           <td>{{ obj.rank | default:"" }}</td>
@@ -159,7 +167,7 @@
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           <td>
                             <a class="btn  btn-primary btn-xs"
-                               href="{% url "assessments:music_mid_edit" obj.id %}">编辑</a>
+                               href="{% url "assessments:pe_end_edit" obj.id %}">编辑</a>
                             <a class="btn btn-danger btn-xs"
                                href="javascript:void(0);"
                                onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -199,7 +207,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url "assessments:music_mid_import" %}">
+                    action="{% url "assessments:pe_end_import" %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择考核文件Excel文件:</label>
@@ -226,7 +234,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url "assessments:music_mid_update_rank" %}">
+                    action="{% url "assessments:pe_end_update_rank" %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择名次更新文件：</label>
@@ -257,7 +265,7 @@
     function deleteItem(id, element) {
       if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
         // 构建删除URL
-        const deleteUrl = `/assessments/music/middelete/?nid=${id}`;
+        const deleteUrl = `/assessments/pe/enddelete/?nid=${id}`;
 
         // 创建临时表单用于提交删除请求（防止URL参数被篡改）
         const form = document.createElement('form');
