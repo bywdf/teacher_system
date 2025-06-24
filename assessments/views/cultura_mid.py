@@ -216,11 +216,7 @@ def cultura_mid_import(request):
                             return default
 
                     # 创建或更新记录
-                    obj, created = TeacherMidAssess.objects.update_or_create(
-                        teacher=teacher,
-                        semester=semester_map[semester_str],
-                        term_type=term_type,
-                        defaults={
+                    defaults={
                             'assess_time': row[2] or datetime.date.today().isoformat(),
                             'assess_depart': assess_depart,
                             'class_hours': safe_float(row[5]),
@@ -232,7 +228,19 @@ def cultura_mid_import(request):
                             'remark': row[11] or "",
                             'week': int(row[12]) if len(row) > 12 and row[12] is not None else 10
                         }
+                    obj, created = TeacherMidAssess.objects.get_or_create(
+                        teacher=teacher,
+                        semester=semester_map[semester_str],
+                        term_type=term_type,
+                        defaults=defaults
                     )
+                    # 如果是更新操作，需要先更新字段再保存
+                    if not created:
+                        for key, value in defaults.items():
+                            setattr(obj, key, value)
+
+                    # 触发save方法以计算total_score
+                    obj.save()
 
                     success_count += 1
                     if created:

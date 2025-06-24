@@ -273,18 +273,30 @@ def music_term_import(request):
                             final_assess_map[key] = final_assess  # 更新映射缓存
                     
                     # ------------------- 创建或更新学期总评记录 -------------------
-                    obj, created = MusicTeacherSemesterAssess.objects.update_or_create(
+                   # 准备默认值（不包括total_score，让模型自己计算）
+                    defaults = {
+                        'assess_time': assess_time,
+                        'assess_depart': assess_depart,
+                        'mid_score': mid_assess,
+                        'final_score': final_assess,
+                        'remark': remark,
+                    }
+                    
+                    # 获取或创建对象
+                    obj, created = MusicTeacherSemesterAssess.objects.get_or_create(
                         teacher=teacher,
                         semester=semester,
                         term_type=term_type,
-                        defaults={
-                            'assess_time': assess_time,
-                            'assess_depart': assess_depart,
-                            'mid_score': mid_assess,
-                            'final_score': final_assess,
-                            'remark': remark,
-                        }
+                        defaults=defaults
                     )
+                    
+                    # 如果是更新操作，应用更改
+                    if not created:
+                        for field, value in defaults.items():
+                            setattr(obj, field, value)
+                    
+                    # 确保保存时计算总分
+                    obj.save()
 
                     success_count += 1
                     if created:

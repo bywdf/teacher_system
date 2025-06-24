@@ -220,12 +220,7 @@ def pe_mid_import(request):
                         except (TypeError, ValueError):
                             return default
 
-                    # 创建或更新记录
-                    obj, created = PeTeacherMidAssess.objects.update_or_create(
-                        teacher=teacher,
-                        semester=semester_map[semester_str],
-                        term_type=term_type,
-                        defaults={
+                    defaults={
                             'assess_time': row[2] or datetime.date.today().isoformat(),
                             'assess_depart': assess_depart,
                             'class_hours': safe_float(row[5]),
@@ -237,7 +232,22 @@ def pe_mid_import(request):
                             'teach_book': safe_float(row[11]),
                             'remark': row[12] or "",                            
                         }
+                    
+                    # 创建或更新记录
+                    obj, created = PeTeacherMidAssess.objects.get_or_create(
+                        teacher=teacher,
+                        semester=semester_map[semester_str],
+                        term_type=term_type,
+                        defaults=defaults
                     )
+                    
+                    # 如果是更新操作，需要先更新字段再保存
+                    if not created:
+                        for key, value in defaults.items():
+                            setattr(obj, key, value)
+
+                    # 触发save方法以计算total_score
+                    obj.save()
 
                     success_count += 1
                     if created:

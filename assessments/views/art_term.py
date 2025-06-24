@@ -273,18 +273,26 @@ def art_term_import(request):
                             final_assess_map[key] = final_assess  # 更新映射缓存
                     
                     # ------------------- 创建或更新学期总评记录 -------------------
-                    obj, created = ArtTeacherSemesterAssess.objects.update_or_create(
-                        teacher=teacher,
-                        semester=semester,
-                        term_type=term_type,
-                        defaults={
+                    defaults={
                             'assess_time': assess_time,
                             'assess_depart': assess_depart,
                             'mid_score': mid_assess,
                             'final_score': final_assess,
                             'remark': remark,
                         }
+                    obj, created = ArtTeacherSemesterAssess.objects.get_or_create(
+                        teacher=teacher,
+                        semester=semester,
+                        term_type=term_type,
+                        defaults=defaults
                     )
+                    # 如果是更新操作，需要先更新字段再保存
+                    if not created:
+                        for key, value in defaults.items():
+                            setattr(obj, key, value)
+
+                    # 触发save方法以计算total_score
+                    obj.save()
 
                     success_count += 1
                     if created:

@@ -228,30 +228,39 @@ def pe_end_import(request):
                         except (TypeError, ValueError):
                             return default
 
-                    # 创建或更新记录
-                    obj, created = PeTeacherFinalAssess.objects.update_or_create(
+                    # 设置批量导入字段
+                    defaults = {
+                        'assess_time': row[2] or datetime.date.today().isoformat(),
+                        'assess_depart': assess_depart,
+                        'attend_score': safe_float(row[5]),
+                        'class_hours': safe_float(row[6]),
+                        'major_hours': safe_float(row[7]),
+                        'kejiancao_hours': safe_float(row[8]),
+                        'extra_work_hours': safe_float(row[9]),
+                        'total_workload': safe_float(row[10]),
+                        'workload_score': safe_float(row[11]),
+                        'student_awards': safe_float(row[12]),
+                        'ncee_awards': safe_float(row[13]),
+                        'invigilation_score': safe_float(row[14]),
+                        'teach_book': safe_float(row[15]),
+                        'remark': row[16] or "",                            
+                    }
+
+                    # 获取或创建对象，但不直接设置total_score
+                    obj, created = PeTeacherFinalAssess.objects.get_or_create(
                         teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
-                        defaults={
-                            'assess_time': row[2] or datetime.date.today().isoformat(),
-                            'assess_depart': assess_depart,
-                            'attend_score': safe_float(row[5]),
-                            'class_hours': safe_float(row[6]),
-                            'major_hours': safe_float(row[7]),
-                            'kejiancao_hours': safe_float(row[8]),
-                            'extra_work_hours': safe_float(row[9]),
-                            'total_workload': safe_float(row[10]),
-                            'workload_score': safe_float(row[11]),
-                            'student_awards': safe_float(row[12]),
-                            'ncee_awards': safe_float(row[13]),
-                            'invigilation_score': safe_float(row[14]),
-                            'teach_book': safe_float(row[15]),
-                            'remark': row[16] or "", 
-                        }
+                        defaults=defaults
                     )
-                    
-                    obj.save() # 强制保存，重新计算总分
+
+                    # 如果是更新操作，需要先更新字段再保存
+                    if not created:
+                        for key, value in defaults.items():
+                            setattr(obj, key, value)
+
+                    # 触发save方法以计算total_score
+                    obj.save()
                     
                     success_count += 1
                     if created:
