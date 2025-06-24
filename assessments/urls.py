@@ -1,5 +1,5 @@
 from django.urls import path
-from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid, music_end, music_term, art_mid, art_end
+from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid, music_end, music_term, art_mid, art_end, art_term
 
 app_name = 'assessments'
 
@@ -86,4 +86,12 @@ urlpatterns = [
     path('art/endimport/', art_end.art_end_import, name='art_end_import'),
     path('art/end/export/', art_end.art_end_export, name='art_end_export'),
     path('art_end/update_rank/', art_end.art_end_update_rank, name='art_end_update_rank'),
+    # 美术学期管理url
+    path('art/termlist/', art_term.art_term_list, name='art_term_list'),
+    path('art/termadd/', art_term.art_term_add, name='art_term_add'),
+    path('art/termdelete/', art_term.art_term_delete, name='art_term_delete'),
+    path('art/termedit/<int:pk>', art_term.art_term_edit, name='art_term_edit'),
+    path('art/termimport/', art_term.art_term_import, name='art_term_import'),
+    path('art/term/export/', art_term.art_term_export, name='art_term_export'),
+    path('art_term/update_rank/', art_term.art_term_update_rank, name='art_term_update_rank'),
 ]
