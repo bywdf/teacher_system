@@ -2,7 +2,7 @@ from django.urls import path
 from assessments.views import semester, assessdepart
 from assessments.views import cultura_mid, cultura_end, cultura_term
 from assessments.views import music_mid, music_end, music_term, art_mid, art_end, art_term
-from assessments.views import pe_mid, pe_end
+from assessments.views import pe_mid, pe_end, pe_term
 
 
 app_name = 'assessments'
@@ -115,4 +115,12 @@ urlpatterns = [
     path('pe/endimport/', pe_end.pe_end_import, name='pe_end_import'),
     path('pe/end/export/', pe_end.pe_end_export, name='pe_end_export'),
     path('pe_end/update_rank/', pe_end.pe_end_update_rank, name='pe_end_update_rank'),
+    # 体育学期管理
+    path('pe/termlist/', pe_term.pe_term_list, name='pe_term_list'),
+    path('pe/termadd/', pe_term.pe_term_add, name='pe_term_add'),
+    path('pe/termdelete/', pe_term.pe_term_delete, name='pe_term_delete'),
+    path('pe/termedit/<int:pk>', pe_term.pe_term_edit, name='pe_term_edit'),
+    path('pe/termimport/', pe_term.pe_term_import, name='pe_term_import'),
+    path('pe/term/export/', pe_term.pe_term_export, name='pe_term_export'),
+    path('pe_term/update_rank/', pe_term.pe_term_update_rank, name='pe_term_update_rank'),
 ]

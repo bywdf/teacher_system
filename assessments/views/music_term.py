@@ -367,7 +367,7 @@ def music_term_export(request):
     ws.append(headers)
 
     # 设置表头样式
-    header_font = Font(bold=True, size=12)
+    header_font = Font(bold=True, size=10)
     header_alignment = Alignment(horizontal='center', vertical='center')
     border = Border(
         left=Side(style='thin'),

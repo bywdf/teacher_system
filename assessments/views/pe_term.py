@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import  TeacherSemesterAssess, AssessDepart, Semester, TermType, TeacherMidAssess, TeacherFinalAssess
+from assessments.models import  PeTeacherSemester, AssessDepart, Semester, TermType, PeTeacherMidAssess, PeTeacherFinalAssess
 from accounts.models import UserInfo, Subject
 
 
-class EndAssessModelForm(BootStrapModelForm):
+class AssessModelForm(BootStrapModelForm):
     class Meta:
-        model = TeacherSemesterAssess
+        model = PeTeacherSemester
         # 字段，所有字段
         fields = '__all__'
 
 
-def cultura_term_list(request):
+def pe_term_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,7 +52,7 @@ def cultura_term_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = TeacherSemesterAssess.objects.filter(
+    queryset = PeTeacherSemester.objects.filter(
         query).order_by('id')
 
     page_object = Pagination(request, queryset)
@@ -71,19 +71,19 @@ def cultura_term_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'cultura_term_list.html', content)
+    return render(request, 'pe_term_list.html', content)
 
 
-def cultura_term_delete(request):
+def pe_term_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    TeacherSemesterAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:cultura_term_list')
+    PeTeacherSemester.objects.filter(id=nid).delete()
+    return redirect('assessments:pe_term_list')
 
 
-def cultura_term_edit(request, pk):
-    instance = get_object_or_404(TeacherSemesterAssess, pk=pk)
-    form = EndAssessModelForm(request.POST or None, instance=instance)
+def pe_term_edit(request, pk):
+    instance = get_object_or_404(PeTeacherSemester, pk=pk)
+    form = AssessModelForm(request.POST or None, instance=instance)
 
     if request.method == 'POST':
         if form.is_valid():
@@ -92,13 +92,13 @@ def cultura_term_edit(request, pk):
             semester = form.cleaned_data['semester']
             
             # 查找对应的期中成绩
-            mid_assess = TeacherMidAssess.objects.filter(
+            mid_assess = PeTeacherMidAssess.objects.filter(
                 teacher=teacher, 
                 semester=semester
             ).first()
             
             # 查找对应的期末成绩
-            final_assess = TeacherFinalAssess.objects.filter(
+            final_assess = PeTeacherFinalAssess.objects.filter(
                 teacher=teacher, 
                 semester=semester
             ).first()
@@ -112,7 +112,7 @@ def cultura_term_edit(request, pk):
                                  (final_assess.total_score if final_assess else 0)
             
             instance.save()
-            return redirect('assessments:cultura_term_list')
+            return redirect('assessments:pe_term_list')
 
     context = {
         'form': form,
@@ -124,24 +124,24 @@ def cultura_term_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
-def cultura_term_add(request):
-    form = EndAssessModelForm()
+def pe_term_add(request):
+    form = AssessModelForm()
     teachers = UserInfo.objects.all()
     if request.method == 'POST':
-        form = EndAssessModelForm(request.POST)
+        form = AssessModelForm(request.POST)
         if form.is_valid():
             # 保存前自动关联期中期末成绩
             teacher = form.cleaned_data['teacher']
             semester = form.cleaned_data['semester']
             
             # 查找对应的期中成绩
-            mid_assess = TeacherMidAssess.objects.filter(
+            mid_assess = PeTeacherMidAssess.objects.filter(
                 teacher=teacher, 
                 semester=semester
             ).first()
             
             # 查找对应的期末成绩
-            final_assess = TeacherFinalAssess.objects.filter(
+            final_assess = PeTeacherFinalAssess.objects.filter(
                 teacher=teacher, 
                 semester=semester
             ).first()
@@ -154,20 +154,20 @@ def cultura_term_add(request):
                                  (final_assess.total_score if final_assess else 0)
             instance.save()
             
-            return redirect('assessments:cultura_term_list')
+            return redirect('assessments:pe_term_list')
     
     return render(request, 'assess_change.html', {'form': form, 'title': '新建考核','show_mid_score': True, 'show_final_score': True})
 
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def cultura_term_import(request):
+def pe_term_import(request):
     """批量导入考核成绩并自动关联期中期末成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_term_list')
+            return redirect('assessments:pe_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -186,12 +186,12 @@ def cultura_term_import(request):
             
             # 预加载期中期末成绩映射（教师-学期 -> 成绩对象）
             mid_assess_map = {}
-            for mid in TeacherMidAssess.objects.all():
+            for mid in PeTeacherMidAssess.objects.all():
                 key = (mid.teacher_id, mid.semester_id)
                 mid_assess_map[key] = mid
                 
             final_assess_map = {}
-            for final in TeacherFinalAssess.objects.all():
+            for final in PeTeacherFinalAssess.objects.all():
                 key = (final.teacher_id, final.semester_id)
                 final_assess_map[key] = final
 
@@ -255,7 +255,7 @@ def cultura_term_import(request):
                     mid_assess = mid_assess_map.get(key)
                     if not mid_assess:
                         # 尝试通过查询获取（处理映射未加载的情况）
-                        mid_assess = TeacherMidAssess.objects.filter(
+                        mid_assess = PeTeacherMidAssess.objects.filter(
                             teacher=teacher, 
                             semester=semester
                         ).first()
@@ -265,7 +265,7 @@ def cultura_term_import(request):
                     # 查找期末成绩
                     final_assess = final_assess_map.get(key)
                     if not final_assess:
-                        final_assess = TeacherFinalAssess.objects.filter(
+                        final_assess = PeTeacherFinalAssess.objects.filter(
                             teacher=teacher, 
                             semester=semester
                         ).first()
@@ -280,7 +280,7 @@ def cultura_term_import(request):
                             'final_score': final_assess,
                             'remark': remark,
                         }
-                    obj, created = TeacherSemesterAssess.objects.get_or_create(
+                    obj, created = PeTeacherSemester.objects.get_or_create(
                         teacher=teacher,
                         semester=semester,
                         term_type=term_type,
@@ -318,10 +318,10 @@ def cultura_term_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_term_list')
+    return redirect('assessments:pe_term_list')
 
 
-def cultura_term_export(request):
+def pe_term_export(request):
     """导出教师学期考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
@@ -344,14 +344,14 @@ def cultura_term_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset = TeacherSemesterAssess.objects.filter(query).select_related(
+    queryset = PeTeacherSemester.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
     # 创建工作簿和工作表
     wb = Workbook()
     ws = wb.active
-    ws.title = "教师期中考核数据"
+    ws.title = "教师学期考核数据"
 
     # 设置表头
     headers = [
@@ -415,7 +415,7 @@ def cultura_term_export(request):
         ws.column_dimensions[column_letter].width = adjusted_width
 
     # 设置文件名
-    filename = f"教师期末考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"教师学期考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
 
     # 准备响应
     response = HttpResponse(
@@ -429,14 +429,14 @@ def cultura_term_export(request):
 
 
 
-def cultura_term_update_rank(request):
+def pe_term_update_rank(request):
     """更新教师学期考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:cultura_term_list')
+            return redirect('assessments:pe_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -497,7 +497,7 @@ def cultura_term_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = TeacherSemesterAssess.objects.get(
+                        assess = PeTeacherSemester.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -511,7 +511,7 @@ def cultura_term_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except TeacherSemesterAssess.DoesNotExist:
+                    except PeTeacherSemester.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -535,4 +535,4 @@ def cultura_term_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:cultura_term_list')
+    return redirect('assessments:pe_term_list')
