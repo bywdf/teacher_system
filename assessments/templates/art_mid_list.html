@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/custom_table.css' %}">
+{% endblock css %}
+{% block title %}
+  期中 美术教师综合管理考核成绩
+{% endblock title %}
+{% block title_d %}
+  全部列表
+{% endblock title_d %}
+{% block content %}
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="box">
+        <div class="box-header">
+          <div style="margin-bottom: 10px" class="clearfix">
+            <a class="btn btn-success" href={% url "assessments:art_mid_add" %}>
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              新建考核
+            </a>
+            <!-- 多条件筛选表单 -->
+            <div style="float: right; width: 100%; margin-top: 10px;">
+              <form method="get" class="form-inline">
+                <!-- 学期筛选 -->
+                <div class="form-group">
+                  <label for="semester">学期：</label>
+                  <select name="semester" id="semester" class="form-control">
+                    <option value="all">全部学期</option>
+                    {% for semester in semesters %}
+                      <option value="{{ semester.id }}"
+                              {% if selected_semester == semester.id|stringformat:"s" %}selected{% endif %}>
+                        {{ semester }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- 考核类型筛选 -->
+                <div class="form-group" style="margin-left: 10px;">
+                  <label for="term_type">考核类型：</label>
+                  <select name="term_type" id="term_type" class="form-control">
+                    <option value="all">全部类型</option>
+                    {% for term_type in term_types %}
+                      <option value="{{ term_type.id }}"
+                              {% if selected_term_type == term_type.id|stringformat:"s" %}selected{% endif %}>
+                        {{ term_type.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- 考核部门筛选 -->
+                <div class="form-group" style="margin-left: 10px;">
+                  <label for="assess_depart">考核部门：</label>
+                  <select name="assess_depart" id="assess_depart" class="form-control">
+                    <option value="all">全部部门</option>
+                    {% for depart in assess_departs %}
+                      <option value="{{ depart.id }}"
+                              {% if selected_assess_depart == depart.id|stringformat:"s" %}selected{% endif %}>
+                        {{ depart.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- 学科筛选 -->
+                <!-- 学科筛选 - 修正版 -->
+                <div class="form-group">
+                  <label for="subject">学科：</label>
+                  <select name="subject" id="subject" class="form-control">
+                    <option value="all">全部学科</option>
+                    {% for subject in subjects %}
+                      <option value="{{ subject.id }}"
+                              {% if selected_subject|add:"0" == subject.id %}selected{% endif %}>
+                        {{ subject.title }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- 教师姓名搜索 -->
+                <div class="form-group" style="margin-left: 10px;">
+                  <label for="teacher_name">教师姓名：</label>
+                  <input type="text"
+                         name="teacher_name"
+                         id="teacher_name"
+                         class="form-control"
+                         value="{{ teacher_name }}"
+                         placeholder="输入教师姓名">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-left: 10px;">
+                  <span class="glyphicon glyphicon-search"></span> 查询
+                </button>
+                <a href="?" class="btn btn-default" style="margin-left: 5px;">重置</a>
+                <!-- 新增导出按钮 -->
+                <a href="{% url 'assessments:art_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                   class="btn btn-success"
+                   style="margin-left: 5px">
+                  <span class="glyphicon glyphicon-export"></span> 导出Excel
+                </a>
+              </form>
+            </div>
+            <!-- /多条件筛选表单 -->
+          </div>
+          <div class="box-body">
+            <div id="example2_wrapper"
+                 class="dataTables_wrapper form-inline dt-bootstrap">
+              <div class="row">
+                <div class="col-sm-6"></div>
+                <div class="col-sm-6"></div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <!-- Table -->
+                  <table id="example2"
+                         class="table table-bordered table-hover dataTable"
+                         role="grid"
+                         aria-describedby="example2_info">
+                    <thead>
+                      <tr role="row">
+                        <th>ID</th>
+                        <th>学期</th>
+                        <th>考核类型</th>
+                        <th>考核时间</th>
+                        <th>考核部门</th>
+                        <th>姓名</th>
+                        <th>学科</th>
+                        <th>课堂教学节数</th>
+                        <th>专业课节数折算</th>
+                        <th>艺体活动与竞赛培训节数折算</th>
+                        <th>额外工作节数折算</th>
+                        <th>总工作量节数</th>
+                        <th>课时工作量成绩</th>
+                        <th>常规教学薄成绩</th>
+                        <th>总成绩</th>
+                        <th>名次</th>
+                        <th>备注</th>
+                        <th>公示完成</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for obj in queryset %}
+                        <tr role="row">
+                          <th scope="row">{{ obj.id }}</th>
+                          <td>{{ obj.semester }}</td>
+                          <td>{{ obj.term_type }}</td>
+                          <td>{{ obj.assess_time }}</td>
+                          <td>{{ obj.assess_depart }}</td>
+                          <td>{{ obj.teacher.name }}</td>
+                          <td>{{ obj.teacher.subject }}</td>
+                          <td>{{ obj.class_hours }}</td>
+                          <td>{{ obj.major_hours }}</td>
+                          <td>{{ obj.activity_hours }}</td>
+                          <td>{{ obj.extra_work_hours }}</td>
+                          <td>{{ obj.total_workload }}</td>
+                          <td>{{ obj.workload_score }}</td>
+                          <td>{{ obj.teach_book }}</td>
+                          <td>{{ obj.total_score }}</td>
+                          <td>{{ obj.rank | default:"" }}</td>
+                          <td>{{ obj.remark }}</td>
+                          <td>{{ obj.is_published|yesno:"是,否" }}</td>
+                          <td>
+                            <a class="btn  btn-primary btn-xs"
+                               href="{% url "assessments:art_mid_edit" obj.id %}">编辑</a>
+                            <a class="btn btn-danger btn-xs"
+                               href="javascript:void(0);"
+                               onclick="deleteItem('{{ obj.id }}', this);">删除</a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  <!--End Table -->
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-5">
+                  <div class="dataTables_info"
+                       id="example2_info"
+                       role="status"
+                       aria-live="polite">每页展示10条数据</div>
+                </div>
+                <div class="col-sm-7">
+                  <div class="dataTables_paginate paging_simple_numbers"
+                       id="example2_paginate">
+                    <ul class="pagination">
+                      {{ page_string }}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+              批量上传文化课教师期中考核数据
+            </div>
+            <div class="panel-body">
+              <form method="post"
+                    enctype="multipart/form-data"
+                    action="{% url "assessments:art_mid_import" %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label>选择考核文件Excel文件:</label>
+                  <input type="file" name="excel_file" required>
+                </div>
+                <button type="submit" class="btn btn-primary">导入</button>
+              </form>
+              {% if messages %}
+                <div class="mt-3">
+                  {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+              更新文化课期中考核名次及公示状态
+            </div>
+            <div class="panel-body">
+              <form method="post"
+                    enctype="multipart/form-data"
+                    action="{% url "assessments:art_mid_update_rank" %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label>选择名次更新文件：</label>
+                  <input type="file" name="excel_file" required>
+                </div>
+                <button type="submit" class="btn btn-success">
+                  <span class="glyphicon glyphicon-upload"></span> 更新名次
+                </button>
+              </form>
+              {% if messages %}
+                <div class="mt-3">
+                  {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}danger{% endif %}">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block js %}
+  <script>
+    function deleteItem(id, element) {
+      if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
+        // 构建删除URL
+        const deleteUrl = `/assessments/art/middelete/?nid=${id}`;
+
+        // 创建临时表单用于提交删除请求（防止URL参数被篡改）
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = deleteUrl;
+
+        // 添加CSRF令牌（Django需要CSRF保护）
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (csrfToken) {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = csrfToken.value;
+          form.appendChild(csrfInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+{% endblock js %}
