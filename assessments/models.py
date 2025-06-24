@@ -299,6 +299,8 @@ class MusicTeacherSemesterAssess(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -381,6 +383,8 @@ class ArtTeacherSemesterAssess(models.Model):
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     mid_score = models.ForeignKey(ArtTeacherMidAssess, on_delete=models.SET_NULL,
                                   verbose_name='期中成绩', blank=True, null=True, related_name='mid_score')
     final_score = models.ForeignKey(ArtTeacherFinalAssess, on_delete=models.SET_NULL,
@@ -440,19 +444,6 @@ class PeTeacherBase(models.Model):
         verbose_name = '体育教师考核底版'
         verbose_name_plural = '体育教师考核底版'
 
-    def save(self, *args, **kwargs):
-        scores = [
-            self.class_hours or 0,
-            self.major_hours or 0,
-            self.kejiancao_hours or 0,
-            self.extra_work_hours or 0
-        ]
-        self.total_workload = round(sum(scores), 3)
-        # 总成绩是工作量成绩、常规教学薄成绩相加
-        self.total_score = round(self.total_workload + self.teach_book, 3)
-
-        super().save(*args, **kwargs)
-
 
 class PeTeacherMidAssess(PeTeacherBase):
     '''体育教师期中考核成绩'''
@@ -460,6 +451,17 @@ class PeTeacherMidAssess(PeTeacherBase):
         unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '体育教师期中考核成绩'
         verbose_name_plural = '体育教师期中考核成绩'
+        
+    def save(self, *args, **kwargs):
+        scores = [
+            self.total_workload or 0,
+            self.major_hours or 0,            
+        ]
+        # 计算总成绩
+        self.total_score = round(sum(scores), 3)
+
+        super().save(*args, **kwargs)
+
 
 
 class PeTeacherFinalAssess(PeTeacherBase):
@@ -479,14 +481,17 @@ class PeTeacherFinalAssess(PeTeacherBase):
         verbose_name_plural = '体育教师期末考核成绩'
 
     def save(self, *args, **kwargs):
+        
+        # 成绩列表
         scores = [
+            self.total_workload or 0,
             self.attend_score or 0,
             self.student_awards or 0,
             self.ncee_awards or 0,
-            self.invigilation_score or 0
+            self.invigilation_score or 0,
+            self.teach_book or 0
         ]
-        self.total_score = round(
-            self.total_workload + self.teach_book + sum(scores), 3)
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)
 
 
@@ -498,6 +503,8 @@ class PeTeacherSemester(models.Model):
         Semester, on_delete=models.CASCADE, verbose_name='学期')
     term_type = models.ForeignKey(
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(PeTeacherMidAssess, on_delete=models.SET_NULL,
@@ -553,19 +560,7 @@ class ItTeacherbase(models.Model):
 
     class Meta:
         abstract = True
-
-    def save(self, *args, **kwargs):
-        scores = [
-            self.class_hours or 0,
-            self.video_hours or 0,
-            self.network_hours or 0,
-            self.extra_work_hours or 0
-        ]
-        self.total_workload = round(sum(scores), 3)
-        total_score = self.total_workload + self.teach_book
-        self.total_score = round(total_score, 3)
-        super().save(*args, **kwargs)
-
+        
 
 class ItTeacherMidAssess(ItTeacherbase):
     '''信息技术教师期中考核成绩'''
@@ -573,6 +568,15 @@ class ItTeacherMidAssess(ItTeacherbase):
         unique_together = ('teacher', 'semester', 'term_type')
         verbose_name = '信息技术教师期中考核成绩'
         verbose_name_plural = '信息技术教师期中考核成绩'
+    def save(self, *args, **kwargs):
+        
+        scores = [
+            self.total_workload or 0,
+            self.teach_book or 0,            
+        ]        
+        self.total_score = round(sum(scores), 3)
+        super().save(*args, **kwargs)
+
 
 
 class ItTeacherFinalAssess(ItTeacherbase):
@@ -590,10 +594,11 @@ class ItTeacherFinalAssess(ItTeacherbase):
     def save(self, *args, **kwargs):
         scores = [
             self.attend_score or 0,
-            self.invigilation_score or 0
+            self.invigilation_score or 0,
+            self.total_workload or 0,
+            self.teach_book or 0,
         ]
-        self.total_score = round(
-            self.total_workload + self.teach_book + sum(scores), 3)
+        self.total_score = round(sum(scores), 3)
         super().save(*args, **kwargs)
 
 
@@ -605,6 +610,8 @@ class ItTeacherSemester(models.Model):
         TermType, on_delete=models.CASCADE, verbose_name='学期考核类型')
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(ItTeacherMidAssess, on_delete=models.SET_NULL,
@@ -687,6 +694,8 @@ class GroupLeaderSemester(models.Model):
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     mid_score = models.ForeignKey(GroupLeaderMidAssess, on_delete=models.SET_NULL,
                                   verbose_name='期中成绩', blank=True, null=True, related_name='mid_score')
     final_score = models.ForeignKey(GroupLeaderFinalAssess, on_delete=models.SET_NULL,
@@ -770,6 +779,8 @@ class HeaderTeacherSemester(models.Model):
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     class_number = models.IntegerField(verbose_name='班级')
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     mid_score = models.ForeignKey(HeaderTeacherMidAssess, on_delete=models.SET_NULL,

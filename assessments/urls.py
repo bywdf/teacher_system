@@ -1,5 +1,5 @@
 from django.urls import path
-from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid, music_end
+from assessments.views import cultura_mid, semester, assessdepart, cultura_end, cultura_term, music_mid, music_end, music_term
 
 app_name = 'assessments'
 
@@ -53,7 +53,7 @@ urlpatterns = [
     path('music/midimport/', music_mid.music_mid_import, name='music_mid_import'),
     path('music/mid/export/', music_mid.music_mid_export, name='music_mid_export'),
     path('music_mid/update_rank/', music_mid.music_mid_update_rank, name='music_mid_update_rank'),
-    # 音乐科期末考核管理
+    # 音乐期末考核管理
     path('music/endlist/', music_end.music_end_list, name='music_end_list'),
     path('music/endadd/', music_end.music_end_add, name='music_end_add'),
     path('music/enddelete/', music_end.music_end_delete, name='music_end_delete'),
@@ -61,4 +61,12 @@ urlpatterns = [
     path('music/endimport/', music_end.music_end_import, name='music_end_import'),
     path('music/end/export/', music_end.music_end_export, name='music_end_export'),
     path('music_end/update_rank/', music_end.music_end_update_rank, name='music_end_update_rank'),
+    # 音乐学期管理url
+    path('music/termlist/', music_term.music_term_list, name='music_term_list'),
+    path('music/termadd/', music_term.music_term_add, name='music_term_add'),
+    path('music/termdelete/', music_term.music_term_delete, name='music_term_delete'),
+    path('music/termedit/<int:pk>', music_term.music_term_edit, name='music_term_edit'),
+    path('music/termimport/', music_term.music_term_import, name='music_term_import'),
+    path('music/term/export/', music_term.music_term_export, name='music_term_export'),
+    path('music_term/update_rank/', music_term.music_term_update_rank, name='music_term_update_rank'),
 ]
