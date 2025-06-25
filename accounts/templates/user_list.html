@@ -113,7 +113,7 @@
           <div class="panel-body">
             <form method="post"
                   enctype="multipart/form-data"
-                  action="{% url "accounts:import_users" %}">
+                  action="{% url 'accounts:import_users' %}">
               {% csrf_token %}
               <div class="form-group">
                 <label>选择Excel文件:</label>

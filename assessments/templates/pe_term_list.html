@@ -15,7 +15,7 @@
       <div class="box">
         <div class="box-header">
           <div style="margin-bottom: 10px" class="clearfix">
-            <a class="btn btn-success" href={% url "assessments:pe_term_add" %}>
+            <a class="btn btn-success" href="{% url 'assessments:pe_term_add' %}">
               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               新建考核
             </a>
@@ -149,7 +149,7 @@
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           <td>
                             <a class="btn  btn-primary btn-xs"
-                               href="{% url "assessments:pe_term_edit" obj.id %}">编辑</a>
+                               href="{% url 'assessments:pe_term_edit' obj.id %}">编辑</a>
                             <a class="btn btn-danger btn-xs"
                                href="javascript:void(0);"
                                onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -189,7 +189,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url "assessments:pe_term_import" %}">
+                    action="{% url 'assessments:pe_term_import' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择考核文件Excel文件:</label>
@@ -216,7 +216,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url "assessments:pe_term_update_rank" %}">
+                    action="{% url 'assessments:pe_term_update_rank' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择名次更新文件：</label>

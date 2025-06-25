@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="{% static 'css/custom_table.css' %}">
 {% endblock css %}
 {% block title %}
-  期中文化科教师综合管理考核成绩
+  期末 教研组长综合管理考核成绩
 {% endblock title %}
 {% block title_d %}
   全部列表
@@ -16,7 +16,7 @@
         <div class="box-header">
           <div style="margin-bottom: 10px" class="clearfix">
             <a class="btn btn-success"
-               href="{% url 'assessments:cultura_mid_add' %}">
+               href="{% url 'assessments:groupleader_end_add' %}">
               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               新建考核
             </a>
@@ -91,7 +91,7 @@
                 </button>
                 <a href="?" class="btn btn-default" style="margin-left: 5px;">重置</a>
                 <!-- 新增导出按钮 -->
-                <a href="{% url 'assessments:cultura_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                <a href="{% url 'assessments:groupleader_end_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
                    class="btn btn-success"
                    style="margin-left: 5px">
                   <span class="glyphicon glyphicon-export"></span> 导出Excel
@@ -121,19 +121,12 @@
                         <th>考核类型</th>
                         <th>考核时间</th>
                         <th>考核部门</th>
-                        <th>姓名</th>
-                        <th>学科</th>
-                        <th>课时节数</th>
-                        <th>值班节数折算</th>
-                        <th>额外工作节数折算</th>
-                        <th>总工作量节数</th>
-                        <th>课时工作量成绩</th>
-                        <th>教师个人成绩</th>
-                        <th>班级量化成绩</th>
-                        <th>教研组量化成绩</th>
+                        <th>组长</th>
+                        <th>教研组</th>
+                        <th>总结</th>
+                        <th>教学水平/教师常规薄本评价</th>
                         <th>总成绩</th>
                         <th>名次</th>
-                        <th>备注</th>
                         <th>公示完成</th>
                         <th>操作</th>
                       </tr>
@@ -148,21 +141,14 @@
                           <td>{{ obj.assess_depart }}</td>
                           <td>{{ obj.teacher.name }}</td>
                           <td>{{ obj.teacher.subject }}</td>
-                          <td>{{ obj.class_hours }}</td>
-                          <td>{{ obj.duty_hours }}</td>
-                          <td>{{ obj.extra_work_hours }}</td>
-                          <td>{{ obj.total_workload }}</td>
-                          <td>{{ obj.workload_score }}</td>
-                          <td>{{ obj.personal_score }}</td>
-                          <td>{{ obj.class_score }}</td>
-                          <td>{{ obj.group_score }}</td>
+                          <td>{{ obj.plan_summary_score }}</td>
+                          <td>{{ obj.teach_level_score }}</td>
                           <td>{{ obj.total_score }}</td>
                           <td>{{ obj.rank | default:"" }}</td>
-                          <td>{{ obj.remark }}</td>
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           <td>
                             <a class="btn  btn-primary btn-xs"
-                               href="{% url 'assessments:cultura_mid_edit' obj.id %}">编辑</a>
+                               href="{% url 'assessments:groupleader_end_edit' obj.id %}">编辑</a>
                             <a class="btn btn-danger btn-xs"
                                href="javascript:void(0);"
                                onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -197,12 +183,12 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-              批量上传文化课教师期中考核数据
+              批量上传教师考核数据
             </div>
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url 'assessments:cultura_mid_import' %}">
+                    action="{% url 'assessments:groupleader_end_import' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择考核文件Excel文件:</label>
@@ -224,12 +210,12 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
-              更新文化课期中考核名次及公示状态
+              更新教师考核名次及公示状态
             </div>
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url "assessments:cultura_mid_update_rank" %}">
+                    action="{% url 'assessments:groupleader_end_update_rank' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择名次更新文件：</label>
@@ -260,7 +246,7 @@
     function deleteItem(id, element) {
       if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
         // 构建删除URL
-        const deleteUrl = `/assessments/cultura/middelete/?nid=${id}`;
+        const deleteUrl = `/assessments/groupleader/enddelete/?nid=${id}`;
 
         // 创建临时表单用于提交删除请求（防止URL参数被篡改）
         const form = document.createElement('form');

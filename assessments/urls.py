@@ -4,6 +4,7 @@ from assessments.views import cultura_mid, cultura_end, cultura_term
 from assessments.views import music_mid, music_end, music_term, art_mid, art_end, art_term
 from assessments.views import pe_mid, pe_end, pe_term
 from assessments.views import it_mid, it_end, it_term
+from assessments.views import groupleader_mid, groupleader_end, groupleader_term
 
 
 app_name = 'assessments'
@@ -149,4 +150,29 @@ urlpatterns = [
     path('it/termimport/', it_term.it_term_import, name='it_term_import'),
     path('it/term/export/', it_term.it_term_export, name='it_term_export'),
     path('it_term/update_rank/', it_term.it_term_update_rank, name='it_term_update_rank'),
+    
+    # 教研组长期中考核管理
+    path('groupleader/midlist/', groupleader_mid.groupleader_mid_list, name='groupleader_mid_list'),
+    path('groupleader/midadd/', groupleader_mid.groupleader_mid_add, name='groupleader_mid_add'),
+    path('groupleader/middelete/', groupleader_mid.groupleader_mid_delete, name='groupleader_mid_delete'),
+    path('groupleader/midedit/<int:pk>', groupleader_mid.groupleader_mid_edit, name='groupleader_mid_edit'),
+    path('groupleader/midimport/', groupleader_mid.groupleader_mid_import, name='groupleader_mid_import'),
+    path('groupleader/mid/export/', groupleader_mid.groupleader_mid_export, name='groupleader_mid_export'),
+    path('groupleader_mid/update_rank/', groupleader_mid.groupleader_mid_update_rank, name='groupleader_mid_update_rank'),
+    # 教研组长期期末考核管理
+    path('groupleader/endlist/', groupleader_end.groupleader_end_list, name='groupleader_end_list'),
+    path('groupleader/endadd/', groupleader_end.groupleader_end_add, name='groupleader_end_add'),
+    path('groupleader/enddelete/', groupleader_end.groupleader_end_delete, name='groupleader_end_delete'),
+    path('groupleader/endedit/<int:pk>', groupleader_end.groupleader_end_edit, name='groupleader_end_edit'),
+    path('groupleader/endimport/', groupleader_end.groupleader_end_import, name='groupleader_end_import'),
+    path('groupleader/end/export/', groupleader_end.groupleader_end_export, name='groupleader_end_export'),
+    path('groupleader_end/update_rank/', groupleader_end.groupleader_end_update_rank, name='groupleader_end_update_rank'),
+    # 教研组长期学期管理
+    path('groupleader/termlist/', groupleader_term.groupleader_term_list, name='groupleader_term_list'),
+    path('groupleader/termadd/', groupleader_term.groupleader_term_add, name='groupleader_term_add'),
+    path('groupleader/termdelete/', groupleader_term.groupleader_term_delete, name='groupleader_term_delete'),
+    path('groupleader/termedit/<int:pk>', groupleader_term.groupleader_term_edit, name='groupleader_term_edit'),
+    path('groupleader/termimport/', groupleader_term.groupleader_term_import, name='groupleader_term_import'),
+    path('groupleader/term/export/', groupleader_term.groupleader_term_export, name='groupleader_term_export'),
+    path('groupleader_term/update_rank/', groupleader_term.groupleader_term_update_rank, name='groupleader_term_update_rank'),
 ]
