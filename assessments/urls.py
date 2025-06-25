@@ -3,7 +3,7 @@ from assessments.views import semester, assessdepart
 from assessments.views import cultura_mid, cultura_end, cultura_term
 from assessments.views import music_mid, music_end, music_term, art_mid, art_end, art_term
 from assessments.views import pe_mid, pe_end, pe_term
-from assessments.views import it_mid, it_end
+from assessments.views import it_mid, it_end, it_term
 
 
 app_name = 'assessments'
@@ -141,4 +141,12 @@ urlpatterns = [
     path('it/endimport/', it_end.it_end_import, name='it_end_import'),
     path('it/end/export/', it_end.it_end_export, name='it_end_export'),
     path('it_end/update_rank/', it_end.it_end_update_rank, name='it_end_update_rank'),
+    # 信息技术学期管理
+    path('it/termlist/', it_term.it_term_list, name='it_term_list'),
+    path('it/termadd/', it_term.it_term_add, name='it_term_add'),
+    path('it/termdelete/', it_term.it_term_delete, name='it_term_delete'),
+    path('it/termedit/<int:pk>', it_term.it_term_edit, name='it_term_edit'),
+    path('it/termimport/', it_term.it_term_import, name='it_term_import'),
+    path('it/term/export/', it_term.it_term_export, name='it_term_export'),
+    path('it_term/update_rank/', it_term.it_term_update_rank, name='it_term_update_rank'),
 ]
