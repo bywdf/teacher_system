@@ -552,7 +552,8 @@ class ItTeacherbase(models.Model):
     extra_work_hours = models.FloatField(
         verbose_name='额外工作量、托管', blank=True, null=True)
     total_workload = models.FloatField(
-        verbose_name='工作量成绩', blank=True, null=True)
+        verbose_name='总工作量节数', blank=True, null=True)
+    workload_score = models.FloatField(verbose_name='工作量成绩', blank=True, null=True)
     teach_book = models.FloatField(
         verbose_name='常规教学薄成绩', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
@@ -573,7 +574,7 @@ class ItTeacherMidAssess(ItTeacherbase):
     def save(self, *args, **kwargs):
         
         scores = [
-            self.total_workload or 0,
+            self.workload_score or 0,
             self.teach_book or 0,            
         ]        
         self.total_score = round(sum(scores), 3)
@@ -597,7 +598,7 @@ class ItTeacherFinalAssess(ItTeacherbase):
         scores = [
             self.attend_score or 0,
             self.invigilation_score or 0,
-            self.total_workload or 0,
+            self.workload_score or 0,
             self.teach_book or 0,
         ]
         self.total_score = round(sum(scores), 3)

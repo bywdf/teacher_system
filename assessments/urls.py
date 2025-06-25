@@ -3,6 +3,7 @@ from assessments.views import semester, assessdepart
 from assessments.views import cultura_mid, cultura_end, cultura_term
 from assessments.views import music_mid, music_end, music_term, art_mid, art_end, art_term
 from assessments.views import pe_mid, pe_end, pe_term
+from assessments.views import it_mid
 
 
 app_name = 'assessments'
@@ -123,4 +124,13 @@ urlpatterns = [
     path('pe/termimport/', pe_term.pe_term_import, name='pe_term_import'),
     path('pe/term/export/', pe_term.pe_term_export, name='pe_term_export'),
     path('pe_term/update_rank/', pe_term.pe_term_update_rank, name='pe_term_update_rank'),
+    
+    # 信息技术教师期中考核管理
+    path('it/midlist/', it_mid.it_mid_list, name='it_mid_list'),
+    path('it/midadd/', it_mid.it_mid_add, name='it_mid_add'),
+    path('it/middelete/', it_mid.it_mid_delete, name='it_mid_delete'),
+    path('it/midedit/<int:pk>', it_mid.it_mid_edit, name='it_mid_edit'),
+    path('it/midimport/', it_mid.it_mid_import, name='it_mid_import'),
+    path('it/mid/export/', it_mid.it_mid_export, name='it_mid_export'),
+    path('it_mid/update_rank/', it_mid.it_mid_update_rank, name='it_mid_update_rank'),
 ]
