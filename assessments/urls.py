@@ -5,7 +5,7 @@ from assessments.views import music_mid, music_end, music_term, art_mid, art_end
 from assessments.views import pe_mid, pe_end, pe_term
 from assessments.views import it_mid, it_end, it_term
 from assessments.views import groupleader_mid, groupleader_end, groupleader_term
-
+from assessments.views import headteacher_mid
 
 app_name = 'assessments'
 
@@ -175,4 +175,13 @@ urlpatterns = [
     path('groupleader/termimport/', groupleader_term.groupleader_term_import, name='groupleader_term_import'),
     path('groupleader/term/export/', groupleader_term.groupleader_term_export, name='groupleader_term_export'),
     path('groupleader_term/update_rank/', groupleader_term.groupleader_term_update_rank, name='groupleader_term_update_rank'),
+
+    # 班主任期中考核管理
+    path('headteacher/midlist/', headteacher_mid.headteacher_mid_list, name='headteacher_mid_list'),
+    path('headteacher/midadd/', headteacher_mid.headteacher_mid_add, name='headteacher_mid_add'),
+    path('headteacher/middelete/', headteacher_mid.headteacher_mid_delete, name='headteacher_mid_delete'),
+    path('headteacher/midedit/<int:pk>', headteacher_mid.headteacher_mid_edit, name='headteacher_mid_edit'),
+    path('headteacher/midimport/', headteacher_mid.headteacher_mid_import, name='headteacher_mid_import'),
+    path('headteacher/mid/export/', headteacher_mid.headteacher_mid_export, name='headteacher_mid_export'),
+    path('headteacher_mid/update_rank/', headteacher_mid.headteacher_mid_update_rank, name='headteacher_mid_update_rank'),
 ]

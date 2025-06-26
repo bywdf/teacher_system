@@ -322,6 +322,11 @@
                    value="{{ form.instance.total_score|default:'' }}"
                    readonly>
           </div>
+          <!-- 名次 -->
+          <div class="form-group">
+            <label>{{ form.rank.label }}</label>
+            {{ form.rank }}
+          </div>
           <!-- 是否公布开关 -->
           <div class="form-group">
             <label>{{ form.is_published.label }}</label>

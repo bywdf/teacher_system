@@ -722,7 +722,7 @@ class GroupLeaderSemester(models.Model):
         super().save(*args, **kwargs)
 
 
-class HeaderTeacherBase(models.Model):
+class HeadTeacherBase(models.Model):
     """班主任考核底板"""
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
@@ -743,6 +743,7 @@ class HeaderTeacherBase(models.Model):
         verbose_name='班级教学考核成绩', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
     rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    remark = models.TextField(verbose_name='备注', blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -757,7 +758,7 @@ class HeaderTeacherBase(models.Model):
         super().save(*args, **kwargs)
 
 
-class HeaderTeacherMidAssess(HeaderTeacherBase):
+class HeadTeacherMidAssess(HeadTeacherBase):
     """班主任中期考核成绩"""
     class Meta:
         unique_together = ('teacher', 'semester', 'term_type', 'class_number')
@@ -765,7 +766,7 @@ class HeaderTeacherMidAssess(HeaderTeacherBase):
         verbose_name_plural = '班主任中期考核成绩'
 
 
-class HeaderTeacherFinalAssess(HeaderTeacherBase):
+class HeadTeacherFinalAssess(HeadTeacherBase):
     """班主任期末考核成绩"""
     class Meta:
         unique_together = ('teacher', 'semester', 'term_type', 'class_number')
@@ -773,7 +774,7 @@ class HeaderTeacherFinalAssess(HeaderTeacherBase):
         verbose_name_plural = '班主任期末考核成绩'
 
 
-class HeaderTeacherSemester(models.Model):
+class HeadTeacherSemester(models.Model):
     """班主任学期总评成绩"""
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
@@ -786,9 +787,9 @@ class HeaderTeacherSemester(models.Model):
         max_length=50, verbose_name='考核时间', blank=True, null=True)
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
-    mid_score = models.ForeignKey(HeaderTeacherMidAssess, on_delete=models.SET_NULL,
+    mid_score = models.ForeignKey(HeadTeacherMidAssess, on_delete=models.SET_NULL,
                                   verbose_name='期中成绩', blank=True, null=True, related_name='mid_score')
-    final_score = models.ForeignKey(HeaderTeacherFinalAssess, on_delete=models.SET_NULL,
+    final_score = models.ForeignKey(HeadTeacherFinalAssess, on_delete=models.SET_NULL,
                                     verbose_name='期末成绩', blank=True, null=True, related_name='final_score')
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
     rank = models.FloatField(verbose_name='名次', blank=True, null=True)

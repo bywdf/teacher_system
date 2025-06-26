@@ -159,13 +159,23 @@
               </div>
             </div>
           </div>
-          <!-- 总成绩 -->
-          <div class="form-group">
-            <label>{{ form.total_score.label }}</label>
-            <input type="text"
-                   class="form-control"
-                   value="{{ form.instance.total_score|default:'' }}"
-                   readonly>
+          <div class="row">
+            <div class="col-md-6">
+              <!-- 总成绩 -->
+              <div class="form-group">
+                <label>{{ form.total_score.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ form.instance.total_score|default:'' }}"
+                       readonly>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ form.rank.label }}</label>
+                {{ form.rank }}
+              </div>
+            </div>
           </div>
           <!-- 是否公布开关 -->
           <div class="form-group">
