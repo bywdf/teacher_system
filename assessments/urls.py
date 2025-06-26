@@ -5,8 +5,7 @@ from assessments.views import music_mid, music_end, music_term, art_mid, art_end
 from assessments.views import pe_mid, pe_end, pe_term
 from assessments.views import it_mid, it_end, it_term
 from assessments.views import groupleader_mid, groupleader_end, groupleader_term
-from assessments.views import headteacher_mid
-
+from assessments.views import headteacher_mid, headteacher_end
 app_name = 'assessments'
 
 urlpatterns = [
@@ -184,4 +183,12 @@ urlpatterns = [
     path('headteacher/midimport/', headteacher_mid.headteacher_mid_import, name='headteacher_mid_import'),
     path('headteacher/mid/export/', headteacher_mid.headteacher_mid_export, name='headteacher_mid_export'),
     path('headteacher_mid/update_rank/', headteacher_mid.headteacher_mid_update_rank, name='headteacher_mid_update_rank'),
+    # 班主任期末考核管理
+    path('headteacher/endlist/', headteacher_end.headteacher_end_list, name='headteacher_end_list'),
+    path('headteacher/endadd/', headteacher_end.headteacher_end_add, name='headteacher_end_add'),
+    path('headteacher/enddelete/', headteacher_end.headteacher_end_delete, name='headteacher_end_delete'),
+    path('headteacher/endedit/<int:pk>', headteacher_end.headteacher_end_edit, name='headteacher_end_edit'),
+    path('headteacher/endimport/', headteacher_end.headteacher_end_import, name='headteacher_end_import'),
+    path('headteacher/end/export/', headteacher_end.headteacher_end_export, name='headteacher_end_export'),
+    path('headteacher_end/update_rank/', headteacher_end.headteacher_end_update_rank, name='headteacher_end_update_rank'),
 ]

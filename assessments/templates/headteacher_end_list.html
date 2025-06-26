@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="{% static 'css/custom_table.css' %}">
 {% endblock css %}
 {% block title %}
-  期中 班主任综合管理考核成绩
+  期末 班主任综合管理考核成绩
 {% endblock title %}
 {% block title_d %}
   全部列表
@@ -16,7 +16,7 @@
         <div class="box-header">
           <div style="margin-bottom: 10px" class="clearfix">
             <a class="btn btn-success"
-               href="{% url 'assessments:headteacher_mid_add' %}">
+               href="{% url 'assessments:headteacher_end_add' %}">
               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               新建考核
             </a>
@@ -91,7 +91,7 @@
                 </button>
                 <a href="?" class="btn btn-default" style="margin-left: 5px;">重置</a>
                 <!-- 新增导出按钮 -->
-                <a href="{% url 'assessments:headteacher_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                <a href="{% url 'assessments:headteacher_end_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
                    class="btn btn-success"
                    style="margin-left: 5px">
                   <span class="glyphicon glyphicon-export"></span> 导出Excel
@@ -152,7 +152,7 @@
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           <td>
                             <a class="btn  btn-primary btn-xs"
-                               href="{% url 'assessments:headteacher_mid_edit' obj.id %}">编辑</a>
+                               href="{% url 'assessments:headteacher_end_edit' obj.id %}">编辑</a>
                             <a class="btn btn-danger btn-xs"
                                href="javascript:void(0);"
                                onclick="deleteItem('{{ obj.id }}', this);">删除</a>
@@ -192,7 +192,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url 'assessments:headteacher_mid_import' %}">
+                    action="{% url 'assessments:headteacher_end_import' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择考核文件Excel文件:</label>
@@ -219,7 +219,7 @@
             <div class="panel-body">
               <form method="post"
                     enctype="multipart/form-data"
-                    action="{% url 'assessments:headteacher_mid_update_rank' %}">
+                    action="{% url 'assessments:headteacher_end_update_rank' %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <label>选择名次更新文件：</label>
@@ -250,7 +250,7 @@
     function deleteItem(id, element) {
       if (confirm("确定要删除此用户吗？此操作不可撤销。")) {
         // 构建删除URL
-        const deleteUrl = `/assessments/headteacher/middelete/?nid=${id}`;
+        const deleteUrl = `/assessments/headteacher/enddelete/?nid=${id}`;
 
         // 创建临时表单用于提交删除请求（防止URL参数被篡改）
         const form = document.createElement('form');

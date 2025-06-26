@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import HeadTeacherMidAssess, AssessDepart, Semester, TermType
+from assessments.models import HeadTeacherFinalAssess, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
 
 
 class AssessModelForm(BootStrapModelForm):
     class Meta:
-        model = HeadTeacherMidAssess
+        model = HeadTeacherFinalAssess
         # 字段，所有字段
         fields = '__all__'
 
 
-def headteacher_mid_list(request):
+def headteacher_end_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,7 +52,7 @@ def headteacher_mid_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = HeadTeacherMidAssess.objects.filter(
+    queryset = HeadTeacherFinalAssess.objects.filter(
         query).order_by('id')
 
     page_object = Pagination(request, queryset)
@@ -71,19 +71,19 @@ def headteacher_mid_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'headteacher_mid_list.html', content)
+    return render(request, 'headteacher_end_list.html', content)
 
 
-def headteacher_mid_delete(request):
+def headteacher_end_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    HeadTeacherMidAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:headteacher_mid_list')
+    HeadTeacherFinalAssess.objects.filter(id=nid).delete()
+    return redirect('assessments:headteacher_end_list')
 
 
-def headteacher_mid_edit(request, pk):
+def headteacher_end_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(HeadTeacherMidAssess, pk=pk)
+    instance = get_object_or_404(HeadTeacherFinalAssess, pk=pk)
     # 创建表单实例，绑定现有数据
     form = AssessModelForm(request.POST or None, instance=instance)
 
@@ -91,7 +91,7 @@ def headteacher_mid_edit(request, pk):
         if form.is_valid():
             # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
             form.save()
-            return redirect('assessments:headteacher_mid_list')  # 重定向到列表页
+            return redirect('assessments:headteacher_end_list')  # 重定向到列表页
         # 若表单验证失败，保留错误信息并重新渲染页面
 
     # 渲染编辑页面，传递表单和对象
@@ -107,7 +107,7 @@ def headteacher_mid_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
-def headteacher_mid_add(request):
+def headteacher_end_add(request):
     """添加"""
     form = AssessModelForm()
     # 获取所有教师数据
@@ -116,7 +116,7 @@ def headteacher_mid_add(request):
         form = AssessModelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('assessments:headteacher_mid_list')
+            return redirect('assessments:headteacher_end_list')
         
     content = {
         'form': form,
@@ -132,13 +132,13 @@ def headteacher_mid_add(request):
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def headteacher_mid_import(request):
+def headteacher_end_import(request):
     """批量导入考核成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:headteacher_mid_list')
+            return redirect('assessments:headteacher_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -231,7 +231,7 @@ def headteacher_mid_import(request):
                         }
                     
                     # 创建或更新记录
-                    obj, created = HeadTeacherMidAssess.objects.get_or_create(
+                    obj, created = HeadTeacherFinalAssess.objects.get_or_create(
                         teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
@@ -269,10 +269,10 @@ def headteacher_mid_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:headteacher_mid_list')
+    return redirect('assessments:headteacher_end_list')
 
 
-def headteacher_mid_export(request):
+def headteacher_end_export(request):
     """导出班主任考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
@@ -295,7 +295,7 @@ def headteacher_mid_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset =HeadTeacherMidAssess.objects.filter(query).select_related(
+    queryset =HeadTeacherFinalAssess.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
@@ -381,14 +381,14 @@ def headteacher_mid_export(request):
     return response
 
 
-def headteacher_mid_update_rank(request):
+def headteacher_end_update_rank(request):
     """更新教师期中考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:headteacher_mid_list')
+            return redirect('assessments:headteacher_end_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -449,7 +449,7 @@ def headteacher_mid_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = HeadTeacherMidAssess.objects.get(
+                        assess = HeadTeacherFinalAssess.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -463,7 +463,7 @@ def headteacher_mid_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except HeadTeacherMidAssess.DoesNotExist:
+                    except HeadTeacherFinalAssess.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -487,4 +487,4 @@ def headteacher_mid_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:headteacher_mid_list')
+    return redirect('assessments:headteacher_end_list')
