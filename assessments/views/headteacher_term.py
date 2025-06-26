@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import HeadTeacherMidAssess, AssessDepart, Semester, TermType
+from assessments.models import HeadTeacherSemester, AssessDepart, Semester, TermType, HeadTeacherMidAssess, HeadTeacherFinalAssess
 from accounts.models import UserInfo, Subject
 
 
 class AssessModelForm(BootStrapModelForm):
     class Meta:
-        model = HeadTeacherMidAssess
+        model = HeadTeacherSemester
         # 字段，所有字段
         fields = '__all__'
 
 
-def headteacher_mid_list(request):
+def headteacher_term_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,7 +52,7 @@ def headteacher_mid_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = HeadTeacherMidAssess.objects.filter(
+    queryset = HeadTeacherSemester.objects.filter(
         query).order_by('id')
 
     page_object = Pagination(request, queryset)
@@ -71,74 +71,104 @@ def headteacher_mid_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'headteacher_mid_list.html', content)
+    return render(request, 'headteacher_term_list.html', content)
 
 
-def headteacher_mid_delete(request):
+def headteacher_term_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    HeadTeacherMidAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:headteacher_mid_list')
+    HeadTeacherSemester.objects.filter(id=nid).delete()
+    return redirect('assessments:headteacher_term_list')
 
 
-def headteacher_mid_edit(request, pk):
-    # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(HeadTeacherMidAssess, pk=pk)
-    # 创建表单实例，绑定现有数据
+def headteacher_term_edit(request, pk):
+    instance = get_object_or_404(HeadTeacherSemester, pk=pk)
     form = AssessModelForm(request.POST or None, instance=instance)
 
     if request.method == 'POST':
         if form.is_valid():
-            # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
-            form.save()
-            return redirect('assessments:headteacher_mid_list')  # 重定向到列表页
-        # 若表单验证失败，保留错误信息并重新渲染页面
+            # 保存前自动关联期中期末成绩
+            teacher = form.cleaned_data['teacher']
+            semester = form.cleaned_data['semester']
+            
+            # 查找对应的期中成绩
+            mid_assess = HeadTeacherMidAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 查找对应的期末成绩
+            final_assess = HeadTeacherFinalAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 设置关联
+            instance.mid_score = mid_assess
+            instance.final_score = final_assess
+            
+            # 计算总成绩
+            instance.total_score = (mid_assess.total_score if mid_assess else 0) + \
+                                 (final_assess.total_score if final_assess else 0)
+            
+            instance.save()
+            return redirect('assessments:headteacher_term_list')
 
-    # 渲染编辑页面，传递表单和对象
     context = {
         'form': form,
         'title': '考核记录',
         'instance': instance,
         'show_class_field':True,
-        'show_manage_score':True,
-        'show_safety_score':True,
-        'show_class_score':True,
+        'show_mid_score': True,
+        'show_final_score': True
     }
     return render(request, 'assess_change.html', context)
 
 
-def headteacher_mid_add(request):
-    """添加"""
+def headteacher_term_add(request):
     form = AssessModelForm()
-    # 获取所有教师数据
     teachers = UserInfo.objects.all()
     if request.method == 'POST':
         form = AssessModelForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('assessments:headteacher_mid_list')
-        
-    content = {
-        'form': form,
-        'title': '添加考核记录',
-        'show_class_field':True,
-        'show_manage_score':True,
-        'show_safety_score':True,
-        'show_class_score':True,
-    }
+            # 保存前自动关联期中期末成绩
+            teacher = form.cleaned_data['teacher']
+            semester = form.cleaned_data['semester']
+            
+            # 查找对应的期中成绩
+            mid_assess = HeadTeacherMidAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 查找对应的期末成绩
+            final_assess = HeadTeacherFinalAssess.objects.filter(
+                teacher=teacher, 
+                semester=semester
+            ).first()
+            
+            # 创建实例并设置关联
+            instance = form.save(commit=False)
+            instance.mid_score = mid_assess
+            instance.final_score = final_assess
+            instance.total_score = (mid_assess.total_score if mid_assess else 0) + \
+                                 (final_assess.total_score if final_assess else 0)
+            instance.save()
+            
+            return redirect('assessments:headteacher_term_list')
     
-    return render(request, 'assess_change.html', content)
+    return render(request, 'assess_change.html', {'form': form, 'title': '新建考核','show_mid_score': True, 'show_final_score': True, 'show_class_field':True,})
 
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def headteacher_mid_import(request):
-    """批量导入考核成绩，支持一个教师担任多个班级班主任"""
+def headteacher_term_import(request):
+    """批量导入考核成绩并自动关联期中期末成绩，包含班级信息"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:headteacher_mid_list')
+            return redirect('assessments:headteacher_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -148,20 +178,23 @@ def headteacher_mid_import(request):
             created_count = 0
             updated_count = 0
 
-            # 学期映射字典
-            semester_map = {}
-            for sem in Semester.objects.all():
-                key = f"{sem.year}{sem.get_semester_type_display()}"
-                semester_map[key] = sem
-
-            # 考核类型映射
+            # 预加载基础数据映射（优化查询性能）
+            semester_map = {f"{sem.year}{sem.get_semester_type_display()}": sem 
+                           for sem in Semester.objects.all()}
             term_type_map = {tt.name: tt for tt in TermType.objects.all()}
-
-            # 部门映射
             depart_map = {ad.name: ad for ad in AssessDepart.objects.all()}
-
-            # 教师映射 (姓名->对象)
             teacher_map = {t.name: t for t in UserInfo.objects.all()}
+            
+            # 预加载期中期末成绩映射（教师-学期 -> 成绩对象）
+            mid_assess_map = {}
+            for mid in HeadTeacherMidAssess.objects.all():
+                key = (mid.teacher_id, mid.semester_id, mid.class_number)
+                mid_assess_map[key] = mid
+                
+            final_assess_map = {}
+            for final in HeadTeacherFinalAssess.objects.all():
+                key = (final.teacher_id, final.semester_id, final.class_number)
+                final_assess_map[key] = final
 
             for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                 try:
@@ -169,95 +202,111 @@ def headteacher_mid_import(request):
                     if not any(row):
                         continue
 
-                    # 解析学期 (格式: "2023-2024上学期")
-                    semester_str = row[0]
+                    # 解析必要字段，假设Excel列顺序：学期、考核类型、考核时间、部门、教师、班级、备注
+                    semester_str = row[0].strip() if row[0] else ""
+                    term_type_name = row[1].strip() if row[1] else ""
+                    assess_time = row[2] if row[2] else datetime.date.today().isoformat()
+                    depart_name = row[3].strip() if row[3] else ""
+                    teacher_name = row[4].strip() if row[4] else ""
+                    
+                    # 新增：获取班级信息
+                    class_number = row[5] if len(row) > 5 and row[5] is not None else None
+                    if class_number is not None:
+                        try:
+                            class_number = int(class_number)
+                            if class_number <= 0:
+                                raise ValueError("班级号必须为正整数")
+                        except (TypeError, ValueError):
+                            raise ValueError("班级号必须为有效整数")
+                    else:
+                        raise ValueError("班级号不能为空")
+
+                    # 基础字段校验
                     if not semester_str:
                         raise ValueError("学期不能为空")
+                    if not term_type_name:
+                        raise ValueError("考核类型不能为空")
+                    if not depart_name:
+                        raise ValueError("考核部门不能为空")
+                    if not teacher_name:
+                        raise ValueError("教师姓名不能为空")
+                    if class_number is None:
+                        raise ValueError("班级号不能为空")
 
+                    # 处理学期（支持自动创建不存在的学期）
                     if semester_str not in semester_map:
-                        # 尝试创建新学期
-                        year = semester_str[:-3]  # 去掉后3个字符(学期名)
+                        year = semester_str[:-3]  # 假设格式为"2023-2024上学期"，取前部分作为学年
                         semester_type = 'last' if '上' in semester_str else 'next'
-                        sem, created_sem = Semester.objects.get_or_create(
+                        sem, created = Semester.objects.get_or_create(
                             year=year,
                             semester_type=semester_type
                         )
                         semester_map[semester_str] = sem
+                    semester = semester_map[semester_str]
 
-                    # 获取其他关联对象
-                    term_type_name = row[1]
-                    if not term_type_name:
-                        raise ValueError("考核类型不能为空")
-
+                    # 处理考核类型（自动创建不存在的类型）
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        term_type = TermType.objects.create(
-                            name=term_type_name)
+                        term_type = TermType.objects.create(name=term_type_name)
                         term_type_map[term_type_name] = term_type
 
-                    depart_name = row[3]
-                    if not depart_name:
-                        raise ValueError("考核部门不能为空")
-
+                    # 处理考核部门（自动创建不存在的部门）
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(
-                            name=depart_name)
+                        assess_depart = AssessDepart.objects.create(name=depart_name)
                         depart_map[depart_name] = assess_depart
 
-                    teacher_name = row[4]
-                    if not teacher_name:
-                        raise ValueError("教师姓名不能为空")
-
+                    # 处理教师（必须已存在）
                     teacher = teacher_map.get(teacher_name)
                     if not teacher:
-                        raise ValueError(f"教师 '{teacher_name}' 不存在")
+                        raise ValueError(f"教师 '{teacher_name}' 不存在于系统中")
 
-                    # 新增：处理班级号
-                    class_number = row[5]
-                    if class_number is None:
-                        raise ValueError("班级号不能为空")
-                    try:
-                        class_number = int(class_number)
-                    except (TypeError, ValueError):
-                        raise ValueError(f"班级号必须是整数: {class_number}")
-
-                    # 转换字段值
-                    def safe_float(value, default=0.0):
-                        try:
-                            return round(value, 3) if value is not None else default
-                        except (TypeError, ValueError):
-                            return default
-
-                    defaults = {
-                        'teacher': teacher,
-                        'assess_time': row[2] or datetime.date.today().isoformat(),
-                        'assess_depart': assess_depart,
-                        'class_number': class_number,
-                        'manage_score': safe_float(row[6]),
-                        'safety_score': safe_float(row[7]),
-                        'class_score': safe_float(row[8]),
-                        'remark': row[9] or '',
-                    }
+                    # ------------------- 关键修改：关联期中期末成绩 -------------------
+                    # 构建查找键（教师ID+学期ID+班级号）
+                    key = (teacher.id, semester.id, class_number)
                     
-                    # 关键修改：使用模型的唯一约束字段作为查询条件
-                    obj, created = HeadTeacherMidAssess.objects.get_or_create(
-                        semester=semester_map[semester_str],
+                    # 查找期中成绩
+                    mid_assess = mid_assess_map.get(key)
+                    if not mid_assess:
+                        # 尝试通过查询获取（处理映射未加载的情况）
+                        mid_assess = HeadTeacherMidAssess.objects.filter(
+                            teacher=teacher, 
+                            semester=semester,
+                            class_number=class_number
+                        ).first()
+                        if mid_assess:
+                            mid_assess_map[key] = mid_assess  # 更新映射缓存
+                    
+                    # 查找期末成绩
+                    final_assess = final_assess_map.get(key)
+                    if not final_assess:
+                        final_assess = HeadTeacherFinalAssess.objects.filter(
+                            teacher=teacher, 
+                            semester=semester,
+                            class_number=class_number
+                        ).first()
+                        if final_assess:
+                            final_assess_map[key] = final_assess  # 更新映射缓存
+                    
+                    # ------------------- 创建或更新学期总评记录 -------------------
+                    defaults={
+                            'assess_time': assess_time,
+                            'assess_depart': assess_depart,
+                            'mid_score': mid_assess,
+                            'final_score': final_assess,
+                            'class_number': class_number  # 新增：设置班级号
+                        }
+                    obj, created = HeadTeacherSemester.objects.get_or_create(
+                        teacher=teacher,
+                        semester=semester,
                         term_type=term_type,
-                        class_number=class_number,
+                        class_number=class_number,  # 新增：作为唯一约束条件之一
                         defaults=defaults
                     )
-                    
                     # 如果是更新操作，需要先更新字段再保存
                     if not created:
-                        # 只更新教师和其他可更新字段
-                        obj.teacher = teacher
-                        obj.assess_time = defaults['assess_time']
-                        obj.assess_depart = defaults['assess_depart']
-                        obj.manage_score = defaults['manage_score']
-                        obj.safety_score = defaults['safety_score']
-                        obj.class_score = defaults['class_score']
-                        obj.remark = defaults['remark']
+                        for key, value in defaults.items():
+                            setattr(obj, key, value)
 
                     # 触发save方法以计算total_score
                     obj.save()
@@ -271,9 +320,10 @@ def headteacher_mid_import(request):
                 except Exception as e:
                     errors.append(f"第 {row_num} 行错误: {str(e)}")
 
+            # 处理导入结果反馈
             if errors:
-                messages.warning(
-                    request, f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条")
+                msg = f"成功导入 {success_count} 条（新增:{created_count}, 更新:{updated_count}），失败 {len(errors)} 条"
+                messages.warning(request, msg)
                 for error in errors[:5]:  # 最多显示5条错误
                     messages.error(request, error)
                 if len(errors) > 5:
@@ -285,11 +335,11 @@ def headteacher_mid_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:headteacher_mid_list')
+    return redirect('assessments:headteacher_term_list')
 
 
-def headteacher_mid_export(request):
-    """导出班主任考核数据"""
+def headteacher_term_export(request):
+    """导出教师学期考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
     term_type_id = request.GET.get('term_type')
@@ -311,20 +361,19 @@ def headteacher_mid_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset =HeadTeacherMidAssess.objects.filter(query).select_related(
+    queryset = HeadTeacherSemester.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
     # 创建工作簿和工作表
     wb = Workbook()
     ws = wb.active
-    ws.title = "班主任考核数据"
+    ws.title = "教师学期考核数据"
 
     # 设置表头
     headers = [
-        '序号', '学期', '考核类型', '考核时间', '考核部门', '班主任',
-        '班级', '常规管理成绩', '闭环式安全成绩', '班级成绩',
-        '总成绩', '名次', '备注',
+        '序号', '学期', '考核类型', '考核时间', '考核部门', '班主任','班级', 
+        '期中成绩', '期末成绩', '学期成绩', '名次', '备注',
     ]
 
     # 添加表头行
@@ -355,9 +404,8 @@ def headteacher_mid_export(request):
             obj.assess_depart.name,
             obj.teacher.name,
             obj.class_number,
-            obj.manage_score,
-            obj.safety_score,    
-            obj.class_score,    
+            obj.mid_score.total_score if obj.mid_score else '',
+            obj.final_score.total_score if obj.final_score else '',
             obj.total_score,
             obj.rank,
             obj.remark,
@@ -384,7 +432,7 @@ def headteacher_mid_export(request):
         ws.column_dimensions[column_letter].width = adjusted_width
 
     # 设置文件名
-    filename = f"教师期中考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"教师学期考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
 
     # 准备响应
     response = HttpResponse(
@@ -397,14 +445,14 @@ def headteacher_mid_export(request):
     return response
 
 
-def headteacher_mid_update_rank(request):
+def headteacher_term_update_rank(request):
     """更新教师学期考核数据的名次并将公示状态改为已公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:headteacher_mid_list')
+            return redirect('assessments:headteacher_term_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -480,7 +528,7 @@ def headteacher_mid_update_rank(request):
                     
                     # 查找并更新记录（直接使用class_number字段）
                     try:
-                        assess = HeadTeacherMidAssess.objects.get(
+                        assess = HeadTeacherSemester.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type,
@@ -495,7 +543,7 @@ def headteacher_mid_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except HeadTeacherMidAssess.DoesNotExist:
+                    except HeadTeacherSemester.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 班级: {class_number}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -519,4 +567,4 @@ def headteacher_mid_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:headteacher_mid_list')
+    return redirect('assessments:headteacher_term_list')

@@ -761,7 +761,7 @@ class HeadTeacherBase(models.Model):
 class HeadTeacherMidAssess(HeadTeacherBase):
     """班主任中期考核成绩"""
     class Meta:
-        unique_together = ('teacher', 'semester', 'term_type', 'class_number')
+        unique_together = ('semester', 'term_type', 'class_number')
         verbose_name = '班主任中期考核成绩'
         verbose_name_plural = '班主任中期考核成绩'
 
@@ -769,7 +769,7 @@ class HeadTeacherMidAssess(HeadTeacherBase):
 class HeadTeacherFinalAssess(HeadTeacherBase):
     """班主任期末考核成绩"""
     class Meta:
-        unique_together = ('teacher', 'semester', 'term_type', 'class_number')
+        unique_together = ('semester', 'term_type', 'class_number')
         verbose_name = '班主任期末考核成绩'
         verbose_name_plural = '班主任期末考核成绩'
 
@@ -797,7 +797,7 @@ class HeadTeacherSemester(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
-        unique_together = ('teacher', 'semester', 'term_type', 'class_number')
+        unique_together = ('semester', 'term_type', 'class_number')
         verbose_name = '班主任学期总评成绩'
         verbose_name_plural = '班主任学期总评成绩'
 

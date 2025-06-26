@@ -133,7 +133,7 @@ def headteacher_end_add(request):
 # 下面是批量导入需要的功能
 @transaction.atomic
 def headteacher_end_import(request):
-    """批量导入考核成绩"""
+    """批量导入考核成绩，支持一个教师担任多个班级班主任"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
@@ -178,7 +178,7 @@ def headteacher_end_import(request):
                         # 尝试创建新学期
                         year = semester_str[:-3]  # 去掉后3个字符(学期名)
                         semester_type = 'last' if '上' in semester_str else 'next'
-                        sem, created = Semester.objects.get_or_create(
+                        sem, created_sem = Semester.objects.get_or_create(
                             year=year,
                             semester_type=semester_type
                         )
@@ -213,6 +213,15 @@ def headteacher_end_import(request):
                     if not teacher:
                         raise ValueError(f"教师 '{teacher_name}' 不存在")
 
+                    # 新增：处理班级号
+                    class_number = row[5]
+                    if class_number is None:
+                        raise ValueError("班级号不能为空")
+                    try:
+                        class_number = int(class_number)
+                    except (TypeError, ValueError):
+                        raise ValueError(f"班级号必须是整数: {class_number}")
+
                     # 转换字段值
                     def safe_float(value, default=0.0):
                         try:
@@ -220,28 +229,35 @@ def headteacher_end_import(request):
                         except (TypeError, ValueError):
                             return default
 
-                    defaults={
-                            'assess_time': row[2] or datetime.date.today().isoformat(),
-                            'assess_depart': assess_depart,
-                            'class_number': row[5],
-                            'manage_score': safe_float(row[6]),
-                            'safety_score': safe_float(row[7]),
-                            'class_score': safe_float(row[8]),
-                            'remark': row[9] or '',
-                        }
+                    defaults = {
+                        'teacher': teacher,
+                        'assess_time': row[2] or datetime.date.today().isoformat(),
+                        'assess_depart': assess_depart,
+                        'class_number': class_number,
+                        'manage_score': safe_float(row[6]),
+                        'safety_score': safe_float(row[7]),
+                        'class_score': safe_float(row[8]),
+                        'remark': row[9] or '',
+                    }
                     
-                    # 创建或更新记录
+                    # 关键修改：使用模型的唯一约束字段作为查询条件
                     obj, created = HeadTeacherFinalAssess.objects.get_or_create(
-                        teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
+                        class_number=class_number,
                         defaults=defaults
                     )
                     
                     # 如果是更新操作，需要先更新字段再保存
                     if not created:
-                        for key, value in defaults.items():
-                            setattr(obj, key, value)
+                        # 只更新教师和其他可更新字段
+                        obj.teacher = teacher
+                        obj.assess_time = defaults['assess_time']
+                        obj.assess_depart = defaults['assess_depart']
+                        obj.manage_score = defaults['manage_score']
+                        obj.safety_score = defaults['safety_score']
+                        obj.class_score = defaults['class_score']
+                        obj.remark = defaults['remark']
 
                     # 触发save方法以计算total_score
                     obj.save()
@@ -382,7 +398,7 @@ def headteacher_end_export(request):
 
 
 def headteacher_end_update_rank(request):
-    """更新教师期中考核数据的名次并将公示状态改为应经公示"""
+    """更新教师学期考核数据的名次并将公示状态改为已公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
@@ -416,15 +432,30 @@ def headteacher_end_update_rank(request):
                     if not any(row):
                         continue
 
-                    # 获取关键字段
+                    # 获取关键字段（班级编号现为普通字段，假设在第4列）
                     semester_str = row[0]
                     term_type_name = row[1]
                     teacher_name = row[2]
-                    rank_value = row[3]
+                    class_number = row[3]  # 班级号作为普通字段
+                    rank_value = row[4]    # 名次列后移一位
+                    
+                    # 类型转换和空值处理
+                    if semester_str is not None:
+                        semester_str = str(semester_str).strip()
+                    if term_type_name is not None:
+                        term_type_name = str(term_type_name).strip()
+                    if teacher_name is not None:
+                        teacher_name = str(teacher_name).strip()
                     
                     # 验证必填字段
-                    if not all([semester_str, term_type_name, teacher_name, rank_value]):
+                    if not all([semester_str, term_type_name, teacher_name, class_number, rank_value]):
                         raise ValueError("所有字段都不能为空")
+                    
+                    # 处理班级号（转为整数类型）
+                    try:
+                        class_number = int(class_number)  # 转为整数
+                    except (TypeError, ValueError):
+                        raise ValueError(f"班级号必须是整数: {class_number}")
                     
                     # 验证名次格式
                     try:
@@ -447,12 +478,13 @@ def headteacher_end_update_rank(request):
                     if not teacher:
                         raise ValueError(f"教师 '{teacher_name}' 不存在")
                     
-                    # 查找并更新记录
+                    # 查找并更新记录（直接使用class_number字段）
                     try:
                         assess = HeadTeacherFinalAssess.objects.get(
                             teacher=teacher,
                             semester=semester,
-                            term_type=term_type
+                            term_type=term_type,
+                            class_number=class_number  # 直接使用整数类型
                         )
                         
                         # 更新名次和公示状态
@@ -465,7 +497,7 @@ def headteacher_end_update_rank(request):
                         
                     except HeadTeacherFinalAssess.DoesNotExist:
                         not_found_count += 1
-                        errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
+                        errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 班级: {class_number}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
                 except Exception as e:
                     errors.append(f"第 {row_num} 行错误: {str(e)}")
