@@ -18,6 +18,15 @@ class AssessDepart(models.Model):
         return self.name
 
 
+# class ALDepart(models.Model):
+#     name = models.CharField(verbose_name='部门', max_length=50, unique=True)
+
+#     class Meta:
+#         verbose_name = '后勤部门'
+#         verbose_name_plural = verbose_name
+#     def __str__(self):
+#         return self.name
+
 class Semester(models.Model):
     '''学期表'''
     year = models.CharField(max_length=20, verbose_name='学年')
@@ -209,7 +218,7 @@ class TeacherSemesterAssess(models.Model):
         final = self.final_score.total_score if self.final_score else 0
 
         # 总成绩是期中期末直接相加,保留三位小数
-        self.total_score = mid + final
+        self.total_score =round(mid + final, 3)
         super().save(*args, **kwargs)
 
 
@@ -273,6 +282,8 @@ class MusicTeacherFinalAssess(ArtTeacherBase):
         verbose_name='出勤成绩', blank=True, null=True)
     invigilation_score = models.FloatField(
         verbose_name='监考成绩', blank=True, null=True)
+    # 艺考赋分
+    art_score = models.FloatField(verbose_name='下学期艺考赋分', blank=True, null=True, default=0)
 
     class Meta:
         unique_together = ('teacher', 'semester', 'term_type')
@@ -286,6 +297,7 @@ class MusicTeacherFinalAssess(ArtTeacherBase):
             self.attend_score or 0,
             self.workload_score or 0,
             self.invigilation_score or 0,
+            self.art_score or 0,
             self.teach_book or 0
         ]
         # 计算总成绩
@@ -326,7 +338,7 @@ class MusicTeacherSemesterAssess(models.Model):
         final = self.final_score.total_score if self.final_score else 0
 
         # 总成绩是期中期末直接相加,保留三位小数
-        self.total_score = mid + final
+        self.total_score =round(mid + final, 3)
         super().save(*args, **kwargs)
 
 
@@ -353,6 +365,8 @@ class ArtTeacherFinalAssess(ArtTeacherBase):
         verbose_name='出勤成绩', blank=True, null=True)
     invigilation_score = models.FloatField(
         verbose_name='监考成绩', blank=True, null=True)
+    # 艺考赋分
+    art_score = models.FloatField(verbose_name='下学期艺考赋分', blank=True, null=True, default=0)
 
     class Meta:
         unique_together = ('teacher', 'semester', 'term_type')
@@ -366,6 +380,7 @@ class ArtTeacherFinalAssess(ArtTeacherBase):
             self.attend_score or 0,
             self.workload_score or 0,
             self.invigilation_score or 0,
+            self.art_score or 0,
             self.teach_book or 0
         ]
         # 计算总成绩
@@ -406,7 +421,7 @@ class ArtTeacherSemesterAssess(models.Model):
         final = self.final_score.total_score if self.final_score else 0
 
         # 总成绩是期中期末直接相加,保留三位小数
-        self.total_score = mid + final
+        self.total_score =round(mid + final, 3)
         super().save(*args, **kwargs)
 
 
@@ -813,12 +828,16 @@ class EduAdmin(models.Model):
     """教务员考核表"""
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='考核类型', blank=True, null=True
+    )
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
     assess_time = models.CharField(
         max_length=50, verbose_name='考核时间', blank=True, null=True)
+    grade_depart = models.CharField(verbose_name="年级部", max_length=100, blank=True, null=True)
     # 考勤得分
     attend_score = models.FloatField(
         verbose_name='考勤得分', blank=True, null=True)
@@ -852,12 +871,16 @@ class ALAdmin(models.Model):
     """行政后勤考核表"""
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='考核类型', blank=True, null=True
+    )
+    assess_time = models.CharField(
+        max_length=50, verbose_name='考核时间', blank=True, null=True)
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
         AssessDepart, on_delete=models.CASCADE, verbose_name='此次参与考核部门')
-    assess_time = models.CharField(
-        max_length=50, verbose_name='考核时间', blank=True, null=True)
+    al_depart = models.CharField(verbose_name="后勤科室", max_length=100, blank=True, null=True)    
     # 考勤得分
     attend_score = models.FloatField(
         verbose_name='考勤得分', blank=True, null=True)
@@ -891,6 +914,9 @@ class DeputyHeadTeacher(models.Model):
     """副班主任考核表"""
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, verbose_name='学期')
+    term_type = models.ForeignKey(
+        TermType, on_delete=models.CASCADE, verbose_name='考核类型', blank=True, null=True
+    )
     teacher = models.ForeignKey(
         UserInfo, on_delete=models.CASCADE, verbose_name='教师')
     assess_depart = models.ForeignKey(
@@ -922,6 +948,7 @@ class DeputyHeadTeacher(models.Model):
     is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
+        unique_together = ('teacher', 'semester')
         verbose_name = '副班主任考核表'
         verbose_name_plural = '副班主任考核表'
 

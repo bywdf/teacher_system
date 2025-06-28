@@ -83,6 +83,20 @@
             {{ form.assess_depart }}
             <span class="text-red">{{ form.assess_depart.errors.0 }}</span>
           </div>
+          <!-- 年级部 (教务员) -->
+          {% if grade_depart %}
+            <div class="form-group">
+              <label>{{ form.grade_depart.label }}</label>
+              {{ form.grade_depart }}
+            </div>
+          {% endif %}
+          <!-- 年级部 (教务员) -->
+          {% if al_depart %}
+            <div class="form-group">
+              <label>{{ form.al_depart.label }}</label>
+              {{ form.al_depart }}
+            </div>
+          {% endif %}
           <!-- 考勤得分 (仅适用于部分教师类型) -->
           {% if show_attend_score %}
             <div class="form-group">
@@ -245,13 +259,6 @@
               {{ form.class_score }}
             </div>
           {% endif %}
-          <!-- 民主评议得分 (教务员、副班主任) -->
-          {% if show_democratic_score %}
-            <div class="form-group">
-              <label>{{ form.democratic_score.label }}</label>
-              {{ form.democratic_score }}
-            </div>
-          {% endif %}
           <!-- 问卷评价得分 (副班主任) -->
           {% if show_questionnaire_score %}
             <div class="form-group">
@@ -293,6 +300,13 @@
               <label>{{ form.attend_workload.label }}</label>
               {{ form.attend_workload }}
             </div>
+            <!-- 民主评议得分 (教务员、副班主任) -->
+            {% if show_democratic_score %}
+              <div class="form-group">
+                <label>{{ form.democratic_score.label }}</label>
+                {{ form.democratic_score }}
+              </div>
+            {% endif %}
           {% endif %}
           <!-- 期中成绩 -->
           {% if show_mid_score %}

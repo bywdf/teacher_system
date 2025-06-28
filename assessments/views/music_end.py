@@ -236,8 +236,9 @@ def music_end_import(request):
                             'total_workload': safe_float(row[10]),
                             'workload_score': safe_float(row[11]),
                             'invigilation_score': safe_float(row[12]),
-                            'teach_book': safe_float(row[13]),
-                            'remark': row[14] or "",                            
+                            'art_score': safe_float(row[13]),
+                            'teach_book': safe_float(row[14]),
+                            'remark': row[15] or "",                            
                         }
                     obj, created = MusicTeacherFinalAssess.objects.get_or_create(
                         teacher=teacher,
@@ -315,7 +316,7 @@ def music_end_export(request):
     headers = [
         '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
         '教师学科', '出勤成绩', '课堂节数', '专业课节数折合', '艺体活动与竞赛培训节数折算', '额外工作折算',
-        '总工作量节数', '个人成课时工作量成绩', '监考得分', '常规教学薄成绩',
+        '总工作量节数', '个人成课时工作量成绩', '监考得分', '下学期艺考赋分', '常规教学薄成绩',
         '总成绩', '名次', '备注', 
     ]
 
@@ -355,6 +356,7 @@ def music_end_export(request):
             obj.total_workload,
             obj.workload_score,
             obj.invigilation_score,
+            obj.art_score,
             obj.teach_book,
             obj.total_score,
             obj.rank,

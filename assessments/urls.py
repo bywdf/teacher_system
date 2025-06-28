@@ -6,6 +6,8 @@ from assessments.views import pe_mid, pe_end, pe_term
 from assessments.views import it_mid, it_end, it_term
 from assessments.views import groupleader_mid, groupleader_end, groupleader_term
 from assessments.views import headteacher_mid, headteacher_end, headteacher_term
+from assessments.views import eduadmin, aladmin
+
 app_name = 'assessments'
 
 urlpatterns = [
@@ -199,4 +201,22 @@ urlpatterns = [
     path('headteacher/termimport/', headteacher_term.headteacher_term_import, name='headteacher_term_import'),
     path('headteacher/term/export/', headteacher_term.headteacher_term_export, name='headteacher_term_export'),
     path('headteacher_term/update_rank/', headteacher_term.headteacher_term_update_rank, name='headteacher_term_update_rank'),
+
+    # 教务员管理考核
+    path('eduadmin/list/', eduadmin.eduadmin_list, name='eduadmin_list'),
+    path('eduadmin/add/', eduadmin.eduadmin_add, name='eduadmin_add'),
+    path('eduadmin/delete/', eduadmin.eduadmin_delete, name='eduadmin_delete'),
+    path('eduadmin/edit/<int:pk>', eduadmin.eduadmin_edit, name='eduadmin_edit'),
+    path('eduadmin/import/', eduadmin.eduadmin_import, name='eduadmin_import'),
+    path('eduadmin/export/', eduadmin.eduadmin_export, name='eduadmin_export'),
+    path('eduadmin/update_rank/', eduadmin.eduadmin_update_rank, name='eduadmin_update_rank'),
+    
+    # 行政后勤管理考核
+    path('aladmin/list/', aladmin.aladmin_list, name='aladmin_list'),
+    path('aladmin/add/', aladmin.aladmin_add, name='aladmin_add'),
+    path('aladmin/delete/', aladmin.aladmin_delete, name='aladmin_delete'),
+    path('aladmin/edit/<int:pk>', aladmin.aladmin_edit, name='aladmin_edit'),
+    path('aladmin/import/', aladmin.aladmin_import, name='aladmin_import'),
+    path('aladmin/export/', aladmin.aladmin_export, name='aladmin_export'),
+    path('aladmin/update_rank/', aladmin.aladmin_update_rank, name='aladmin_update_rank'),
 ]

@@ -13,18 +13,18 @@ from django.db import transaction
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 
-from assessments.models import ArtTeacherFinalAssess, AssessDepart, Semester, TermType
+from assessments.models import ALAdmin, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
 
 
 class AssessModelForm(BootStrapModelForm):
     class Meta:
-        model = ArtTeacherFinalAssess
+        model = ALAdmin
         # 字段，所有字段
         fields = '__all__'
 
 
-def art_end_list(request):
+def aladmin_list(request):
     # 获取所有可选数据
     semesters = Semester.objects.order_by('-id')
     term_types = TermType.objects.all()
@@ -52,7 +52,7 @@ def art_end_list(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 应用查询条件
-    queryset = ArtTeacherFinalAssess.objects.filter(
+    queryset = ALAdmin.objects.filter(
         query).order_by('id')
 
     page_object = Pagination(request, queryset)
@@ -71,19 +71,19 @@ def art_end_list(request):
         'selected_subject': subject_id if subject_id else 'all',
 
     }
-    return render(request, 'art_end_list.html', content)
+    return render(request, 'aladmin_list.html', content)
 
 
-def art_end_delete(request):
+def aladmin_delete(request):
     """删除"""
     nid = request.GET.get('nid')
-    ArtTeacherFinalAssess.objects.filter(id=nid).delete()
-    return redirect('assessments:art_end_list')
+    ALAdmin.objects.filter(id=nid).delete()
+    return redirect('assessments:aladmin_list')
 
 
-def art_end_edit(request, pk):
+def aladmin_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
-    instance = get_object_or_404(ArtTeacherFinalAssess, pk=pk)
+    instance = get_object_or_404(ALAdmin, pk=pk)
     # 创建表单实例，绑定现有数据
     form = AssessModelForm(request.POST or None, instance=instance)
 
@@ -91,7 +91,7 @@ def art_end_edit(request, pk):
         if form.is_valid():
             # 保存更新（可在此处添加额外逻辑，如权限检查、计算字段等）
             form.save()
-            return redirect('assessments:art_end_list')  # 重定向到列表页
+            return redirect('assessments:aladmin_list')  # 重定向到列表页
         # 若表单验证失败，保留错误信息并重新渲染页面
 
     # 渲染编辑页面，传递表单和对象
@@ -99,18 +99,15 @@ def art_end_edit(request, pk):
         'form': form,
         'title': '考核记录',
         'instance': instance,
-        'title': '添加考核记录',
-        'show_workload_fields':True,
-        'show_major_hours':True,
-        'show_teach_book':True,
-        'show_activity_hours':True, 
+        'al_depart': True,
         'show_attend_score':True,
-        'show_invigilation_score':True,
+        'show_democratic_score':True,
+        'show_attend_workload':True,
     }
     return render(request, 'assess_change.html', context)
 
 
-def art_end_add(request):
+def aladmin_add(request):
     """添加"""
     form = AssessModelForm()
     # 获取所有教师数据
@@ -119,17 +116,15 @@ def art_end_add(request):
         form = AssessModelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('assessments:art_end_list')
+            return redirect('assessments:aladmin_list')
         
     content = {
         'form': form,
         'title': '添加考核记录',
-        'show_workload_fields':True,
-        'show_major_hours':True,
-        'show_teach_book':True,
-        'show_activity_hours':True,
+        'al_depart': True,
         'show_attend_score':True,
-        'show_invigilation_score':True,        
+        'show_democratic_score':True,
+        'show_attend_workload':True,
     }
     
     return render(request, 'assess_change.html', content)
@@ -137,13 +132,13 @@ def art_end_add(request):
 
 # 下面是批量导入需要的功能
 @transaction.atomic
-def art_end_import(request):
+def aladmin_import(request):
     """批量导入考核成绩"""
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:art_end_list')
+            return redirect('assessments:aladmin_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -210,7 +205,7 @@ def art_end_import(request):
                             name=depart_name)
                         depart_map[depart_name] = assess_depart
 
-                    teacher_name = row[4]
+                    teacher_name = row[5]  # 注意其它考核姓名在row[4]，教务员和行政后勤的姓名列前面加了一列“科室”
                     if not teacher_name:
                         raise ValueError("教师姓名不能为空")
 
@@ -225,28 +220,24 @@ def art_end_import(request):
                         except (TypeError, ValueError):
                             return default
 
-                    # 创建或更新记录
                     defaults={
                             'assess_time': row[2] or datetime.date.today().isoformat(),
                             'assess_depart': assess_depart,
-                            'attend_score': safe_float(row[5]),
-                            'class_hours': safe_float(row[6]),
-                            'major_hours': safe_float(row[7]),
-                            'activity_hours': safe_float(row[8]),
-                            'extra_work_hours': safe_float(row[9]),
-                            'total_workload': safe_float(row[10]),
-                            'workload_score': safe_float(row[11]),
-                            'invigilation_score': safe_float(row[12]),
-                            'art_score': safe_float(row[13]),
-                            'teach_book': safe_float(row[14]),
-                            'remark': row[15] or "",                            
+                            'al_depart': row[4],
+                            'attend_score': safe_float(row[6]),
+                            'attend_workload': safe_float(row[7]),
+                            'democratic_score': safe_float(row[8]),
+                            'remark': row[9] or '',
                         }
-                    obj, created = ArtTeacherFinalAssess.objects.get_or_create(
+                    
+                    # 创建或更新记录
+                    obj, created = ALAdmin.objects.get_or_create(
                         teacher=teacher,
                         semester=semester_map[semester_str],
                         term_type=term_type,
                         defaults=defaults
                     )
+                    
                     # 如果是更新操作，需要先更新字段再保存
                     if not created:
                         for key, value in defaults.items():
@@ -278,11 +269,11 @@ def art_end_import(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:art_end_list')
+    return redirect('assessments:aladmin_list')
 
 
-def art_end_export(request):
-    """导出教期末考核数据"""
+def aladmin_export(request):
+    """导出教师考核数据"""
     # 获取筛选参数
     semester_id = request.GET.get('semester')
     term_type_id = request.GET.get('term_type')
@@ -304,21 +295,20 @@ def art_end_export(request):
         query &= Q(teacher__subject_id=subject_id)
 
     # 获取数据
-    queryset = ArtTeacherFinalAssess.objects.filter(query).select_related(
+    queryset =ALAdmin.objects.filter(query).select_related(
         'semester', 'term_type', 'assess_depart', 'teacher', 'teacher__subject'
     ).order_by('id')
 
     # 创建工作簿和工作表
     wb = Workbook()
     ws = wb.active
-    ws.title = "期末考核数据"
+    ws.title = "教师考核数据"
 
     # 设置表头
     headers = [
-        '序号', '学期', '考核类型', '考核时间', '考核部门', '姓名',
-        '教师学科', '出勤成绩', '课堂节数', '专业课节数折合', '艺体活动与竞赛培训节数折算', '额外工作折算',
-        '总工作量节数', '个人成课时工作量成绩', '监考得分', '下学期艺考赋分','常规教学薄成绩',
-        '总成绩', '名次', '备注', 
+        '序号', '学期', '考核类型', '考核时间', '考核部门', '科室', '姓名',
+        '学科', '考勤', '出勤工作量', '民主评议总分',
+        '总成绩', '名次', '备注',
     ]
 
     # 添加表头行
@@ -347,21 +337,15 @@ def art_end_export(request):
             obj.term_type.name,
             obj.assess_time,
             obj.assess_depart.name,
+            obj.al_depart,
             obj.teacher.name,
             obj.teacher.subject.title if obj.teacher.subject else '',
             obj.attend_score,
-            obj.class_hours,
-            obj.major_hours,
-            obj.activity_hours,
-            obj.extra_work_hours,
-            obj.total_workload,
-            obj.workload_score,
-            obj.invigilation_score,
-            obj.art_score,
-            obj.teach_book,
+            obj.attend_workload,
+            obj.democratic_score,    
             obj.total_score,
             obj.rank,
-            obj.remark,           
+            obj.remark,
         ]
 
         ws.append(data)
@@ -385,7 +369,7 @@ def art_end_export(request):
         ws.column_dimensions[column_letter].width = adjusted_width
 
     # 设置文件名
-    filename = f"教师期末考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"教师期中考核数据_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
 
     # 准备响应
     response = HttpResponse(
@@ -398,14 +382,14 @@ def art_end_export(request):
     return response
 
 
-def art_end_update_rank(request):
-    """更新教师期末考核数据的名次并将公示状态改为应经公示"""
+def aladmin_update_rank(request):
+    """更新教师考核数据的名次并将公示状态改为应经公示"""
     
     if request.method == "POST":
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
             messages.error(request, "请选择Excel文件")
-            return redirect('assessments:art_end_list')
+            return redirect('assessments:aladmin_list')
 
         try:
             wb = load_workbook(excel_file)
@@ -466,7 +450,7 @@ def art_end_update_rank(request):
                     
                     # 查找并更新记录
                     try:
-                        assess = ArtTeacherFinalAssess.objects.get(
+                        assess = ALAdmin.objects.get(
                             teacher=teacher,
                             semester=semester,
                             term_type=term_type
@@ -480,7 +464,7 @@ def art_end_update_rank(request):
                         success_count += 1
                         updated_count += 1
                         
-                    except ArtTeacherFinalAssess.DoesNotExist:
+                    except ALAdmin.DoesNotExist:
                         not_found_count += 1
                         errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 学期: {semester_str}, 考核类型: {term_type_name}")
 
@@ -504,4 +488,4 @@ def art_end_update_rank(request):
         except Exception as e:
             messages.error(request, f"文件处理错误: {str(e)}")
 
-    return redirect('assessments:art_end_list')
+    return redirect('assessments:aladmin_list')
