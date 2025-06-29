@@ -300,13 +300,13 @@
               <label>{{ form.attend_workload.label }}</label>
               {{ form.attend_workload }}
             </div>
-            <!-- 民主评议得分 (教务员、副班主任) -->
-            {% if show_democratic_score %}
-              <div class="form-group">
-                <label>{{ form.democratic_score.label }}</label>
-                {{ form.democratic_score }}
-              </div>
-            {% endif %}
+          {% endif %}
+          <!-- 民主评议得分 (教务员、行政后勤、副班主任) -->
+          {% if show_democratic_score %}
+            <div class="form-group">
+              <label>{{ form.democratic_score.label }}</label>
+              {{ form.democratic_score }}
+            </div>
           {% endif %}
           <!-- 期中成绩 -->
           {% if show_mid_score %}

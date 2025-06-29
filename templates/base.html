@@ -286,6 +286,12 @@
               </a>
               <ul class="treeview-menu">
                 <li>
+                  <a href="{% url 'assessments:headteacher_mid_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期中考核</span></a>
+                </li>
+                <li>
+                  <a href="{% url 'assessments:groupleader_mid_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期中考核</span></a>
+                </li>
+                <li>
                   <a href="{% url 'assessments:cultura_mid_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期中考核</span></a>
                 </li>
                 <li>
@@ -310,6 +316,12 @@
                 </span>
               </a>
               <ul class="treeview-menu">
+                <li>
+                  <a href="{% url 'assessments:headteacher_end_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期末考核</span></a>
+                </li>
+                <li>
+                  <a href="{% url 'assessments:groupleader_end_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期末考核</span></a>
+                </li>
                 <li>
                   <a href="{% url 'assessments:cultura_end_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期末考核</span></a>
                 </li>
@@ -336,6 +348,12 @@
               </a>
               <ul class="treeview-menu">
                 <li>
+                  <a href="{% url 'assessments:headteacher_term_list' %}"><i class="fa fa-circle-o"></i> <span>班主任学期考核</span></a>
+                </li>
+                <li>
+                  <a href="{% url 'assessments:groupleader_term_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长学期考核</span></a>
+                </li>
+                <li>
                   <a href="{% url 'assessments:cultura_term_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师学期考核</span></a>
                 </li>
                 <li>
@@ -350,31 +368,16 @@
                 <li>
                   <a href="{% url 'assessments:it_term_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师学期考核</span></a>
                 </li>
+                <li>
+                  <a href="{% url 'assessments:eduadmin_list' %}"><i class="fa fa-circle-o"></i> <span>教务员学期考核</span></a>
+                </li>
               </ul>
             </li>
             <li>
-              <a href="{% url 'assessments:groupleader_mid_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期中考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:groupleader_end_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期末考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:groupleader_term_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长学期考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:headteacher_mid_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期中考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:headteacher_end_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期末考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:headteacher_term_list' %}"><i class="fa fa-circle-o"></i> <span>班主任学期考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:eduadmin_list' %}"><i class="fa fa-circle-o"></i> <span>教务员学期考核</span></a>
-            </li>
-            <li>
               <a href="{% url 'assessments:aladmin_list' %}"><i class="fa fa-circle-o"></i> <span>行政后勤学期考核</span></a>
+            </li>
+            <li>
+              <a href="{% url 'assessments:deputy_list' %}"><i class="fa fa-circle-o"></i> <span>副班主任学期考核</span></a>
             </li>
           </ul>
           <!-- /.sidebar-menu -->

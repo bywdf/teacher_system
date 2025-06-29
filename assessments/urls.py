@@ -6,7 +6,7 @@ from assessments.views import pe_mid, pe_end, pe_term
 from assessments.views import it_mid, it_end, it_term
 from assessments.views import groupleader_mid, groupleader_end, groupleader_term
 from assessments.views import headteacher_mid, headteacher_end, headteacher_term
-from assessments.views import eduadmin, aladmin
+from assessments.views import eduadmin, aladmin, deputy
 
 app_name = 'assessments'
 
@@ -219,4 +219,13 @@ urlpatterns = [
     path('aladmin/import/', aladmin.aladmin_import, name='aladmin_import'),
     path('aladmin/export/', aladmin.aladmin_export, name='aladmin_export'),
     path('aladmin/update_rank/', aladmin.aladmin_update_rank, name='aladmin_update_rank'),
+    
+    # 副班主任管理考核
+    path('deputy/list/', deputy.deputy_list, name='deputy_list'),
+    path('deputy/add/', deputy.deputy_add, name='deputy_add'),
+    path('deputy/delete/', deputy.deputy_delete, name='deputy_delete'),
+    path('deputy/edit/<int:pk>', deputy.deputy_edit, name='deputy_edit'),
+    path('deputy/import/', deputy.deputy_import, name='deputy_import'),
+    path('deputy/export/', deputy.deputy_export, name='deputy_export'),
+    path('deputy/update_rank/', deputy.deputy_update_rank, name='deputy_update_rank'),
 ]
