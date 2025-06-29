@@ -351,6 +351,9 @@
                   <a href="{% url 'assessments:headteacher_term_list' %}"><i class="fa fa-circle-o"></i> <span>班主任学期考核</span></a>
                 </li>
                 <li>
+                  <a href="{% url 'assessments:deputy_list' %}"><i class="fa fa-circle-o"></i> <span>副班主任学期考核</span></a>
+                </li>
+                <li>
                   <a href="{% url 'assessments:groupleader_term_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长学期考核</span></a>
                 </li>
                 <li>
@@ -371,13 +374,29 @@
                 <li>
                   <a href="{% url 'assessments:eduadmin_list' %}"><i class="fa fa-circle-o"></i> <span>教务员学期考核</span></a>
                 </li>
+                <li>
+                  <a href="{% url 'assessments:aladmin_list' %}"><i class="fa fa-circle-o"></i> <span>行政后勤学期考核</span></a>
+                </li>
+              </ul>
+            </li>
+            <!--证书管理-->
+            <li class="treeview">
+              <a href="#"><i class="fa fa-file-image-o"></i> <span>证书管理</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li>
+                  <a href="#"><i class="fa fa-circle-o"></i> <span>证书管理</span></a>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-circle-o"></i> <span>年度考核管理</span></a>
+                </li>
               </ul>
             </li>
             <li>
-              <a href="{% url 'assessments:aladmin_list' %}"><i class="fa fa-circle-o"></i> <span>行政后勤学期考核</span></a>
-            </li>
-            <li>
-              <a href="{% url 'assessments:deputy_list' %}"><i class="fa fa-circle-o"></i> <span>副班主任学期考核</span></a>
+              <a href="#"><i class="fa fa-circle-o"></i> <span>测试链接</span></a>
             </li>
           </ul>
           <!-- /.sidebar-menu -->
