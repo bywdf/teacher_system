@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import datetime
 
 # Create your models here.
 
@@ -21,7 +22,14 @@ class Subject(models.Model):
 
 
 class UserInfo(AbstractUser):
+    # 头像
+    avatar = models.ImageField(upload_to='media/avatar/%Y/%m/%d', null=True, blank=True, verbose_name="头像")
     name = models.CharField(max_length=100, verbose_name="姓名")
+    birthday = models.DateField(default=datetime.date(1900, 1, 1), null=True, blank=True, verbose_name="出生日期")
+    # 参加工作时间
+    work_time = models.CharField(verbose_name="参加工作时间", blank=True, null=True)
+    # 入党时间
+    party_time = models.CharField(verbose_name="入党时间", blank=True, null=True)
     idnumber = models.CharField(
         max_length=18, verbose_name="身份证号", blank=True, null=True)
     gender_choices = (
@@ -35,3 +43,32 @@ class UserInfo(AbstractUser):
         Department, on_delete=models.SET_NULL, null=True, verbose_name="所属年级（部门）")
     subject = models.ForeignKey(
         Subject, on_delete=models.SET_NULL, null=True, verbose_name="任教学科")
+    
+    # 第一学历
+    first_education = models.CharField(verbose_name="第一学历", max_length=100, blank=True, null=True)
+    # 第一学历毕业院校
+    first_education_school = models.CharField(verbose_name="第一学历毕业院校", max_length=100, blank=True, null=True)
+    # 第一学历专业
+    first_education_major = models.CharField(verbose_name="第一学历专业", max_length=100, blank=True, null=True)
+    # 第一学历毕业时间
+    first_education_time = models.CharField(verbose_name="第一学历毕业时间", blank=True, null=True)
+    # 最高学历
+    highest_education = models.CharField(verbose_name="最高学历", max_length=100, blank=True, null=True)
+    # 最高学历毕业院校
+    highest_education_school = models.CharField(verbose_name="最高学历毕业院校", max_length=100, blank=True, null=True)
+    # 最高学历专业
+    highest_education_major = models.CharField(verbose_name="最高学历专业", max_length=100, blank=True, null=True)
+    # 最高学历毕业时间
+    highest_education_time = models.CharField(verbose_name="最高学历毕业时间", blank=True, null=True)
+    
+    # 专业资格
+    professional_qualification = models.CharField(verbose_name="专业资格", max_length=100, blank=True, null=True)
+    professional_qualification_time = models.CharField(verbose_name="专业资格取得时间", blank=True, null=True)
+    # 职称及聘任时间
+    professional_title = models.CharField(verbose_name="聘任职称", max_length=100, blank=True, null=True)
+    professional_title_time = models.CharField(verbose_name="聘任时间", blank=True, null=True)        
+    # 分级竞聘后聘任等级及时间
+    appointment_grade = models.CharField(verbose_name="分级竞聘后聘任等级", max_length=100, blank=True, null=True)
+    appointment_grade_time = models.CharField(verbose_name="分级竞聘后聘任时间", blank=True, null=True)
+    # 调入我校时间
+    transfer_time = models.CharField(verbose_name="调入我校时间", blank=True, null=True)

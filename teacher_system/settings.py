@@ -129,6 +129,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # 自定义用户模型
 AUTH_USER_MODEL = 'accounts.UserInfo'
 
+LOGIN_URL = '/login/'
+
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'  # 使用数据库存储会话
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

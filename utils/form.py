@@ -1,10 +1,10 @@
 
-from app01 import models
+from accounts import models
 from django import forms
 from django.core.validators import RegexValidator   # 引入正则
 from django.core.exceptions import ValidationError  # 引入报错
 
-from app01.utils.bootstrap import BootStrapModelForm
+from utils.bootstrap import BootStrapModelForm
 
 
 # 用modelform，先写一个类
@@ -22,48 +22,48 @@ class UserModelForm(BootStrapModelForm):
             
             
 
-class PrettyModelForm(BootStrapModelForm):
+class UserModelForm(BootStrapModelForm):
     # 验证方式一：
-    mobile = forms.CharField(
+    phone = forms.CharField(
         label='手机号',
         validators=[RegexValidator(r'^1[3-9]\d{9}$', '手机号格式错误')]
     )
     
     class Meta:
-        model = models.PrettyNum
+        model = models.UserInfo
         # exclude = ['level']  这个是排除哪个字段
         fields = '__all__'
 
-    # 验证方式二   clean_mobile 自动生成的字段
+    # 验证方式二   clean_phone 自动生成的字段
     # 钩子方法 比如检验存在不存在，正则表达式都可以
-    def clean_mobile(self):
-        txt_molile = self.cleaned_data["mobile"]  # 用户输入的字段
-        exists = models.PrettyNum.objects.filter(mobile=txt_molile).exists()
+    def clean_phone(self):
+        txt_molile = self.cleaned_data["phone"]  # 用户输入的字段
+        exists = models.UserInfo.objects.filter(phone=txt_molile).exists()
         if exists:
             raise ValidationError('手机号已存在')
         else:
             return txt_molile   
 
 
-class PrettyEditModelForm(BootStrapModelForm):
+class UserEditModelForm(BootStrapModelForm):
     
-    mobile = forms.CharField(
+    phone = forms.CharField(
         label='手机号',
         validators=[RegexValidator(r'^1[3-9]\d{9}$', '手机号格式错误')]
     )
     
-    # mobile = forms.CharField(disabled=True, label='手机号') #不让修改显示
+    # phone = forms.CharField(disabled=True, label='手机号') #不让修改显示
     class Meta:
-        model = models.PrettyNum
-        fields = ['mobile', 'price', 'level', 'status']
+        model = models.UserInfo
+        fields = ['phone', 'price', 'level', 'status']
 
-    def clean_mobile(self):
+    def clean_phone(self):
         
         # 当前编辑行的id:self.instance.pk 
         
-        txt_molile = self.cleaned_data["mobile"]  # 用户输入的字段
+        txt_molile = self.cleaned_data["phone"]  # 用户输入的字段
         # 排除自己以外的是不是存在
-        exists = models.PrettyNum.objects.exclude(id=self.instance.pk).filter(mobile=txt_molile).exists()    
+        exists = models.UserInfo.objects.exclude(id=self.instance.pk).filter(phone=txt_molile).exists()    
         if exists:
             raise ValidationError('手机号已存在')
         else:

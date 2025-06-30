@@ -7,10 +7,6 @@ from utils.bootstrap import BootStrapModelForm
 from utils.pagination import Pagination
 
 # Create your views here.
-def testbase(request):
-    return render(request, 'base.html')
-
-
 class SemesterModelForm(BootStrapModelForm):
     class Meta:
         model = models.Semester
