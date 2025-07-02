@@ -21,7 +21,10 @@ from accounts.views import account
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # path("login/", account.custom_login, name="login"),
+    # 登录注销
+    path('image/code/', account.image_code, name='image_code'),
+    path("login/", account.user_login, name="login"),
+    path("logout/", account.user_logout, name="logout"),
     path('index/', account.index, name='index'),
     
     path('accounts/', include('accounts.urls')),
