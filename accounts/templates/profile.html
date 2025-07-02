@@ -54,18 +54,14 @@
             <h4 class="mb-3">安全设置</h4>
             <div class="card">
               <div class="card-body">
-                <button type="button"
-                        class="btn btn-warning btn-flat btn-block"
-                        data-toggle="modal"
-                        data-target="#changePasswordModal">
+                <a href="{% url 'accounts:change_password' %}"
+                   class="btn btn-warning btn-flat btn-block">
                   <i class="fa fa-key mr-2"></i>修改密码
-                </button>
-                <button type="button"
-                        class="btn btn-info btn-flat btn-block"
-                        data-toggle="modal"
-                        data-target="#changeAvatarModal">
+                </a>
+                <a href="{% url 'accounts:update_avatar' %}"
+                   class="btn btn-info btn-flat btn-block">
                   <i class="fa fa-user-circle mr-2"></i>修改头像
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -373,7 +369,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputSubject"
-                             value="{{ user.transfer_time|default:"未设置" }}"
+                             value="{{ user.appointment_grade_time|default:"未设置" }}"
                              disabled>
                     </div>
                   </div>
@@ -385,99 +381,4 @@
       </div>
     </div>
   </div>
-</div>
-<!-- 修改密码模态框 -->
-<div class="modal fade"
-     id="changePasswordModal"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="changePasswordModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="changePasswordModalLabel">修改密码</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="oldPassword">当前密码</label>
-            <input type="password" class="form-control" id="oldPassword">
-          </div>
-          <div class="form-group">
-            <label for="newPassword">新密码</label>
-            <input type="password" class="form-control" id="newPassword">
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">确认新密码</label>
-            <input type="password" class="form-control" id="confirmPassword">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary">修改密码</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- 修改头像模态框 -->
-<div class="modal fade"
-     id="changeAvatarModal"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="changeAvatarModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="changeAvatarModalLabel">修改头像</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="avatarFile">选择头像图片</label>
-            <div class="input-group">
-              <div class="custom-file">
-                <input type="file" class="custom-file-input" id="avatarFile">
-                <label class="custom-file-label" for="avatarFile">选择文件</label>
-              </div>
-            </div>
-          </div>
-          <div class="form-group text-center">
-            <img id="avatarPreview"
-                 src="{% static 'img/default_avatar.jpg' %}"
-                 alt="头像预览"
-                 class="img-circle img-fluid">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary">上传头像</button>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock content %}
-{% block js %}
-  <script>
-        // 头像预览
-        $(function() {
-            $('#avatarFile').change(function() {
-                var file = this.files[0];
-                if (file) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#avatarPreview').attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-        });
-  </script>
-{% endblock js %}

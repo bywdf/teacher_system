@@ -1,5 +1,5 @@
 from django.urls import path
-from accounts.views import user, department, subject, account, user_profile
+from accounts.views import user, department, subject, user_profile
 
 app_name = 'accounts'
 
@@ -28,5 +28,7 @@ urlpatterns = [
     path('subject/multi/', subject.subject_multi, name='subject_multi'), 
     
     # 个人用户
-    path('profile/', user_profile.user_profile, name='user_profile'),   
+    path('profile/', user_profile.user_profile, name='user_profile'),
+    path('change_password/', user_profile.change_password, name='change_password'),
+    path('update_avatar/', user_profile.update_avatar, name='update_avatar'), 
 ]

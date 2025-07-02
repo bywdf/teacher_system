@@ -1,0 +1,39 @@
+<!-- accounts/update_avatar.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  修改头像
+{% endblock title %}
+{% block content %}
+  <div class="card card-primary">
+    <div class="card-header">
+      <h3 class="card-title">修改头像</h3>
+    </div>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="card-body">
+        <div class="form-group">
+          <label for="id_avatar">当前头像</label>
+          <div class="mb-3">
+            {% if request.user.avatar %}
+              <img src="{{ request.user.avatar.url }}"
+                   alt="当前头像"
+                   class="img-circle img-thumbnail"
+                   style="max-width: 200px">
+            {% else %}
+              <img src="{% static 'img/default_avatar.jpg' %}"
+                   alt="默认头像"
+                   class="img-circle img-thumbnail"
+                   style="max-width: 200px">
+            {% endif %}
+          </div>
+        </div>
+        {{ form.as_p }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">上传头像</button>
+        <a href="{% url 'accounts:user_profile' %}" class="btn btn-default">取消</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

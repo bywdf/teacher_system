@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
+import os
+
 
 # Create your models here.
 
@@ -23,7 +26,7 @@ class Subject(models.Model):
 
 class UserInfo(AbstractUser):
     # 头像
-    avatar = models.ImageField(upload_to='media/avatar/%Y/%m/%d', null=True, blank=True, verbose_name="头像")
+    avatar = models.ImageField(upload_to='avatar/%Y/%m/%d', null=True, blank=True, verbose_name="头像")
     name = models.CharField(max_length=100, verbose_name="姓名")
     birthday = models.DateField(default=datetime.date(1900, 1, 1), null=True, blank=True, verbose_name="出生日期")
     # 参加工作时间
@@ -84,3 +87,12 @@ class UserInfo(AbstractUser):
     appointment_grade_time = models.CharField(verbose_name="分级竞聘后聘任时间", blank=True, null=True)
     # 调入我校时间
     transfer_time = models.CharField(verbose_name="调入我校时间", blank=True, null=True)
+    
+    # 保存方法可以简化，使用更健壮的路径处理
+    def save(self, *args, **kwargs):
+        # 确保上传时目录存在
+        if self.avatar:
+            # 获取完整上传路径（不含文件名）
+            upload_dir = os.path.dirname(os.path.join(settings.MEDIA_ROOT, self.avatar.name))
+            os.makedirs(upload_dir, exist_ok=True)
+        super().save(*args, **kwargs)
