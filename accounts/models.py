@@ -44,6 +44,18 @@ class UserInfo(AbstractUser):
     subject = models.ForeignKey(
         Subject, on_delete=models.SET_NULL, null=True, verbose_name="任教学科")
     
+    
+    # 民族
+    nation = models.CharField(verbose_name="民族", max_length=100, blank=True, null=True)
+    # 政治面貌
+    political_status = models.CharField(verbose_name="政治面貌", max_length=100, blank=True, null=True)
+    # 籍贯
+    native_place = models.CharField(verbose_name="籍贯", max_length=100, blank=True, null=True)
+    # 现住址
+    address = models.CharField(verbose_name="现住址", max_length=100, blank=True, null=True)
+
+    
+    
     # 第一学历
     first_education = models.CharField(verbose_name="第一学历", max_length=100, blank=True, null=True)
     # 第一学历毕业院校

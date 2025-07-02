@@ -1,0 +1,483 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+      <!-- 左侧个人信息卡片 -->
+      <div class="col-md-3">
+        <!-- 个人资料卡片 -->
+        <div class="card card-primary card-outline">
+          <div class="card-body box-profile">
+            <!-- 头像 -->
+            <div class="text-center">
+              {% if user.avatar %}
+                <img class="profile-user-img img-fluid img-circle"
+                     src="{{ user.avatar.url }}"
+                     alt="用户头像">
+              {% else %}
+                <img class="profile-user-img img-fluid img-circle"
+                     src="{% static 'img/default_avatar.jpg' %}"
+                     alt="默认头像">
+              {% endif %}
+            </div>
+            <h3 class="profile-username text-center">{{ user.username }}</h3>
+            <p class="text-muted text-center">{{ user.department|default:"未设置部门" }}</p>
+            <hr>
+            <!-- 个人信息列表 -->
+            <ul class="list-group list-group-unbordered mb-3">
+              <li class="list-group-item">
+                <b>用户名</b>
+                <a class="float-right">{{ user.username }}</a>
+              </li>
+              <li class="list-group-item">
+                <b>注册时间</b>
+                <a class="float-right">{{ user.date_joined|date:"Y-m-d H:i" }}</a>
+              </li>
+              <li class="list-group-item">
+                <b>上次登录</b>
+                <a class="float-right">
+                  {% if user.last_login %}
+                    {{ user.last_login }}
+                  {% else %}
+                    首次登录
+                  {% endif %}
+                </a>
+              </li>
+              <li class="list-group-item">
+                <b>联系方式</b>
+                <a class="float-right">{{ user.phone|default:"未设置" }}</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mb-3">安全设置</h4>
+            <div class="card">
+              <div class="card-body">
+                <button type="button"
+                        class="btn btn-warning btn-flat btn-block"
+                        data-toggle="modal"
+                        data-target="#changePasswordModal">
+                  <i class="fa fa-key mr-2"></i>修改密码
+                </button>
+                <button type="button"
+                        class="btn btn-info btn-flat btn-block"
+                        data-toggle="modal"
+                        data-target="#changeAvatarModal">
+                  <i class="fa fa-user-circle mr-2"></i>修改头像
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 右侧个人设置区域 -->
+      <div class="col-md-9">
+        <div class="card">
+          <div class="card-header with-border">
+            <h3 class="card-title">
+              个人设置
+              <div class="pull-right">
+                <a href="#" class="btn btn-info">
+                  <i class="fa fa-edit"></i> 编辑资料
+                </a>
+              </div>
+            </div>
+          </h3>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h4 class="mb-3">账户信息</h4>
+                <form class="form-horizontal">
+                  <div class="form-group row">
+                    <label for="inputName" class="col-sm-2 col-form-label">姓名</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputName"
+                             value="{{ user.name }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputGender" class="col-sm-2 col-form-label">性别</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputGender"
+                             value="{{ user.get_gender_display }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputIdnumber" class="col-sm-2 col-form-label">身份证号</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputIdnumber"
+                             value="{{ user.idnumber|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputEmail" class="col-sm-2 col-form-label">邮箱</label>
+                    <div class="col-sm-10">
+                      <input type="email"
+                             class="form-control"
+                             id="inputEmail"
+                             value="{{ user.email }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputDepartment" class="col-sm-2 col-form-label">部门</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputDepartment"
+                             value="{{ user.department|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">学科</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.subject|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <hr>
+                  <h4 class="mb-3">学历信息</h4>
+                  <div class="form-group row">
+                    <label for="input1edu" class="col-sm-2 col-form-label">第一学历</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1edu"
+                             value="{{ user.first_education|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">第一学历毕业学校</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.first_education_school|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">第一学历毕业专业</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.first_education_major|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">第一学历毕业时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.first_education_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input2edu" class="col-sm-2 col-form-label">最高学历</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1edu"
+                             value="{{ user.highest_education|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">最高历毕业学校</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.highest_education_school|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">最高历毕业专业</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.highest_education_major|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="input1eduschool" class="col-sm-2 col-form-label">最高历毕业时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="input1eduschool"
+                             value="{{ user.highest_education_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                </form>
+                <hr>
+              </div>
+              <div class="col-md-6">
+                <h4>个人信息</h4>
+                <form class="form-horizontal">
+                  <div class="form-group row">
+                    <label for="inputName" class="col-sm-2 col-form-label">出生年月</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputName"
+                             value="{{ user.birthday|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputUsername" class="col-sm-2 col-form-label">民族</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputUsername"
+                             value="{{ user.nation|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputEmail" class="col-sm-2 col-form-label">政治面貌</label>
+                    <div class="col-sm-10">
+                      <input type="email"
+                             class="form-control"
+                             id="inputEmail"
+                             value="{{ user.political_status|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputDepartment" class="col-sm-2 col-form-label">籍贯</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputDepartment"
+                             value="{{ user.nation_place|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">现住址</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.address|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputName" class="col-sm-2 col-form-label">参加工作时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputName"
+                             value="{{ user.work_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputUsername" class="col-sm-2 col-form-label">党员入党时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputUsername"
+                             value="{{ user.party_time|default:"非党员或未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputEmail" class="col-sm-2 col-form-label">专业资格</label>
+                    <div class="col-sm-10">
+                      <input type="email"
+                             class="form-control"
+                             id="inputEmail"
+                             value="{{ user.professional_qualtification|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputDepartment" class="col-sm-2 col-form-label">专业资格获得时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputDepartment"
+                             value="{{ user.professional_qualtification_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">现聘任职称</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.professional_title|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">现职称聘任时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.professional_title_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">分级竞聘等级</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.appointment_grade|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">分级竞聘时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.appointment_grade_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputSubject" class="col-sm-2 col-form-label">调入我校时间</label>
+                    <div class="col-sm-10">
+                      <input type="text"
+                             class="form-control"
+                             id="inputSubject"
+                             value="{{ user.transfer_time|default:"未设置" }}"
+                             disabled>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 修改密码模态框 -->
+<div class="modal fade"
+     id="changePasswordModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="changePasswordModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="changePasswordModalLabel">修改密码</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="oldPassword">当前密码</label>
+            <input type="password" class="form-control" id="oldPassword">
+          </div>
+          <div class="form-group">
+            <label for="newPassword">新密码</label>
+            <input type="password" class="form-control" id="newPassword">
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">确认新密码</label>
+            <input type="password" class="form-control" id="confirmPassword">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary">修改密码</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 修改头像模态框 -->
+<div class="modal fade"
+     id="changeAvatarModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="changeAvatarModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="changeAvatarModalLabel">修改头像</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="avatarFile">选择头像图片</label>
+            <div class="input-group">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="avatarFile">
+                <label class="custom-file-label" for="avatarFile">选择文件</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group text-center">
+            <img id="avatarPreview"
+                 src="{% static 'img/default_avatar.jpg' %}"
+                 alt="头像预览"
+                 class="img-circle img-fluid">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary">上传头像</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block js %}
+  <script>
+        // 头像预览
+        $(function() {
+            $('#avatarFile').change(function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#avatarPreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+  </script>
+{% endblock js %}

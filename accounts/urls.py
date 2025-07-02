@@ -1,12 +1,9 @@
 from django.urls import path
-from accounts.views import user, department, subject, account
+from accounts.views import user, department, subject, account, user_profile
 
 app_name = 'accounts'
 
 urlpatterns = [
-    # 验证管理
-    # path('check_code/',account.check_code_view, name='check_code'),
-    
     # 用户管理
     path('user/list/', user.user_list, name='user_list'),
     path('user/add/', user.user_add, name='user_add'),
@@ -28,5 +25,8 @@ urlpatterns = [
     path('subject/delete/', subject.subject_delete, name='subject_delete'),
     path('subject/edit/', subject.subject_edit, name='subject_edit'),
     path('subject/detail/', subject.subject_detail, name='subject_detail'),
-    path('subject/multi/', subject.subject_multi, name='subject_multi'),    
+    path('subject/multi/', subject.subject_multi, name='subject_multi'), 
+    
+    # 个人用户
+    path('profile/', user_profile.user_profile, name='user_profile'),   
 ]

@@ -294,8 +294,18 @@
           <ul class="sidebar-menu" data-widget="tree">
             <li class="header">菜单</li>
             <!-- Optionally, you can add icons to the links -->
-            <li>
-              <a href="{% url 'index' %}"><i class="fa fa-dashboard"></i> <span>首页</span></a>
+            <!--个人中心-->
+            <li class="treeview">
+              <a href="#"><i class="fa fa-dashboard"></i> <span>个人中心</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li>
+                  <a href="{% url 'accounts:user_profile' %}"><i class="fa fa-circle-o"></i>个人资料</a>
+                </li>
+              </ul>
             </li>
             <!--系统管理-->
             <li class="treeview">
