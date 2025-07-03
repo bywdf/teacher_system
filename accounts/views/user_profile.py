@@ -63,6 +63,10 @@ def update_avatar(request):
             form.save()
             messages.success(request, '头像更新成功！')
             return redirect('accounts:user_profile')
+        else:
+            # 添加表单错误到消息
+            for error in form.errors.values():
+                messages.error(request, error)
     else:
         form = AvatarUpdateForm(instance=request.user)
     

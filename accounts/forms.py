@@ -1,10 +1,14 @@
+from PIL import Image
+from io import BytesIO
+import os, sys
+
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import get_user_model
 from django.core.validators import RegexValidator, validate_email
-from accounts.models import Department, Subject, UserInfo
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from accounts.models import UserInfo
+from accounts.models import Department, Subject, UserInfo
 
 
 class ImportUsersForm(forms.Form):
@@ -29,14 +33,66 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     
     
 class AvatarUpdateForm(forms.ModelForm):
+    MAX_UPLOAD_SIZE = 2 * 1024 * 1024  # 2MB
+    ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+    
     avatar = forms.ImageField(
         label="选择头像",
-        widget=forms.FileInput(attrs={'class': 'form-control-file'})
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        help_text=f"最大尺寸: 2MB, 格式: JPG/PNG/GIF"
     )
 
     class Meta:
         model = UserInfo
         fields = ['avatar']
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        
+        # 检查文件大小
+        if avatar.size > self.MAX_UPLOAD_SIZE:
+            raise forms.ValidationError(f"文件太大！最大允许 {self.MAX_UPLOAD_SIZE//1024//1024}MB")
+        
+        # 检查文件类型
+        if avatar.content_type not in self.ALLOWED_TYPES:
+            raise forms.ValidationError("只支持 JPG, PNG 或 GIF 格式")
+        
+        return avatar
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        avatar = self.cleaned_data.get('avatar')
+        
+        if avatar:
+            # 打开图片并进行处理
+            img = Image.open(avatar)
+            
+            # 转换为RGB模式（处理PNG透明度问题）
+            if img.mode in ('RGBA', 'P'):
+                img = img.convert('RGB')
+            
+            # 调整尺寸为200x200
+            img.thumbnail((200, 200))
+            
+            # 保存处理后的图片到内存
+            output = BytesIO()
+            img.save(output, format='JPEG' if avatar.content_type == 'image/jpeg' else 'PNG', quality=90)
+            output.seek(0)
+            
+            # 创建新的InMemoryUploadedFile
+            instance.avatar = InMemoryUploadedFile(
+                output,
+                'ImageField',
+                avatar.name,
+                'image/jpeg' if avatar.content_type == 'image/jpeg' else 'image/png',
+                sys.getsizeof(output),
+                None
+            )
+        
+        if commit:
+            instance.save()
+        
+        return instance
         
         
 User = get_user_model()

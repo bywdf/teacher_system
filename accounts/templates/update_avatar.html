@@ -1,4 +1,3 @@
-<!-- accounts/update_avatar.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}
@@ -18,19 +17,38 @@
               <label for="id_avatar">当前头像</label>
               <div class="mb-3">
                 {% if request.user.avatar %}
-                  <img src="{{ request.user.avatar.url }}"
+                  <img id="currentAvatar"
+                       src="{{ request.user.avatar.url }}"
                        alt="当前头像"
                        class="img-circle img-thumbnail"
                        style="max-width: 200px">
                 {% else %}
-                  <img src="{% static 'img/default_avatar.jpg' %}"
+                  <img id="currentAvatar"
+                       src="{% static 'img/default_avatar.jpg' %}"
                        alt="默认头像"
                        class="img-circle img-thumbnail"
                        style="max-width: 200px">
                 {% endif %}
               </div>
             </div>
-            {{ form.as_p }}
+            <!-- 修改的表单字段 -->
+            <div class="form-group">
+              {{ form.avatar.label_tag }}
+              {{ form.avatar }}
+              <small class="form-text text-muted">{{ form.avatar.help_text }}</small>
+              {% if form.avatar.errors %}<div class="alert alert-danger">{{ form.avatar.errors }}</div>{% endif %}
+            </div>
+            <!-- 新增头像预览区域 -->
+            <div class="form-group">
+              <label for="id_avatar">预览新头像</label>
+              <div class="mb-3">
+                <img id="previewAvatar"
+                     src=""
+                     alt="新头像预览"
+                     class="img-circle img-thumbnail d-none"
+                     style="max-width: 200px">
+              </div>
+            </div>
           </div>
           <div class="card-footer">
             <button type="submit" class="btn btn-primary">上传头像</button>
@@ -39,4 +57,35 @@
         </form>
       </div>
     </div>
-  {% endblock content %}
+  </div>
+{% endblock content %}
+{% block js %}
+  <script>
+    // 头像预览功能
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('id_avatar');
+      const previewImg = document.getElementById('previewAvatar');
+      
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          // 检查文件类型是否为图片
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+              previewImg.src = event.target.result;
+              previewImg.classList.remove('d-none'); // 显示预览图
+            };
+            
+            reader.readAsDataURL(file);
+          } else {
+            alert('请选择图片文件！');
+            // 清空文件选择（可选）
+            fileInput.value = '';
+          }
+        }
+      });
+    });
+  </script>
+{% endblock js %}
