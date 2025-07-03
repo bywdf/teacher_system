@@ -82,7 +82,7 @@ def user_login(request):
         request.session.set_expiry(60*60*24*7)  # 7天过期
         
         # 登录成功后重定向
-        return redirect("accounts:user_list")
+        return redirect("accounts:user_profile")
     
     return render(request, 'login.html', {'form': form})
 

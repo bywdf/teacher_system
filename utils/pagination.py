@@ -2,7 +2,7 @@
 自定义的分页组件,以后如果想要使用这个分页组件，你需要做如下几件事：
 
 # 导入
-from app01.utils.pagination import Pagination
+from utils.pagination import Pagination
 
 # 在视图函数中
 def pretty_list(request):

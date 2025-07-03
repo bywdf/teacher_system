@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container mt-4">
+    <a href="{% url 'assessments:my_assessments' %}"
+       class="btn btn-secondary mb-3">&larr; 返回考核列表</a>
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h4>考核详情</h4>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">教师：</div>
+          <div class="col-md-9">{{ assessment.teacher.name }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">学期：</div>
+          <div class="col-md-9">{{ assessment.semester }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">考核类型：</div>
+          <div class="col-md-9">{{ assessment.term_type.name }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">考核部门：</div>
+          <div class="col-md-9">{{ assessment.assess_depart.name }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">考核时间：</div>
+          <div class="col-md-9">{{ assessment.assess_time|default:"-" }}</div>
+        </div>
+        <hr>
+        <!-- 根据不同考核类型显示不同字段 -->
+        {% if model_name == 'TeacherSemesterAssess' %}
+          {% include "assessments/_culture_detail.html" %}
+        {% elif model_name == 'MusicTeacherSemesterAssess' %}
+          {% include "assessments/_music_detail.html" %}
+        {% elif model_name == 'ArtTeacherSemesterAssess' %}
+          {% include "assessments/_art_detail.html" %}
+        {% elif model_name == 'PeTeacherSemester' %}
+          {% include "assessments/_pe_detail.html" %}
+        {% elif model_name == 'ItTeacherSemester' %}
+          {% include "assessments/_it_detail.html" %}
+        {% elif model_name == 'GroupLeaderSemester' %}
+          {% include "assessments/_group_leader_detail.html" %}
+        {% elif model_name == 'HeadTeacherSemester' %}
+          {% include "assessments/_head_teacher_detail.html" %}
+        {% elif model_name == 'EduAdmin' %}
+          {% include "assessments/_edu_admin_detail.html" %}
+        {% elif model_name == 'ALAdmin' %}
+          {% include "assessments/_al_admin_detail.html" %}
+        {% elif model_name == 'DeputyHeadTeacher' %}
+          {% include "assessments/_deputy_head_teacher_detail.html" %}
+        {% endif %}
+        <hr>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">总成绩：</div>
+          <div class="col-md-9 fs-5 fw-bold">{{ assessment.total_score|default:"-" }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">名次：</div>
+          <div class="col-md-9 fs-5 fw-bold">{{ assessment.rank|default:"-" }}</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold">备注：</div>
+          <div class="col-md-9">{{ assessment.remark|default:"无" }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 fw-bold">状态：</div>
+          <div class="col-md-9">
+            {% if assessment.is_published %}
+              <span class="badge bg-success">已公布</span>
+            {% else %}
+              <span class="badge bg-warning">未公布</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

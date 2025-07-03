@@ -7,6 +7,7 @@ from assessments.views import it_mid, it_end, it_term
 from assessments.views import groupleader_mid, groupleader_end, groupleader_term
 from assessments.views import headteacher_mid, headteacher_end, headteacher_term
 from assessments.views import eduadmin, aladmin, deputy
+from assessments.views import user_assess
 
 app_name = 'assessments'
 
@@ -228,4 +229,8 @@ urlpatterns = [
     path('deputy/import/', deputy.deputy_import, name='deputy_import'),
     path('deputy/export/', deputy.deputy_export, name='deputy_export'),
     path('deputy/update_rank/', deputy.deputy_update_rank, name='deputy_update_rank'),
+    
+    # 个人考核成绩查询
+    path('my-assessments/', user_assess.my_assessments, name='my_assessments'),
+    path('assessment/<str:model_name>/<int:pk>/', user_assess.assessment_detail, name='assessment_detail'),
 ]

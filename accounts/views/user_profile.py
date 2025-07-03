@@ -19,21 +19,22 @@ from accounts.models import  UserInfo
 #         'section': 'profile',
 #     }
 #     return render(request, 'profile.html', context)
-@login_required(login_url='login')
+@login_required
 def user_profile(request):
     """用户个人信息展示页"""
     user_id = request.GET.get('user_id')
     
-    # 检查用户是否属于校长组
+    # 检查用户是否属于校长组或超级用户
     is_principal = request.user.groups.filter(name='管理员').exists()
+    can_view_others = is_principal or request.user.is_superuser
     
-    # 非校长组用户只能查看自己的信息
-    if user_id and not is_principal:
+    # 无权限用户只能查看自己的信息
+    if user_id and not can_view_others:
         messages.error(request, "您没有权限查看其他用户的信息")
         return redirect('accounts:user_profile')  # 重定向到自己的信息页
     
-    # 校长组用户可以查看任意用户信息
-    if user_id and is_principal or request.user.is_superuser:
+    # 有权限用户可以查看任意用户信息
+    if user_id and can_view_others:
         try:
             user = UserInfo.objects.get(id=user_id)
             is_other_user = True
@@ -50,6 +51,7 @@ def user_profile(request):
         'page_title': '个人资料',
         'section': 'profile',
         'is_other_user': is_other_user,
+        'can_view_others': can_view_others,  # 传递权限标志到模板
     }
     return render(request, 'profile.html', context)
 

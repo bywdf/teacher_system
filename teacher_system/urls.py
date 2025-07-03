@@ -21,14 +21,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # 首页
+    path('', account.index, name='index'),
+    
+    # 后台管理
     path('admin/', admin.site.urls),
     
     # 登录注销
     path('image/code/', account.image_code, name='image_code'),
     path("login/", account.user_login, name="login"),
     path("logout/", account.user_logout, name="logout"),
-    path('index/', account.index, name='index'),
     
+    # 路由分发
     path('accounts/', include('accounts.urls')),
     path('assessments/', include('assessments.urls')),
 ]
