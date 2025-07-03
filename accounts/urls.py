@@ -31,4 +31,6 @@ urlpatterns = [
     path('profile/', user_profile.user_profile, name='user_profile'),
     path('change_password/', user_profile.change_password, name='change_password'),
     path('update_avatar/', user_profile.update_avatar, name='update_avatar'), 
+    path('userprofile/edit/', user_profile.user_edit_profile, name='user_edit_profile'),
+
 ]

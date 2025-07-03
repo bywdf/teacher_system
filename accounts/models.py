@@ -28,7 +28,7 @@ class UserInfo(AbstractUser):
     # 头像
     avatar = models.ImageField(upload_to='avatar/%Y/%m/%d', null=True, blank=True, verbose_name="头像")
     name = models.CharField(max_length=100, verbose_name="姓名")
-    birthday = models.DateField(default=datetime.date(1900, 1, 1), null=True, blank=True, verbose_name="出生日期")
+    birthday = models.DateField(null=True, blank=True, verbose_name="出生日期")
     # 参加工作时间
     work_time = models.CharField(verbose_name="参加工作时间", blank=True, null=True)
     # 入党时间
@@ -66,7 +66,7 @@ class UserInfo(AbstractUser):
     # 第一学历专业
     first_education_major = models.CharField(verbose_name="第一学历专业", max_length=100, blank=True, null=True)
     # 第一学历毕业时间
-    first_education_time = models.CharField(verbose_name="第一学历毕业时间", blank=True, null=True)
+    first_education_time = models.DateField(verbose_name="第一学历毕业时间", blank=True, null=True)
     # 最高学历
     highest_education = models.CharField(verbose_name="最高学历", max_length=100, blank=True, null=True)
     # 最高学历毕业院校
@@ -74,7 +74,7 @@ class UserInfo(AbstractUser):
     # 最高学历专业
     highest_education_major = models.CharField(verbose_name="最高学历专业", max_length=100, blank=True, null=True)
     # 最高学历毕业时间
-    highest_education_time = models.CharField(verbose_name="最高学历毕业时间", blank=True, null=True)
+    highest_education_time = models.DateField(verbose_name="最高学历毕业时间", blank=True, null=True)
     
     # 专业资格
     professional_qualification = models.CharField(verbose_name="专业资格", max_length=100, blank=True, null=True)

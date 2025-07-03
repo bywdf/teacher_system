@@ -1,13 +1,12 @@
 # accounts/views.py
-import json
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 # from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 
-from accounts.forms import CustomPasswordChangeForm, AvatarUpdateForm
-from accounts.models import UserInfo
+
+from accounts.forms import CustomPasswordChangeForm, AvatarUpdateForm, UserEditForm
+from accounts.models import  UserInfo
 
 
 #@login_required(login_url='login') 已经中间件控制登录状态了，装饰器在精细权限管理时才使用
@@ -68,3 +67,29 @@ def update_avatar(request):
         form = AvatarUpdateForm(instance=request.user)
     
     return render(request, 'update_avatar.html', {'form': form})
+
+
+def user_edit_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            # 更新用户名（手机号）
+            new_phone = form.cleaned_data['phone']
+            if new_phone != user.username:
+                user.username = new_phone
+                user.save(update_fields=['username'])
+            
+            # 保存表单数据
+            form.save()
+            messages.success(request, '资料更新成功！')
+            return redirect('accounts:user_profile')
+    else:
+        form = UserEditForm(instance=user)
+    
+    context = {
+        'form': form,
+        'user': user,
+        'page_title': '编辑资料',
+    }
+    return render(request, 'user_edit_profile.html', context)
