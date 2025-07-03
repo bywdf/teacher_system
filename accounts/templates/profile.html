@@ -50,21 +50,23 @@
               </li>
             </ul>
           </div>
-          <div>
-            <h4 class="mb-3">安全设置</h4>
-            <div class="card">
-              <div class="card-body">
-                <a href="{% url 'accounts:change_password' %}"
-                   class="btn btn-warning btn-flat btn-block">
-                  <i class="fa fa-key mr-2"></i>修改密码
-                </a>
-                <a href="{% url 'accounts:update_avatar' %}"
-                   class="btn btn-info btn-flat btn-block">
-                  <i class="fa fa-user-circle mr-2"></i>修改头像
-                </a>
+          {% if not is_other_user %}
+            <div>
+              <h4 class="mb-3">安全设置</h4>
+              <div class="card">
+                <div class="card-body">
+                  <a href="{% url 'accounts:change_password' %}"
+                     class="btn btn-warning btn-flat btn-block">
+                    <i class="fa fa-key mr-2"></i>修改密码
+                  </a>
+                  <a href="{% url 'accounts:update_avatar' %}"
+                     class="btn btn-info btn-flat btn-block">
+                    <i class="fa fa-user-circle mr-2"></i>修改头像
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
+          {% endif %}
         </div>
       </div>
       <!-- 右侧个人设置区域 -->
@@ -73,11 +75,13 @@
           <div class="card-header with-border">
             <h3 class="card-title">
               个人设置
-              <div class="pull-right">
-                <a href="#" class="btn btn-info">
-                  <i class="fa fa-edit"></i> 编辑资料
-                </a>
-              </div>
+              {% if not is_other_user %}
+                <div class="pull-right">
+                  <a href="#" class="btn btn-info">
+                    <i class="fa fa-edit"></i> 编辑资料
+                  </a>
+                </div>
+              {% endif %}
             </div>
           </h3>
           <div class="card-body">

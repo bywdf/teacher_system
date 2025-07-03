@@ -7,16 +7,38 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 
 from accounts.forms import CustomPasswordChangeForm, AvatarUpdateForm
+from accounts.models import UserInfo
 
 
 #@login_required(login_url='login') 已经中间件控制登录状态了，装饰器在精细权限管理时才使用
+# def user_profile(request):
+#     """用户个人信息展示页"""
+#     user = request.user
+#     context = {
+#         'user': user,
+#         'page_title': '个人资料',
+#         'section': 'profile',
+#     }
+#     return render(request, 'profile.html', context)
 def user_profile(request):
     """用户个人信息展示页"""
-    user = request.user
+    user_id = request.GET.get('user_id')
+    if user_id:
+        try:
+            user = UserInfo.objects.get(id=user_id)
+            is_other_user = True  # 标记为查看其他用户信息
+        except UserInfo.DoesNotExist:
+            user = request.user
+            is_other_user = False
+    else:
+        user = request.user
+        is_other_user = False
+
     context = {
         'user': user,
         'page_title': '个人资料',
         'section': 'profile',
+        'is_other_user': is_other_user  # 传递标记到模板
     }
     return render(request, 'profile.html', context)
 
