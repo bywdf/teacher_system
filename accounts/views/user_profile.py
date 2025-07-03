@@ -1,6 +1,6 @@
 # accounts/views.py
-from django.shortcuts import render, redirect
-# from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 
@@ -19,17 +19,29 @@ from accounts.models import  UserInfo
 #         'section': 'profile',
 #     }
 #     return render(request, 'profile.html', context)
+@login_required(login_url='login')
 def user_profile(request):
     """用户个人信息展示页"""
     user_id = request.GET.get('user_id')
-    if user_id:
+    
+    # 检查用户是否属于校长组
+    is_principal = request.user.groups.filter(name='管理员').exists()
+    
+    # 非校长组用户只能查看自己的信息
+    if user_id and not is_principal:
+        messages.error(request, "您没有权限查看其他用户的信息")
+        return redirect('accounts:user_profile')  # 重定向到自己的信息页
+    
+    # 校长组用户可以查看任意用户信息
+    if user_id and is_principal or request.user.is_superuser:
         try:
             user = UserInfo.objects.get(id=user_id)
-            is_other_user = True  # 标记为查看其他用户信息
+            is_other_user = True
         except UserInfo.DoesNotExist:
-            user = request.user
-            is_other_user = False
+            messages.error(request, "用户不存在")
+            return redirect('accounts:user_list')  # 重定向到用户列表页
     else:
+        # 普通用户或未提供user_id时查看自己的信息
         user = request.user
         is_other_user = False
 
@@ -37,7 +49,7 @@ def user_profile(request):
         'user': user,
         'page_title': '个人资料',
         'section': 'profile',
-        'is_other_user': is_other_user  # 传递标记到模板
+        'is_other_user': is_other_user,
     }
     return render(request, 'profile.html', context)
 
