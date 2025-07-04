@@ -50,6 +50,10 @@ def pe_end_list(request):
         query &= Q(teacher__name__icontains=teacher_name)
     if subject_id and subject_id != 'all':
         query &= Q(teacher__subject_id=subject_id)
+        
+    # 权限控制：普通用户只能查看自己的记录
+    if not (request.user.is_superuser or request.user.groups.filter(name='管理员').exists()):
+        query &= Q(teacher=request.user)
 
     # 应用查询条件
     queryset = PeTeacherFinalAssess.objects.filter(

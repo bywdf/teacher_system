@@ -49,6 +49,8 @@ def cultura_mid_list(request):
 
     # 构建查询条件
     query = Q()
+    
+    
     if semester_id and semester_id != 'all':
         query &= Q(semester_id=semester_id)
     if term_type_id and term_type_id != 'all':
@@ -59,6 +61,10 @@ def cultura_mid_list(request):
         query &= Q(teacher__name__icontains=teacher_name)
     if subject_id and subject_id != 'all':
         query &= Q(teacher__subject_id=subject_id)
+        
+    # 权限控制：普通用户只能查看自己的记录
+    if not (request.user.is_superuser or request.user.groups.filter(name='管理员').exists()):
+        query &= Q(teacher=request.user)
 
     # 应用查询条件
     queryset = TeacherMidAssess.objects.filter(
@@ -78,7 +84,7 @@ def cultura_mid_list(request):
         'selected_assess_depart': assess_depart_id if assess_depart_id else 'all',
         'teacher_name': teacher_name if teacher_name else '',
         'selected_subject': subject_id if subject_id else 'all',
-
+        'is_admin': request.user.is_superuser,  # 添加管理员标识
     }
     return render(request, 'cultura_mid_list.html', content)
 

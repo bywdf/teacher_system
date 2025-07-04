@@ -38,7 +38,7 @@ import copy
 
 class Pagination(object):
     
-    def __init__(self, request, queryset, page_size = 10, page_param='page', plus = 5):
+    def __init__(self, request, queryset, page_size = 20, page_param='page', plus = 5):
         '''
         request: 请求的对象
         queryset: 符合条件的数据（根据这个数据给他进行分页处理）

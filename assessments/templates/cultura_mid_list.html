@@ -179,7 +179,10 @@
                   <div class="dataTables_info"
                        id="example2_info"
                        role="status"
-                       aria-live="polite">每页展示10条数据</div>
+                       aria-live="polite">
+                    <a href="{% url 'assessments:my_assessments' %}"
+                       class="btn btn-secondary mb-3">&larr; 返回个人考核列表</a> 每页展示20条数据
+                  </div>
                 </div>
                 <div class="col-sm-7">
                   <div class="dataTables_paginate paging_simple_numbers"

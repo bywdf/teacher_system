@@ -30,9 +30,9 @@ class UserInfo(AbstractUser):
     name = models.CharField(max_length=100, verbose_name="姓名")
     birthday = models.DateField(null=True, blank=True, verbose_name="出生日期")
     # 参加工作时间
-    work_time = models.CharField(verbose_name="参加工作时间", blank=True, null=True)
+    work_time = models.DateField(verbose_name="参加工作时间", blank=True, null=True)
     # 入党时间
-    party_time = models.CharField(verbose_name="入党时间", blank=True, null=True)
+    party_time = models.DateField(verbose_name="入党时间", blank=True, null=True)
     idnumber = models.CharField(
         max_length=18, verbose_name="身份证号", blank=True, null=True)
     gender_choices = (

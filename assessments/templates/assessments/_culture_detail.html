@@ -1,0 +1,20 @@
+<div class="row mb-3">
+  <div class="col-md-3 fw-bold">期中成绩：</div>
+  <div class="col-md-9">{{ assessment.mid_score.total_score|default:"-" }}</div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-3 fw-bold">期末成绩：</div>
+  <div class="col-md-9">{{ assessment.final_score.total_score|default:"-" }}</div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-3 fw-bold">课时工作量：</div>
+  <div class="col-md-9">{{ assessment.final_score.workload_score|default:"-" }}</div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-3 fw-bold">个人成绩：</div>
+  <div class="col-md-9">{{ assessment.final_score.personal_score|default:"-" }}</div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-3 fw-bold">班级量化：</div>
+  <div class="col-md-9">{{ assessment.final_score.class_score|default:"-" }}</div>
+</div>
