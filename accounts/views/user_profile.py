@@ -19,7 +19,6 @@ from accounts.models import  UserInfo
 #         'section': 'profile',
 #     }
 #     return render(request, 'profile.html', context)
-@login_required
 def user_profile(request):
     """用户个人信息展示页"""
     user_id = request.GET.get('user_id')

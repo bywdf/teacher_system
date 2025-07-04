@@ -116,7 +116,7 @@ class TeacherMidAssess(TeacherBase):
         ]
         self.total_workload = sum(workloads)    
               
-         # 工作量计算（带边界保护）
+        # 工作量计算（带边界保护）
         weekly_workload = self.total_workload / self.week
         self.workload_score = max(
             0, min(10, 4.5 + (weekly_workload - 10) * 0.1))
@@ -159,7 +159,7 @@ class TeacherFinalAssess(TeacherBase):
         if not hasattr(self, 'week') or self.week <= 0:
             raise ValidationError("考核周数必须为正整数")
         
-         # 空值安全处理
+        # 空值安全处理
         workloads = [
             self.class_hours or 0,
             self.duty_hours or 0,
@@ -167,7 +167,7 @@ class TeacherFinalAssess(TeacherBase):
         ]
         self.total_workload = sum(workloads)    
               
-         # 工作量计算（带边界保护）
+        # 工作量计算（带边界保护）
         weekly_workload = self.total_workload / self.week
         self.workload_score = max(
             0, min(10, 4.5 + (weekly_workload - 10) * 0.1))

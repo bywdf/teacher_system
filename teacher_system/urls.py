@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     # 首页
-    path('index/', account.index, name='index'),
+    path('', account.index, name='index'),
     
     # 后台管理
     path('admin/', admin.site.urls),
@@ -37,6 +37,6 @@ urlpatterns = [
     path('assessments/', include('assessments.urls')),
 ]
 
-# 仅在开发环境中添加此配置
+# 仅在开发环境中添加此配置,生产环境由Nginx处理
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
