@@ -78,15 +78,15 @@ class UserInfo(AbstractUser):
     
     # 专业资格
     professional_qualification = models.CharField(verbose_name="专业资格", max_length=100, blank=True, null=True)
-    professional_qualification_time = models.CharField(verbose_name="专业资格取得时间", blank=True, null=True)
+    professional_qualification_time = models.DateField(verbose_name="专业资格取得时间", blank=True, null=True)
     # 职称及聘任时间
     professional_title = models.CharField(verbose_name="聘任职称", max_length=100, blank=True, null=True)
-    professional_title_time = models.CharField(verbose_name="聘任时间", blank=True, null=True)        
+    professional_title_time = models.DateField(verbose_name="聘任时间", blank=True, null=True)        
     # 分级竞聘后聘任等级及时间
     appointment_grade = models.CharField(verbose_name="分级竞聘后聘任等级", max_length=100, blank=True, null=True)
-    appointment_grade_time = models.CharField(verbose_name="分级竞聘后聘任时间", blank=True, null=True)
+    appointment_grade_time = models.DateField(verbose_name="分级竞聘后聘任时间", blank=True, null=True)
     # 调入我校时间
-    transfer_time = models.CharField(verbose_name="调入我校时间", blank=True, null=True)
+    transfer_time = models.DateField(verbose_name="调入我校时间", blank=True, null=True)
     
     # 保存方法可以简化，使用更健壮的路径处理
     def save(self, *args, **kwargs):
