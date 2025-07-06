@@ -15,6 +15,7 @@ from utils.bootstrap import BootStrapModelForm
 
 from assessments.models import EduAdmin, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
+from utils.user_decorator import superuser_required
 
 
 class AssessModelForm(BootStrapModelForm):
@@ -78,6 +79,7 @@ def eduadmin_list(request):
     return render(request, 'eduadmin_list.html', content)
 
 
+@superuser_required
 def eduadmin_delete(request):
     """删除"""
     nid = request.GET.get('nid')
@@ -85,6 +87,7 @@ def eduadmin_delete(request):
     return redirect('assessments:eduadmin_list')
 
 
+@superuser_required
 def eduadmin_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
     instance = get_object_or_404(EduAdmin, pk=pk)
@@ -111,6 +114,7 @@ def eduadmin_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
+@superuser_required
 def eduadmin_add(request):
     """添加"""
     form = AssessModelForm()
@@ -135,6 +139,7 @@ def eduadmin_add(request):
 
 
 # 下面是批量导入需要的功能
+@superuser_required
 @transaction.atomic
 def eduadmin_import(request):
     """批量导入考核成绩"""
@@ -386,6 +391,7 @@ def eduadmin_export(request):
     return response
 
 
+@superuser_required
 def eduadmin_update_rank(request):
     """更新教师考核数据的名次并将公示状态改为应经公示"""
     

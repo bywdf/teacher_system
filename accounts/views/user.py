@@ -9,8 +9,10 @@ from accounts import models
 from utils.pagination import Pagination
 from utils.bootstrap import BootStrapModelForm
 from accounts.forms import ImportUsersForm
+from utils.user_decorator import admin_or_superuser_required, superuser_required
 
 
+@admin_or_superuser_required
 def user_list(request):
     """用户列表"""
     data_dict = {}
@@ -63,6 +65,7 @@ class UserModelForm(BootStrapModelForm):
         return instance
 
 
+@superuser_required
 def user_add(request):
     """添加用户"""
     title = '新建用户'
@@ -84,6 +87,7 @@ class UserEditModelForm(BootStrapModelForm):
         fields = ['username', 'name', 'gender', 'phone', 'department', 'subject']
 
 
+@superuser_required
 def user_edit(request, nid):
     """编辑用户"""
     title = '编辑用户'
@@ -101,6 +105,7 @@ def user_edit(request, nid):
     return render(request, 'change.html', {'form': form, 'title': title})
 
 
+@superuser_required
 def user_delete(request):
     """删除用户"""
     nid = request.GET.get('nid')
@@ -145,6 +150,7 @@ class UserRestModelForm(BootStrapModelForm):
         return instance
 
 
+@superuser_required
 def user_reset(request, nid):
     """重置密码"""
     row_object = models.UserInfo.objects.filter(id=nid).first()
@@ -163,6 +169,7 @@ def user_reset(request, nid):
     return render(request, 'change.html', {'form': form, 'title': title})
 
 
+@superuser_required
 def import_users(request):
     if request.method == 'POST':
         form = ImportUsersForm(request.POST, request.FILES)

@@ -6,6 +6,7 @@ from openpyxl import load_workbook
 from assessments.models import AssessDepart
 from utils.bootstrap import BootStrapModelForm
 from utils.pagination import Pagination
+from utils.user_decorator import superuser_required, admin_or_superuser_required
 
 # Create your views here.
 
@@ -16,6 +17,7 @@ class AssessDepartModelForm(BootStrapModelForm):
         fields = '__all__'
 
 
+@admin_or_superuser_required
 def assessdepart_list(request):
     '''考核部门列表'''
     form = AssessDepartModelForm()
@@ -31,6 +33,7 @@ def assessdepart_list(request):
 
 
 @csrf_exempt
+@superuser_required
 def  assessdepart_add(request):
     '''考核部门添加(Ajax请求)'''
     form = AssessDepartModelForm(request.POST)
@@ -40,7 +43,8 @@ def  assessdepart_add(request):
     return JsonResponse({'status': False, 'error': form.errors})
 
 
-def  assessdepart_delete(request):
+@superuser_required
+def assessdepart_delete(request):
     '''考核部门删除'''
     uid = request.GET.get('uid')
     exists = AssessDepart.objects.filter(id=uid).exists()
@@ -50,7 +54,7 @@ def  assessdepart_delete(request):
     return JsonResponse({'status': True})
 
 
-def  assessdepart_detail(request):
+def assessdepart_detail(request):
     '''根据ID获取考核部门详情'''
     uid = request.GET.get('uid')
     # row_dict = models.assessdepart.objects.filter(id=uid).values('title').first()
@@ -64,7 +68,8 @@ def  assessdepart_detail(request):
     return JsonResponse(result)
     
 @csrf_exempt
-def  assessdepart_edit(request):
+@superuser_required
+def assessdepart_edit(request):
     '''编辑考核部门'''
     uid = request.GET.get('uid')
     row_object = AssessDepart.objects.filter(id=uid).first()
@@ -78,6 +83,7 @@ def  assessdepart_edit(request):
     return JsonResponse({'status': False, 'error': form.errors})
 
 
+@superuser_required
 def assessdepart_import(request):
     '''Excel表格批量导入考核部门'''
     # django.core.files.uploadedfile.InMemoryUploadedFile

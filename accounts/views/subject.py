@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from accounts import models
 from utils.bootstrap import BootStrapModelForm
 from utils.pagination import Pagination
+from utils.user_decorator import admin_or_superuser_required, superuser_required
 # Create your views here.
 
 
@@ -14,6 +15,7 @@ class SubjectModelForm(BootStrapModelForm):
         fields = "__all__"
 
 
+@admin_or_superuser_required
 def subject_list(request):
     '''学科列表'''
     form = SubjectModelForm()
@@ -31,6 +33,7 @@ def subject_list(request):
 
 
 @csrf_exempt
+@superuser_required
 def subject_add(request):
     '''学科添加(Ajax请求)'''
     form = SubjectModelForm(request.POST)
@@ -40,6 +43,7 @@ def subject_add(request):
     return JsonResponse({'status': False, 'error': form.errors})
 
 
+@superuser_required
 def subject_delete(request):
     '''学科删除'''
     uid = request.GET.get('uid')
@@ -64,6 +68,7 @@ def subject_detail(request):
 
 
 @csrf_exempt
+@superuser_required
 def subject_edit(request):
     '''编辑学科'''
     uid = request.GET.get('uid')
@@ -78,6 +83,7 @@ def subject_edit(request):
     return JsonResponse({'status': False, 'error': form.errors})
 
 
+@superuser_required
 def subject_multi(request):
     '''批量上传 (excel)'''
     from openpyxl import load_workbook

@@ -15,6 +15,7 @@ from utils.bootstrap import BootStrapModelForm
 
 from assessments.models import GroupLeaderSemester, AssessDepart, Semester, TermType, GroupLeaderMidAssess, GroupLeaderFinalAssess
 from accounts.models import UserInfo, Subject
+from utils.user_decorator import superuser_required
 
 
 class AssessModelForm(BootStrapModelForm):
@@ -78,6 +79,7 @@ def groupleader_term_list(request):
     return render(request, 'groupleader_term_list.html', content)
 
 
+@superuser_required
 def groupleader_term_delete(request):
     """删除"""
     nid = request.GET.get('nid')
@@ -85,6 +87,7 @@ def groupleader_term_delete(request):
     return redirect('assessments:groupleader_term_list')
 
 
+@superuser_required
 def groupleader_term_edit(request, pk):
     instance = get_object_or_404(GroupLeaderSemester, pk=pk)
     form = AssessModelForm(request.POST or None, instance=instance)
@@ -128,6 +131,7 @@ def groupleader_term_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
+@superuser_required
 def groupleader_term_add(request):
     form = AssessModelForm()
     teachers = UserInfo.objects.all()
@@ -164,6 +168,7 @@ def groupleader_term_add(request):
 
 
 # 下面是批量导入需要的功能
+@superuser_required
 @transaction.atomic
 def groupleader_term_import(request):
     """批量导入考核成绩并自动关联期中期末成绩"""
@@ -429,7 +434,7 @@ def groupleader_term_export(request):
     return response
 
 
-
+@superuser_required
 def groupleader_term_update_rank(request):
     """更新教师学期考核数据的名次并将公示状态改为应经公示"""
     

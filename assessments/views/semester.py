@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from assessments import models
 from utils.bootstrap import BootStrapModelForm
 from utils.pagination import Pagination
+from utils.user_decorator import superuser_required, admin_or_superuser_required
 
 # Create your views here.
 class SemesterModelForm(BootStrapModelForm):
@@ -12,6 +13,8 @@ class SemesterModelForm(BootStrapModelForm):
         model = models.Semester
         fields = '__all__'
 
+
+@admin_or_superuser_required
 def semester_list(request):
     '''学年列表'''
     form = SemesterModelForm()
@@ -24,6 +27,8 @@ def semester_list(request):
     }
     return render(request, 'semester_list.html', context)
 
+
+@superuser_required
 @csrf_exempt
 def  semester_add(request):
     '''学年添加(Ajax请求)'''
@@ -34,6 +39,7 @@ def  semester_add(request):
     return JsonResponse({'status': False, 'error': form.errors})
 
 
+@superuser_required
 def  semester_delete(request):
     '''学年删除'''
     uid = request.GET.get('uid')
@@ -58,6 +64,7 @@ def  semester_detail(request):
     return JsonResponse(result)
     
 @csrf_exempt
+@superuser_required
 def  semester_edit(request):
     '''编辑学年'''
     uid = request.GET.get('uid')

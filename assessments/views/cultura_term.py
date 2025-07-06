@@ -15,6 +15,7 @@ from utils.bootstrap import BootStrapModelForm
 
 from assessments.models import  TeacherSemesterAssess, AssessDepart, Semester, TermType, TeacherMidAssess, TeacherFinalAssess
 from accounts.models import UserInfo, Subject
+from utils.user_decorator import superuser_required
 
 
 class EndAssessModelForm(BootStrapModelForm):
@@ -78,6 +79,7 @@ def cultura_term_list(request):
     return render(request, 'cultura_term_list.html', content)
 
 
+@superuser_required
 def cultura_term_delete(request):
     """删除"""
     nid = request.GET.get('nid')
@@ -85,6 +87,7 @@ def cultura_term_delete(request):
     return redirect('assessments:cultura_term_list')
 
 
+@superuser_required
 def cultura_term_edit(request, pk):
     instance = get_object_or_404(TeacherSemesterAssess, pk=pk)
     form = EndAssessModelForm(request.POST or None, instance=instance)
@@ -128,6 +131,7 @@ def cultura_term_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
+@superuser_required
 def cultura_term_add(request):
     form = EndAssessModelForm()
     teachers = UserInfo.objects.all()
@@ -165,6 +169,7 @@ def cultura_term_add(request):
 
 # 下面是批量导入需要的功能
 @transaction.atomic
+@superuser_required
 def cultura_term_import(request):
     """批量导入考核成绩并自动关联期中期末成绩"""
     if request.method == "POST":
@@ -433,6 +438,7 @@ def cultura_term_export(request):
 
 
 
+@superuser_required
 def cultura_term_update_rank(request):
     """更新教师学期考核数据的名次并将公示状态改为应经公示"""
     

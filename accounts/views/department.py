@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, HttpResponse
 
 from accounts import models
+from utils.user_decorator import admin_or_superuser_required, superuser_required
 
 
+@admin_or_superuser_required
 def department_list(request):
     if request.method == 'GET':
         # 部门列表
@@ -10,6 +12,7 @@ def department_list(request):
     return render(request, 'department_list.html', {'queryset': queryset})
 
 
+@superuser_required
 def department_add(request):
     '''添加部门'''
     if request.method == 'GET':
@@ -20,6 +23,7 @@ def department_add(request):
     return redirect('/accounts/department/list/')
 
 
+@superuser_required
 def department_delete(request):
     '''删除部门'''
     nid = request.GET.get('nid')
@@ -27,6 +31,7 @@ def department_delete(request):
     return redirect('/accounts/department/list/')
 
 
+superuser_required
 def department_edit(request, nid):
     '''修改部门'''
     # 通过nid获取数据，获取到的是一个列表对象，获取第一个

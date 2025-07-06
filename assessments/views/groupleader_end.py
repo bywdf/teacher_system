@@ -15,6 +15,7 @@ from utils.bootstrap import BootStrapModelForm
 
 from assessments.models import GroupLeaderFinalAssess, AssessDepart, Semester, TermType
 from accounts.models import UserInfo, Subject
+from utils.user_decorator import superuser_required
 
 
 class AssessModelForm(BootStrapModelForm):
@@ -78,6 +79,7 @@ def groupleader_end_list(request):
     return render(request, 'groupleader_end_list.html', content)
 
 
+@superuser_required
 def groupleader_end_delete(request):
     """删除"""
     nid = request.GET.get('nid')
@@ -85,6 +87,7 @@ def groupleader_end_delete(request):
     return redirect('assessments:groupleader_end_list')
 
 
+@superuser_required
 def groupleader_end_edit(request, pk):
     # 获取要编辑的对象，若不存在则返回404
     instance = get_object_or_404(GroupLeaderFinalAssess, pk=pk)
@@ -109,6 +112,7 @@ def groupleader_end_edit(request, pk):
     return render(request, 'assess_change.html', context)
 
 
+@superuser_required
 def groupleader_end_add(request):
     """添加"""
     form = AssessModelForm()
