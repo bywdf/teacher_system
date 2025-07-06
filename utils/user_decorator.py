@@ -2,6 +2,9 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth.models import Group
 from functools import wraps
 
+from django.shortcuts import render
+
+
 def admin_or_superuser_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -23,9 +26,7 @@ def superuser_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_superuser:
-            return HttpResponseForbidden("您没有权限操作")
+            # 渲染no_permission.html模板并返回403状态码
+            return render(request, 'no_permission.html', status=403)
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-# @superuser_required
-
-

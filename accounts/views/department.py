@@ -31,7 +31,7 @@ def department_delete(request):
     return redirect('/accounts/department/list/')
 
 
-superuser_required
+@superuser_required
 def department_edit(request, nid):
     '''修改部门'''
     # 通过nid获取数据，获取到的是一个列表对象，获取第一个
@@ -43,6 +43,7 @@ def department_edit(request, nid):
     return redirect('/accounts/department/list')
 
 
+@superuser_required
 def department_multi(request):
     '''批量上传 (excel)'''
     from openpyxl import load_workbook

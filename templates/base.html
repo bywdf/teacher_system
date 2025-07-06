@@ -312,161 +312,170 @@
                 <li>
                   <a href="#"><i class="fa fa-circle-o"></i>荣誉证书</a>
                 </li>
-              </ul>
-            </li>
-            <!--系统管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-cogs"></i> <span>系统管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
                 <li>
-                  <a href="{% url 'accounts:user_list' %}"><i class="fa fa-circle-o"></i>用户管理</a>
+                  <a href="#"><i class="fa fa-circle-o"></i>年度考核</a>
                 </li>
                 <li>
-                  <a href="{% url 'accounts:department_list' %}"><i class="fa fa-circle-o"></i>部门管理</a>
-                </li>
-                <li>
-                  <a href="{% url 'accounts:subject_list' %}"><i class="fa fa-circle-o"></i>学科管理</a>
+                  <a href="#"><i class="fa fa-circle-o"></i>副班主任合格查询</a>
                 </li>
               </ul>
             </li>
-            <!--考核基础数据管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-tasks"></i> <span>考核基础管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="{% url 'assessments:semester_list' %}"><i class="fa fa-circle-o"></i> <span>学年管理</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:assessdepart_list' %}"><i class="fa fa-circle-o"></i> <span>考核部门管理</span></a>
-                </li>
-              </ul>
-            </li>
-            <!--期中考核管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-book"></i> <span>期中考核管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="{% url 'assessments:headteacher_mid_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:groupleader_mid_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:cultura_mid_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:music_mid_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:pe_mid_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:art_mid_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师期中考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:it_mid_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师期中考核</span></a>
-                </li>
-              </ul>
-            </li>
-            <!--期末考核管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-book"></i> <span>期末考核管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="{% url 'assessments:headteacher_end_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:groupleader_end_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:cultura_end_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:music_end_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:pe_end_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:art_end_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师期末考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:it_end_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师期末考核</span></a>
-                </li>
-              </ul>
-            </li>
-            <!--学期考核管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-book"></i> <span>学期考核管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="{% url 'assessments:headteacher_term_list' %}"><i class="fa fa-circle-o"></i> <span>班主任学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:deputy_list' %}"><i class="fa fa-circle-o"></i> <span>副班主任学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:groupleader_term_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:cultura_term_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:music_term_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:pe_term_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:art_term_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:it_term_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:eduadmin_list' %}"><i class="fa fa-circle-o"></i> <span>教务员学期考核</span></a>
-                </li>
-                <li>
-                  <a href="{% url 'assessments:aladmin_list' %}"><i class="fa fa-circle-o"></i> <span>行政后勤学期考核</span></a>
-                </li>
-              </ul>
-            </li>
-            <!--证书管理-->
-            <li class="treeview">
-              <a href="#"><i class="fa fa-file-image-o"></i> <span>证书管理</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="#"><i class="fa fa-circle-o"></i> <span>证书管理</span></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle-o"></i> <span>年度考核管理</span></a>
-                </li>
-              </ul>
-            </li>
+            <!-- 只有管理员组或超级用户成员可以查看链接 -->
+            {% if request.user.groups.all.0.name == '管理员' or request.user.is_superuser %}
+              <!--系统管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-cogs"></i> <span>系统管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="{% url 'accounts:user_list' %}"><i class="fa fa-circle-o"></i>用户管理</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'accounts:department_list' %}"><i class="fa fa-circle-o"></i>部门管理</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'accounts:subject_list' %}"><i class="fa fa-circle-o"></i>学科管理</a>
+                  </li>
+                </ul>
+              </li>
+              <!--考核基础数据管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-tasks"></i> <span>考核基础管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="{% url 'assessments:semester_list' %}"><i class="fa fa-circle-o"></i> <span>学年管理</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:assessdepart_list' %}"><i class="fa fa-circle-o"></i> <span>考核部门管理</span></a>
+                  </li>
+                </ul>
+              </li>
+              <!--期中考核管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-book"></i> <span>期中考核管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="{% url 'assessments:headteacher_mid_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:groupleader_mid_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:cultura_mid_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:music_mid_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:pe_mid_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:art_mid_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师期中考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:it_mid_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师期中考核</span></a>
+                  </li>
+                </ul>
+              </li>
+              <!--期末考核管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-book"></i> <span>期末考核管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="{% url 'assessments:headteacher_end_list' %}"><i class="fa fa-circle-o"></i> <span>班主任期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:groupleader_end_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:cultura_end_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:music_end_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:pe_end_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:art_end_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师期末考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:it_end_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师期末考核</span></a>
+                  </li>
+                </ul>
+              </li>
+              <!--学期考核管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-book"></i> <span>学期考核管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="{% url 'assessments:headteacher_term_list' %}"><i class="fa fa-circle-o"></i> <span>班主任学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:deputy_list' %}"><i class="fa fa-circle-o"></i> <span>副班主任学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:groupleader_term_list' %}"><i class="fa fa-circle-o"></i> <span>教研组长学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:cultura_term_list' %}"><i class="fa fa-circle-o"></i> <span>文化课教师学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:music_term_list' %}"><i class="fa fa-circle-o"></i> <span>音乐教师学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:pe_term_list' %}"><i class="fa fa-circle-o"></i> <span>体育教师学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:art_term_list' %}"><i class="fa fa-circle-o"></i> <span>美术教师学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:it_term_list' %}"><i class="fa fa-circle-o"></i> <span>信息技术教师学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:eduadmin_list' %}"><i class="fa fa-circle-o"></i> <span>教务员学期考核</span></a>
+                  </li>
+                  <li>
+                    <a href="{% url 'assessments:aladmin_list' %}"><i class="fa fa-circle-o"></i> <span>行政后勤学期考核</span></a>
+                  </li>
+                </ul>
+              </li>
+              <!--证书管理-->
+              <li class="treeview">
+                <a href="#"><i class="fa fa-file-image-o"></i> <span>证书管理</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li>
+                    <a href="#"><i class="fa fa-circle-o"></i> <span>证书管理</span></a>
+                  </li>
+                  <li>
+                    <a href="#"><i class="fa fa-circle-o"></i> <span>年度考核管理</span></a>
+                  </li>
+                </ul>
+              </li>
+            {% endif %}
             <li>
               <a href="#"><i class="fa fa-circle-o"></i> <span>测试链接</span></a>
             </li>
