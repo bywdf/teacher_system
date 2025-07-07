@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-93zous^+i-nvxszm-apwtmj9++o0ojomi(81yv&s#z@ka2%i3&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -79,10 +81,18 @@ WSGI_APPLICATION = 'teacher_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+load_dotenv()
+
+# 数据库配置
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -121,12 +131,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-# 静态文件路径
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# 静态文件URL前缀
+STATIC_URL = '/static/'
+# 静态文件收集目录（生产环境中静态文件存放的位置）
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # 媒体路径
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 自定义用户模型
 AUTH_USER_MODEL = 'accounts.UserInfo'

@@ -6,7 +6,7 @@ pillow==10.2.0
 redis==5.2.0
 pytz==2025.2
 tzdata==2023.3
-
+gunicorn==23.0.0
 
 
 
