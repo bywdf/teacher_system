@@ -147,7 +147,7 @@ LOGIN_URL = '/login/'
 
 # 会话设置
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'  # 使用数据库存储会话
-SESSION_COOKIE_AGE = 259200  # 设置会话过期时间为3天
+SESSION_COOKIE_AGE = 86400  # 设置会话过期时间为1天
 
 
 # Default primary key field type
