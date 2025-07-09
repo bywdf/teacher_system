@@ -153,6 +153,7 @@ USE_TZ = True
 
 # 静态文件URL前缀
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
 # 静态文件收集目录（生产环境中静态文件存放的位置）
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
