@@ -93,6 +93,7 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
+        'CONN_MAX_AGE': 300,  # 保持连接5分钟
     }
 }
 
@@ -115,6 +116,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# 日志配置
+# LOGGING = {
+#     'version': 1,
+#     'handlers': {
+#         'file': {
+#             'level': 'ERROR',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': '/var/log/django/import_errors.log',
+#             'maxBytes': 1024 * 1024 * 10,  # 10MB
+#             'backupCount': 5,
+#         },
+#     },
+#     'loggers': {
+#         'your_app_name': {
+#             'handlers': ['file'],
+#             'level': 'WARNING',
+#         },
+#     },
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
