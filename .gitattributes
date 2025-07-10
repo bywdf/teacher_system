@@ -1,1 +1,10 @@
+# 自动识别文本/二进制文件
 * text=auto
+
+# 忽略导出（用于 git archive）
+staticfiles/** export-ignore
+migrations/** export-ignore
+
+# 防止 Git 覆盖这些文件
+staticfiles/** -diff -merge -checkout
+migrations/*.py -diff -merge -checkout

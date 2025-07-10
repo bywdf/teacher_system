@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# IDE configs
+.idea/
+.vscode/
+*.iml
+
 # Distribution / packaging
 .Python
 build/
@@ -26,8 +31,15 @@ share/python-wheels/
 *.egg
 MANIFEST
 local_setting.py
-批量导入模板/
-migrations/
+/批量导入模板/
+/migrations/
+
+# 忽略静态收集目录
+/staticfiles/
+
+# 忽略迁移文件（仅适用于生产环境）
+/migrations/*.py
+!/migrations/__init__.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
