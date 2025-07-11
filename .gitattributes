@@ -1,12 +1,25 @@
 # 自动识别文本/二进制文件
 * text=auto
 
-# 忽略导出（用于 git archive）
-staticfiles/** export-ignore
-accounts/migrations/** export-ignore
-assessments/migrations/** export-ignore
+# ========================
+# 保护自动生成的文件
+# ========================
 
-# 防止 Git 覆盖这些文件
+# 静态文件目录
+staticfiles/** export-ignore
 staticfiles/** -diff -merge -checkout
+
+# 媒体
+ /media/** export-ignore
+/media/** -diff -merge -checkout
+
+# 迁移文件目录
+accounts/migrations/** export-ignore
 accounts/migrations/** -diff -merge -checkout
+
+assessments/migrations/** export-ignore
 assessments/migrations/** -diff -merge -checkout
+
+# 添加新应用的配置
+# /new_app/migrations/** export-ignore
+# /new_app/migrations/** -diff -merge -checkout
