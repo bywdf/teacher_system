@@ -13,6 +13,9 @@ __pycache__/
 *.swp
 *.swo
 
+# Gunicorn 套接字文件
+*.sock
+
 # Distribution / packaging
 .Python
 build/
@@ -32,16 +35,24 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
 local_setting.py
 /批量导入模板/
 # 忽略迁移文件
-/accounts/migrations/*.py
-!/accounts/migrations/__init__.py
-/assessments/migrations/*.py
-!/assessments/migrations/__init__.py
-
+# === 优化：迁移文件规则 ===
+**/migrations/*.py
+!**/migrations/__init__.py
 # 忽略静态收集目录
 /staticfiles/
+
+# 临时文件目录
+/tmp/
+/temp/
+
+
+# === 补充：Django媒体文件 ===
+/media/
+/media/**/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -152,6 +163,30 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+# === 补充：环境变量变体 ===
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+!.env.example
+
+# === 补充：日志与备份 ===
+/logs/
+/logs/**/*.log
+db.sqlite3.bak
+*.sql
+*.dump
+
+# === 补充：系统/工具文件 ===
+# macOS
+.DS_Store
+._*
+# Windows
+Thumbs.db
+desktop.ini
+# Linux
+*~
 
 # Spyder project settings
 .spyderproject
