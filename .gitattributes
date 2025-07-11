@@ -3,8 +3,10 @@
 
 # 忽略导出（用于 git archive）
 staticfiles/** export-ignore
-migrations/** export-ignore
+accounts/migrations/** export-ignore
+assessments/migrations/** export-ignore
 
 # 防止 Git 覆盖这些文件
 staticfiles/** -diff -merge -checkout
-migrations/*.py -diff -merge -checkout
+accounts/migrations/** -diff -merge -checkout
+assessments/migrations/** -diff -merge -checkout

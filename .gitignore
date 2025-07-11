@@ -10,6 +10,8 @@ __pycache__/
 .idea/
 .vscode/
 *.iml
+*.swp
+*.swo
 
 # Distribution / packaging
 .Python
@@ -32,14 +34,14 @@ share/python-wheels/
 MANIFEST
 local_setting.py
 /批量导入模板/
-/migrations/
+# 忽略迁移文件
+/accounts/migrations/*.py
+!/accounts/migrations/__init__.py
+/assessments/migrations/*.py
+!/assessments/migrations/__init__.py
 
 # 忽略静态收集目录
 /staticfiles/
-
-# 忽略迁移文件（仅适用于生产环境）
-/migrations/*.py
-!/migrations/__init__.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
