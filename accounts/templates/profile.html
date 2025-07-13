@@ -305,7 +305,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputWorkTime"
-                             value="{{ user.work_time|default:"未设置" }}"
+                             value="{{ user.work_time|default:"未设置"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
@@ -315,7 +315,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputPartyTime"
-                             value="{{ user.party_time|default:"非党员或未设置" }}"
+                             value="{{ user.party_time|default:"非党员或未设置"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
@@ -335,7 +335,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputProfessionalQualTime"
-                             value="{{ user.professional_qualtification_time|default:"未设置" }}"
+                             value="{{ user.professional_qualtification_time|default:"未设置"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
@@ -355,7 +355,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputProfessionalTitleTime"
-                             value="{{ user.professional_title_time|default:"未设置" }}"
+                             value="{{ user.professional_title_time|default:"未设置"|date:"Y-m"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
@@ -375,7 +375,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputAppointmentGradeTime"
-                             value="{{ user.appointment_grade_time|default:"未设置" }}"
+                             value="{{ user.appointment_grade_time|default:"未设置"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
@@ -385,7 +385,7 @@
                       <input type="text"
                              class="form-control"
                              id="inputJoinSchoolTime"
-                             value="{{ user.join_school_time|default:"未设置" }}"
+                             value="{{ user.join_school_time|default:"未设置"|date:"Y年n月" }}"
                              disabled>
                     </div>
                   </div>
