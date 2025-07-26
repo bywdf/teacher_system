@@ -40,7 +40,7 @@ class UserInfo(AbstractUser):
         (2, '女'),
     )
     gender = models.SmallIntegerField(
-        verbose_name='性别', choices=gender_choices, default=1)
+        verbose_name='性别', choices=gender_choices, blank=True, null=True)
     phone = models.CharField(max_length=11, verbose_name="电话")
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, verbose_name="所属年级（部门）")
