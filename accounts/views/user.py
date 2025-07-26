@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from openpyxl import load_workbook
 # from django.contrib.auth.hashers import make_password 用的直接封装好的set_password
+from django.db.models import Q
 
 from accounts import models
 from utils.pagination import Pagination
@@ -15,17 +16,37 @@ from utils.user_decorator import admin_or_superuser_required, superuser_required
 @admin_or_superuser_required
 def user_list(request):
     """用户列表"""
-    data_dict = {}
-    search_data = request.GET.get('q', '')
-    if search_data:
-        data_dict['name__contains'] = search_data
-
-    queryset = models.UserInfo.objects.filter(**data_dict)
+    # 获取可选数据
+    subjects = models.Subject.objects.all()
+    departments = models.Department.objects.all()
+    
+    # 初始化查询条件
+    subject_id = request.GET.get('subject')
+    department_id = request.GET.get('department')
+    name = request.GET.get('name')
+    
+    # 构建查询条件
+    query = Q()
+    if subject_id and subject_id != 'all' :
+        query &= Q(subject_id=subject_id)
+    if department_id and department_id != 'all':
+        query &= Q(department_id=department_id)
+    if name:
+        query &= Q(name__contains=name)
+    
+    # 应用查询条件
+    queryset = models.UserInfo.objects.filter(query)
+    # 分页
     page_object = Pagination(request, queryset)
+    
     context = {
-        'search_data': search_data,
         'queryset': page_object.page_queryset,
         'page_string': page_object.html(),
+        'subjects': subjects,
+        'departments': departments,
+        'seclect_subject': subject_id if subject_id else 'all', # 默认为all
+        'seclect_department': department_id if department_id else 'all',
+        'seclect_name': name if name else '',
     }
 
     return render(request, 'user_list.html', context)
