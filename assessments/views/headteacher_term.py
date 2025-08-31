@@ -306,7 +306,7 @@ def headteacher_term_import(request):
                             'class_number': class_number  # 新增：设置班级号
                         }
                     obj, created = HeadTeacherSemester.objects.get_or_create(
-                        teacher=teacher,
+                        assess_depart=assess_depart,
                         semester=semester,
                         term_type=term_type,
                         class_number=class_number,  # 新增：作为唯一约束条件之一

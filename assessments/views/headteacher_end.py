@@ -254,6 +254,7 @@ def headteacher_end_import(request):
                         semester=semester_map[semester_str],
                         term_type=term_type,
                         class_number=class_number,
+                        assess_depart=assess_depart,
                         defaults=defaults
                     )
                     
