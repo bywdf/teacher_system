@@ -116,11 +116,14 @@ class TeacherMidAssess(TeacherBase):
         ]
         self.total_workload = sum(workloads)    
               
-        # 工作量计算（带边界保护）
-        weekly_workload = self.total_workload / self.week
+        # 工作量计算（带边界保护和总工作量为0的处理）
+        if self.total_workload == 0:
+            self.workload_score = 0.0
+        else:
+            weekly_workload = self.total_workload / self.week
         # 计算工作量成绩 并保留到3位小数
-        self.workload_score = round(max(
-            0, min(10, 4.5 + (weekly_workload - 10) * 0.1)), 3)
+            self.workload_score = round(max(
+                0, min(10, 4.5 + (weekly_workload - 10) * 0.1)), 3)
 
         # 总分计算
         scores = [
@@ -168,10 +171,14 @@ class TeacherFinalAssess(TeacherBase):
         ]
         self.total_workload = sum(workloads)    
               
-        # 工作量计算（带边界保护）
-        weekly_workload = self.total_workload / self.week
-        self.workload_score = round(max(
-            0, min(10, 4.5 + (weekly_workload - 10) * 0.1)), 3)
+        # 工作量计算（带边界保护和总工作量为0的处理）
+        if self.total_workload == 0:
+            self.workload_score = 0.0
+        else:
+            weekly_workload = self.total_workload / self.week
+            # 计算工作量成绩 并保留到3位小数
+            self.workload_score = round(max(
+                0, min(10, 4.5 + (weekly_workload - 10) * 0.1)), 3)
             
         # 总分计算
         scores = [
