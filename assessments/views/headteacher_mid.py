@@ -249,11 +249,12 @@ def headteacher_mid_import(request):
                         'remark': row[9] or '',
                     }
                     
-                    # 关键修改：使用模型的唯一约束字段作为查询条件
+                    # 关键修改：使用模型的唯一约束字段作为查询条件(学期、考核类型、班级号、参与考核部门)
                     obj, created = HeadTeacherMidAssess.objects.get_or_create(
                         semester=semester_map[semester_str],
                         term_type=term_type,
                         class_number=class_number,
+                        assess_depart=assess_depart,
                         defaults=defaults
                     )
                     
