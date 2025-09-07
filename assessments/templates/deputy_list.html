@@ -133,6 +133,7 @@
                         <th>班级综合管理考核成绩25%</th>
                         <th>总成绩</th>
                         <th>名次</th>
+                        <th>备注</th>
                         <th>公示完成</th>
                         {% if request.user.is_superuser %}<th>操作</th>{% endif %}
                       </tr>
@@ -156,6 +157,7 @@
                           <td>{{ obj.class_score }}</td>
                           <td>{{ obj.total_score }}</td>
                           <td>{{ obj.rank | default:"" }}</td>
+                          <td>{{ obj.rerank }}</td>
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           {% if request.user.is_superuser %}
                             <td>
