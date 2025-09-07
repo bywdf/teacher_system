@@ -104,7 +104,7 @@ def headteacher_term_edit(request, pk):
             # 2. 精准查询期中成绩（匹配唯一约束）
             mid_assess = HeadTeacherMidAssess.objects.filter(
                 semester=semester,
-                term_type=term_type,
+                # term_type=term_type,
                 assess_depart=assess_depart,
                 class_number=class_number  # 核心：班级号匹配
             ).first()
@@ -112,7 +112,7 @@ def headteacher_term_edit(request, pk):
             # 3. 精准查询期末成绩
             final_assess = HeadTeacherFinalAssess.objects.filter(
                 semester=semester,
-                term_type=term_type,
+                # term_type=term_type,
                 assess_depart=assess_depart,
                 class_number=class_number  # 核心：班级号匹配
             ).first()
@@ -154,7 +154,7 @@ def headteacher_term_add(request):
             # 2. 查询期中成绩：补充班级号、考核部门、考核类型（匹配唯一约束）
             mid_assess = HeadTeacherMidAssess.objects.filter(
                 semester=semester,
-                term_type=term_type,
+                # term_type=term_type,
                 assess_depart=assess_depart,
                 class_number=class_number  # 核心：通过班级号精准匹配
             ).first()
@@ -162,7 +162,7 @@ def headteacher_term_add(request):
             # 3. 查询期末成绩：同样补充班级号等参数
             final_assess = HeadTeacherFinalAssess.objects.filter(
                 semester=semester,
-                term_type=term_type,
+                # term_type=term_type,
                 assess_depart=assess_depart,
                 class_number=class_number  # 核心：通过班级号精准匹配
             ).first()
@@ -300,10 +300,10 @@ def headteacher_term_import(request):
                     # 查找期中成绩
                     mid_assess = mid_assess_map.get(query_key)
                     if not mid_assess:
-                        # 二次查询避免映射缓存遗漏
+                        # 二次查询避免映射缓存遗漏(term_type在学期新建、编辑、批量创建的时候不用查询，因为学期、期中、期末不一样)
                         mid_assess = HeadTeacherMidAssess.objects.filter(
                             semester_id=semester.id,
-                            term_type_id=term_type.id,
+                            # term_type_id=term_type.id,
                             assess_depart_id=assess_depart.id,
                             class_number=class_number
                         ).first()
@@ -315,7 +315,7 @@ def headteacher_term_import(request):
                     if not final_assess:
                         final_assess = HeadTeacherFinalAssess.objects.filter(
                             semester_id=semester.id,
-                            term_type_id=term_type.id,
+                            # term_type_id=term_type.id,
                             assess_depart_id=assess_depart.id,
                             class_number=class_number
                         ).first()
