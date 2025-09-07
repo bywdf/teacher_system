@@ -148,7 +148,7 @@
                           <td>{{ obj.final_score.total_score|default:"-" }}</td>
                           <td>{{ obj.total_score }}</td>
                           <td>{{ obj.rank | default:"" }}</td>
-                          <td>{{ obj.remark }}</td>
+                          <td>{{ obj.remark | default:"" }}</td>
                           <td>{{ obj.is_published|yesno:"是,否" }}</td>
                           {% if request.user.is_superuser %}
                             <td>
