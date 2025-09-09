@@ -92,11 +92,13 @@
                 </button>
                 <a href="?" class="btn btn-default" style="margin-left: 5px;">重置</a>
                 <!-- 新增导出按钮 -->
-                <a href="{% url 'assessments:pe_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
-                   class="btn btn-success"
-                   style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-export"></span> 导出Excel
-                </a>
+                {% if request.user.is_superuser %}
+                  <a href="{% url 'assessments:pe_mid_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                     class="btn btn-success"
+                     style="margin-left: 5px">
+                    <span class="glyphicon glyphicon-export"></span> 导出Excel
+                  </a>
+                {% endif %}
               </form>
             </div>
             <!-- /多条件筛选表单 -->
