@@ -35,6 +35,8 @@ urlpatterns = [
     # 路由分发
     path('accounts/', include('accounts.urls')),
     path('assessments/', include('assessments.urls')),
+    path('certificate/', include('certificate.urls')),
+    
 ]
 
 # 仅在开发环境中添加此配置,生产环境由Nginx处理

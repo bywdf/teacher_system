@@ -50,8 +50,7 @@ class Pagination(object):
         query_dict = copy.deepcopy(request.GET)
         query_dict._mutable = True
         
-        self.query_dict = query_dict
-        
+        self.query_dict = query_dict        
         self.page_param = page_param
 
         page = request.GET.get(page_param, '1')
@@ -69,12 +68,12 @@ class Pagination(object):
         
         self.page_queryset = queryset[self.start:self.end]
           
-         # 数据总条数
-        total_count = queryset.count()
+        # 数据总条数  
+        self.total_count = queryset.count()   # 保存总记录数
         # select * from 表 order by id desc/asc     -id/id
         
-        # math.ceil() 向上取整更好, 总页码
-        total_page_count, div = divmod(total_count, page_size)
+        # math.ceil() 向上取整更好, 总页码， 计算总页码
+        total_page_count, div = divmod(self.total_count, page_size)
         if div:
              total_page_count += 1
         self.total_page_count =  total_page_count
@@ -90,8 +89,7 @@ class Pagination(object):
             start_page = 1
             end_page = self.total_page_count
         else:
-            # 数据库中的数据比较多 > 11 页
-            
+            # 数据库中的数据比较多 > 11 页            
             # 当页前小于5(处理小的极值)
             if self.page <= self.plus:
                 start_page = 1
@@ -109,6 +107,10 @@ class Pagination(object):
             
         # 页码
         page_str_list = []
+        
+        # 添加统计信息：总记录数和总页数
+        stats_info = f'<li class="disabled"><span>共有 {self.total_count} 条记录，共 {self.total_page_count} 页</span></li>'
+        page_str_list.append(stats_info)
         
         self.query_dict.setlist(self.page_param, [1])   
         
@@ -146,6 +148,7 @@ class Pagination(object):
         self.query_dict.setlist(self.page_param, [self.total_page_count])
         page_str_list.append('<li><a href="?{}">尾页</a></li>'.format(self.query_dict.urlencode()))    
         
+        # 页码跳转
         search_string = '''
             <li> 
             <form style='float: left; margin-left: -1px;' method='get'>

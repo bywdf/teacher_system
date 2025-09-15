@@ -5,6 +5,7 @@
 # 应用迁移文件 (重要 新建应用需要添加)
 /accounts/migrations/
 /assessments/migrations/
+/certificate/migrations/
 
 # 静态文件和媒体文件
 /staticfiles/

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # 自建应用
     'accounts',
     'assessments',
+    'certificate',
 ]
 
 MIDDLEWARE = [

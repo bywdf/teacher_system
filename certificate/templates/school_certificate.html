@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+  校级证书管理
+{% endblock title %}
+{% block title_d %}
+  全部校级证书
+{% endblock title_d %}
+{% block content %}
+  <div class="box">
+    <div style="margin-bottom: 10px;margin-top: 10px">
+      <a class="btn btn-success"
+         href="{% url "certificate:school_certificate_add" %}">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        新建校级证书
+      </a>
+    </div>
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <!-- Table -->
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for obj in queryset %}
+            <tr>
+              <th scope="row">{{ obj.id }}</th>
+              <td>{{ obj.name }}</td>
+              <td>
+                <a class="btn btn-primary btn-xs"
+                   href="/certificate/school_certificate/{{ obj.id }}/edit/">编辑</a>
+                <a href="javascript:void(0);"
+                   onclick="deleteItem('{{ obj.id }}', this);"
+                   class="btn btn-danger btn-xs">删除</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="box">
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">
+        <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+        批量上传
+      </div>
+      <div class="panel-body">
+        <form method="post"
+              enctype="multipart/form-data"
+              action="{% url 'certificate:school_certificate_multi' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <input type="file" name="exc" required="required">
+          </div>
+          <input type="submit" value="上传" class="btn btn-info btn-sm">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block js %}
+  <script>
+    function deleteItem(id, element) {
+      if (confirm("确定要删除此部门吗？此操作不可撤销。")) {
+        // 构建删除URL
+        const deleteUrl = `/certificate/school_certificate/delete/?nid=${id}`;
+
+        // 创建临时表单用于提交删除请求（防止URL参数被篡改）
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = deleteUrl;
+
+        // 添加CSRF令牌（如果使用Django等需要CSRF保护的框架）
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (csrfToken) {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = csrfToken.value;
+          form.appendChild(csrfInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+{% endblock js %}
