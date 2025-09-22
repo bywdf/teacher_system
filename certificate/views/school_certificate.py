@@ -4,6 +4,7 @@ from certificate.models import SchoolCertificate
 from certificate import models
 from django.shortcuts import redirect
 from utils.bootstrap import BootStrapModelForm
+from utils.pagination import Pagination
 from utils.user_decorator import admin_or_superuser_required, superuser_required
 
 
@@ -17,7 +18,13 @@ class SchoolCertificateModelForm(BootStrapModelForm):
 def school_certificate_list(request):
     """学校证书"""
     queryset = SchoolCertificate.objects.all()
-    return render(request, 'school_certificate.html', {'queryset': queryset})
+    page_object = Pagination(request, queryset)
+    context = {
+        'queryset': page_object.page_queryset,     # 分页数据
+        'page_string': page_object.html()         # 生成页码
+    }
+    
+    return render(request, 'school_certificate.html', context)
 
 @superuser_required
 def school_certificate_add(request):
