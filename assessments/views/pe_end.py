@@ -191,15 +191,9 @@ def pe_end_import(request):
                     if not semester_str:
                         raise ValueError("学期不能为空")
 
+                    # 修改：学期不存在时抛出异常，不再自动创建
                     if semester_str not in semester_map:
-                        # 尝试创建新学期
-                        year = semester_str[:-3]  # 去掉后3个字符(学期名)
-                        semester_type = 'last' if '上' in semester_str else 'next'
-                        sem, created = Semester.objects.get_or_create(
-                            year=year,
-                            semester_type=semester_type
-                        )
-                        semester_map[semester_str] = sem
+                        raise ValueError(f"学期 '{semester_str}' 不存在，请先在系统中创建该学期")
 
                     # 获取其他关联对象
                     term_type_name = row[1]
@@ -207,20 +201,17 @@ def pe_end_import(request):
                         raise ValueError("考核类型不能为空")
 
                     term_type = term_type_map.get(term_type_name)
-                    if not term_type:
-                        term_type = TermType.objects.create(
-                            name=term_type_name)
-                        term_type_map[term_type_name] = term_type
+                    if not term_type:                      
+                        raise ValueError(f"考核类型 '{term_type_name}' 不存在，请先在系统中创建考核类型")
 
                     depart_name = row[3]
                     if not depart_name:
                         raise ValueError("考核部门不能为空")
 
+                    # 优化后的逻辑：仅允许使用已存在的部门，不存在则报错
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(
-                            name=depart_name)
-                        depart_map[depart_name] = assess_depart
+                        raise ValueError(f"考核部门 '{depart_name}' 不存在，请先在系统中创建该部门")
 
                     teacher_name = row[4]
                     if not teacher_name:

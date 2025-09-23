@@ -228,29 +228,20 @@ def music_term_import(request):
                     if not teacher_name:
                         raise ValueError("教师姓名不能为空")
 
-                    # 处理学期（支持自动创建不存在的学期）
+                    # 处理学期（不存在则抛出异常）
                     if semester_str not in semester_map:
-                        year = semester_str[:-3]  # 假设格式为"2023-2024上学期"，取前部分作为学年
-                        semester_type = 'last' if '上' in semester_str else 'next'
-                        sem, created = Semester.objects.get_or_create(
-                            year=year,
-                            semester_type=semester_type
-                        )
-                        semester_map[semester_str] = sem
+                        raise ValueError(f"学期 '{semester_str}' 不存在，请先在系统中创建该学期")
                     semester = semester_map[semester_str]
 
-                    # 处理考核类型（自动创建不存在的类型）
+                    # 处理考核类型（不存在则抛出异常）
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        term_type = TermType.objects.create(name=term_type_name)
-                        term_type_map[term_type_name] = term_type
+                        raise ValueError(f"考核类型 '{term_type_name}' 不存在，请先在系统中创建该类型")
 
-                    # 处理考核部门（自动创建不存在的部门）
+                    # 处理考核部门（不存在则抛出异常）
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(name=depart_name)
-                        depart_map[depart_name] = assess_depart
-
+                        raise ValueError(f"考核部门 '{depart_name}' 不存在，请先在系统中创建该部门")
                     # 处理教师（必须已存在）
                     teacher = teacher_map.get(teacher_name)
                     if not teacher:

@@ -255,39 +255,20 @@ def headteacher_term_import(request):
                     if not teacher_name:
                         raise ValueError("教师姓名不能为空")
 
-                    # 处理学期（自动创建不存在的学期）
+                    # 处理学期（不存在则抛出异常）
                     if semester_str not in semester_map:
-                        try:
-                            # 解析学期格式（例如"2023-2024上学期"）
-                            if '上学期' in semester_str:
-                                year = semester_str.replace('上学期', '').strip()
-                                semester_type = 'last'
-                            elif '下学期' in semester_str:
-                                year = semester_str.replace('下学期', '').strip()
-                                semester_type = 'next'
-                            else:
-                                raise ValueError(f"学期格式错误: {semester_str}（应为'XXXX-XXXX上学期'或'XXXX-XXXX下学期'）")
-                            
-                            sem, created = Semester.objects.get_or_create(
-                                year=year,
-                                semester_type=semester_type
-                            )
-                            semester_map[semester_str] = sem
-                        except Exception as e:
-                            raise ValueError(f"处理学期失败: {str(e)}")
+                        raise ValueError(f"学期 '{semester_str}' 不存在，请先在系统中创建该学期")
                     semester = semester_map[semester_str]
 
-                    # 处理考核类型（自动创建不存在的类型）
+                    # 处理考核类型（不存在则抛出异常）
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        term_type = TermType.objects.create(name=term_type_name)
-                        term_type_map[term_type_name] = term_type
+                        raise ValueError(f"考核类型 '{term_type_name}' 不存在，请先在系统中创建该类型")
 
-                    # 处理考核部门（自动创建不存在的部门）
+                    # 处理考核部门（不存在则抛出异常）
                     assess_depart = depart_map.get(depart_name)
                     if not assess_depart:
-                        assess_depart = AssessDepart.objects.create(name=depart_name)
-                        depart_map[depart_name] = assess_depart
+                        raise ValueError(f"考核部门 '{depart_name}' 不存在，请先在系统中创建该部门")
 
                     # 处理教师（必须已存在）
                     teacher = teacher_map.get(teacher_name)
