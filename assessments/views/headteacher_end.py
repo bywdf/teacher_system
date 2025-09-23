@@ -438,7 +438,7 @@ def headteacher_end_update_rank(request):
             not_found_count = 0  # 未找到匹配期末考核记录的数量
 
             # 3. 预加载数据库关联数据，生成“名称-对象”映射
-            # 3.1 学期映射：key为“学年+学期类型”（如“2023-2024第二学期”）
+            # 3.1 学期映射：key为“学年+学期类型”（如“2023-2024下学期”）
             semester_map = {}
             for sem in Semester.objects.all():
                 key = f"{sem.year}{sem.get_semester_type_display()}"

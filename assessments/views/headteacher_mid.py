@@ -438,7 +438,7 @@ def headteacher_mid_update_rank(request):
             not_found_count = 0  # 未找到匹配考核记录的数量
 
             # 3. 预加载数据库关联数据，生成“名称-对象”映射（减少循环内数据库查询，提升性能）
-            # 3.1 学期映射：key为“学年+学期类型”（如“2023-2024第一学期”），value为Semester对象
+            # 3.1 学期映射：key为“学年+学期类型”（如“2023-2024下学期”），value为Semester对象
             semester_map = {}
             for sem in Semester.objects.all():
                 key = f"{sem.year}{sem.get_semester_type_display()}"  # 拼接易匹配的key
@@ -512,7 +512,7 @@ def headteacher_mid_update_rank(request):
                     # 校验学期
                     semester = semester_map.get(semester_str)
                     if not semester:
-                        raise ValueError(f"学期不存在（当前值：{semester_str}），请确认格式为“学年+学期类型”（如2023-2024第一学期）")
+                        raise ValueError(f"学期不存在（当前值：{semester_str}），请确认格式为“学年+学期类型”（如2023-2024下学期、2024-2025上学期）")
                     
                     # 校验考核类型
                     term_type = term_type_map.get(term_type_name)
