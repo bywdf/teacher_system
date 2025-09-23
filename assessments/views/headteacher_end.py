@@ -409,95 +409,139 @@ def headteacher_end_export(request):
 
 @superuser_required
 def headteacher_end_update_rank(request):
-    """更新教师学期考核数据的名次并将公示状态改为已公示"""
+    """更新班主任期末考核记录的名次，并将记录状态改为“已公示”
+    
+    核心流程：
+    1. 接收POST请求上传的期末考核名次Excel文件（含考核部门字段）
+    2. 解析Excel数据（学期、考核类型、考核部门、教师、班级、名次）
+    3. 多维度校验数据（含部门存在性、“部门+班级”唯一对应班主任）
+    4. 匹配并更新HeadTeacherFinalAssess模型的名次与公示状态
+    5. 收集处理结果并反馈前端，最终跳转回期末考核列表
+    """
     
     if request.method == "POST":
+        # 1. 接收并校验Excel文件是否上传
         excel_file = request.FILES.get('excel_file')
         if not excel_file:
-            messages.error(request, "请选择Excel文件")
-            return redirect('assessments:headteacher_end_list')
+            messages.error(request, "请选择需要上传的期末考核名次Excel文件")
+            return redirect('assessments:headteacher_end_list')  # 跳转回期末考核列表页
 
         try:
-            wb = load_workbook(excel_file)
-            ws = wb.active
-            errors = []
-            success_count = 0
-            updated_count = 0
-            not_found_count = 0
+            # 2. 初始化Excel处理工具与统计变量
+            wb = load_workbook(excel_file)  # 加载Excel文件（支持.xlsx格式）
+            ws = wb.active  # 获取Excel活动工作表（默认第一个工作表）
+            
+            # 统计与错误收集变量
+            errors = []  # 存储每一行数据的处理错误信息
+            success_count = 0  # 成功更新的期末考核记录数
+            updated_count = 0  # 实际修改的记录数
+            not_found_count = 0  # 未找到匹配期末考核记录的数量
 
-            # 学期映射字典
+            # 3. 预加载数据库关联数据，生成“名称-对象”映射
+            # 3.1 学期映射：key为“学年+学期类型”（如“2023-2024第二学期”）
             semester_map = {}
             for sem in Semester.objects.all():
                 key = f"{sem.year}{sem.get_semester_type_display()}"
                 semester_map[key] = sem
 
-            # 考核类型映射
+            # 3.2 考核类型映射：key为考核类型名称（如“期末考核”）
             term_type_map = {tt.name: tt for tt in TermType.objects.all()}
 
-            # 教师映射 (姓名->对象)
+            # 3.3 教师映射：key为教师姓名
             teacher_map = {t.name: t for t in UserInfo.objects.all()}
 
+            # 3.4 考核部门映射：key为部门名称（如“高一年级组”）
+            assess_depart_map = {ad.name: ad for ad in AssessDepart.objects.all()}
+            
+            # 3.5 【核心】班级-部门-班主任映射：key为“部门ID_班级号”（解决同班级号跨部门问题）
+            class_depart_teacher_map = {
+                f"{cls.assess_depart.id}_{cls.class_number}": cls.teacher 
+                for cls in HeadTeacherFinalAssess.objects.all()
+            }
+
+            # 4. 遍历Excel行数据（从第2行开始，跳过表头）
+            # Excel列顺序：0=学期, 1=考核类型, 2=考核部门, 3=教师姓名, 4=班级号, 5=名次
             for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                 try:
-                    # 跳过空行
+                    # 4.1 跳过空行
                     if not any(row):
                         continue
 
-                    # 获取关键字段（班级编号现为普通字段，假设在第4列）
-                    semester_str = row[0]
-                    term_type_name = row[1]
-                    teacher_name = row[2]
-                    class_number = row[3]  # 班级号作为普通字段
-                    rank_value = row[4]    # 名次列后移一位
-                    
-                    # 类型转换和空值处理
-                    if semester_str is not None:
-                        semester_str = str(semester_str).strip()
-                    if term_type_name is not None:
-                        term_type_name = str(term_type_name).strip()
-                    if teacher_name is not None:
-                        teacher_name = str(teacher_name).strip()
-                    
-                    # 验证必填字段
-                    if not all([semester_str, term_type_name, teacher_name, class_number, rank_value]):
-                        raise ValueError("所有字段都不能为空")
-                    
-                    # 处理班级号（转为整数类型）
+                    # 4.2 提取Excel当前行关键字段（row[2]为考核部门）
+                    semester_str = row[0]          # 列1：学期
+                    term_type_name = row[1]        # 列2：考核类型
+                    assess_depart_name = row[2]    # 列3：考核部门
+                    teacher_name = row[3]          # 列4：教师姓名
+                    class_number = row[4]          # 列5：班级号
+                    rank_value = row[5]            # 列6：名次
+
+                    # 4.3 字段预处理：空值处理+字符串去空格
+                    semester_str = str(semester_str).strip() if semester_str else None
+                    term_type_name = str(term_type_name).strip() if term_type_name else None
+                    assess_depart_name = str(assess_depart_name).strip() if assess_depart_name else None
+                    teacher_name = str(teacher_name).strip() if teacher_name else None
+
+                    # 4.4 基础校验：必填字段不能为空（包含考核部门）
+                    required_fields = [semester_str, term_type_name, assess_depart_name, 
+                                      teacher_name, class_number, rank_value]
+                    if not all(required_fields):
+                        raise ValueError("学期、考核类型、考核部门、教师姓名、班级号、名次均为必填字段，不可为空")
+
+                    # 4.5 格式校验：班级号、名次、部门
+                    # 班级号转整数
                     try:
-                        class_number = int(class_number)  # 转为整数
+                        class_number = int(class_number)
                     except (TypeError, ValueError):
-                        raise ValueError(f"班级号必须是整数: {class_number}")
+                        raise ValueError(f"班级号格式错误，必须为整数（当前值：{class_number}）")
                     
-                    # 验证名次格式
+                    # 名次格式校验
                     try:
                         rank_float = float(rank_value)
                         if rank_float <= 0:
-                            raise ValueError("名次必须大于0")
+                            raise ValueError("名次必须为大于0的数字（如1、2、3.5）")
+                        # 若需整数名次可启用：rank_float = int(rank_float)
                     except (TypeError, ValueError):
-                        raise ValueError("名次必须是有效数字")
+                        raise ValueError(f"名次格式错误，必须为有效数字（当前值：{rank_value}）")
                     
-                    # 获取关联对象
+                    # 考核部门存在性校验
+                    assess_depart = assess_depart_map.get(assess_depart_name)
+                    if not assess_depart:
+                        raise ValueError(f"考核部门「{assess_depart_name}」不存在，请确认部门名称与系统配置一致")
+
+                    # 4.6 关联对象存在性校验
+                    # 校验学期
                     semester = semester_map.get(semester_str)
                     if not semester:
-                        raise ValueError(f"学期 '{semester_str}' 不存在")
+                        raise ValueError(f"学期不存在（当前值：{semester_str}），请确认格式为“学年+学期类型”")
                     
+                    # 校验考核类型
                     term_type = term_type_map.get(term_type_name)
                     if not term_type:
-                        raise ValueError(f"考核类型 '{term_type_name}' 不存在")
+                        raise ValueError(f"考核类型不存在（当前值：{term_type_name}），请确认类型名称正确")
                     
+                    # 校验教师
                     teacher = teacher_map.get(teacher_name)
                     if not teacher:
-                        raise ValueError(f"教师 '{teacher_name}' 不存在")
-                    
-                    # 查找并更新记录（直接使用class_number字段）
+                        raise ValueError(f"教师不存在（当前值：{teacher_name}），请确认教师姓名正确")
+
+                    # 4.7 【核心校验】班主任与部门+班级的唯一性匹配
+                    check_key = f"{assess_depart.id}_{class_number}"
+                    if class_depart_teacher_map.get(check_key) != teacher:
+                        raise ValueError(
+                            f"教师「{teacher_name}」不是「{assess_depart_name}」部门下班级「{class_number}」的班主任，无法更新考核名次"
+                        )
+
+                    # 4.8 匹配并更新期末考核记录（包含考核部门条件）
                     try:
+                        # 严格匹配模型的unique_together约束：semester+term_type+assess_depart+class_number
                         assess = HeadTeacherFinalAssess.objects.get(
-                            teacher=teacher,
                             semester=semester,
                             term_type=term_type,
-                            class_number=class_number  # 直接使用整数类型
+                            assess_depart=assess_depart,  # 关键：加入考核部门条件
+                            class_number=class_number,
+                            teacher=teacher
                         )
-                        
+
                         # 更新名次和公示状态
                         assess.rank = rank_float
                         assess.is_published = True
@@ -505,29 +549,33 @@ def headteacher_end_update_rank(request):
                         
                         success_count += 1
                         updated_count += 1
-                        
+
                     except HeadTeacherFinalAssess.DoesNotExist:
                         not_found_count += 1
-                        errors.append(f"第 {row_num} 行: 找不到匹配的记录 - 教师: {teacher_name}, 班级: {class_number}, 学期: {semester_str}, 考核类型: {term_type_name}")
+                        errors.append(
+                            f"第 {row_num} 行: 未找到匹配的期末考核记录 "
+                            f"[部门：{assess_depart_name}，教师：{teacher_name}，班级：{class_number}，学期：{semester_str}]"
+                        )
 
                 except Exception as e:
-                    errors.append(f"第 {row_num} 行错误: {str(e)}")
+                    errors.append(f"第 {row_num} 行错误：{str(e)}")
 
-            # 结果统计
-            result_message = f"成功更新 {success_count} 条记录"
+            # 5. 处理结果反馈
+            result_message = f"成功更新 {success_count} 条期末考核记录"
             if not_found_count > 0:
-                result_message += f"，未找到 {not_found_count} 条记录"
+                result_message += f"，未找到 {not_found_count} 条匹配记录"
             
             if errors:
                 messages.warning(request, result_message)
-                for error in errors[:5]:  # 最多显示5条错误
+                for error in errors[:5]:
                     messages.error(request, error)
                 if len(errors) > 5:
-                    messages.info(request, f"还有 {len(errors)-5} 条错误未显示...")
+                    messages.info(request, f"还有 {len(errors)-5} 条错误未显示，可检查Excel对应行数据")
             else:
                 messages.success(request, result_message)
 
         except Exception as e:
-            messages.error(request, f"文件处理错误: {str(e)}")
+            messages.error(request, f"文件处理失败：{str(e)}（建议检查Excel文件格式是否为.xlsx）")
 
+    # 跳转回期末考核列表页
     return redirect('assessments:headteacher_end_list')
