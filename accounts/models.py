@@ -4,9 +4,7 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 import os
 
-
 # Create your models here.
-
 
 class Department(models.Model):
     """年级（部门）"""
@@ -45,8 +43,7 @@ class UserInfo(AbstractUser):
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, verbose_name="所属年级（部门）")
     subject = models.ForeignKey(
-        Subject, on_delete=models.SET_NULL, null=True, verbose_name="任教学科")
-    
+        Subject, on_delete=models.SET_NULL, null=True, verbose_name="任教学科")    
     
     # 民族
     nation = models.CharField(verbose_name="民族", max_length=100, blank=True, null=True)
@@ -56,9 +53,7 @@ class UserInfo(AbstractUser):
     native_place = models.CharField(verbose_name="籍贯", max_length=100, blank=True, null=True)
     # 现住址
     address = models.CharField(verbose_name="现住址", max_length=100, blank=True, null=True)
-
-    
-    
+        
     # 第一学历
     first_education = models.CharField(verbose_name="第一学历", max_length=100, blank=True, null=True)
     # 第一学历毕业院校
