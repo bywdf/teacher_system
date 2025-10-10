@@ -23,6 +23,7 @@
           <tr>
             <th>ID</th>
             <th>名称</th>
+            <th>备注</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -31,6 +32,7 @@
             <tr>
               <th scope="row">{{ obj.id }}</th>
               <td>{{ obj.name }}</td>
+              <td>{{ obj.description }}</td>
               <td>
                 <a class="btn btn-primary btn-xs"
                    href="/certificate/school_certificate/{{ obj.id }}/edit/">编辑</a>
