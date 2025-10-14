@@ -79,7 +79,8 @@ class TeacherSchoolCertificate(models.Model):
         upload_to=certificate_upload_path,
         verbose_name="证书文件",
         help_text="支持图片(JPG, PNG)或PDF格式",
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])]
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])],
+        blank=True, null=True
     )
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="上传时间")
     notes = models.TextField(blank=True, verbose_name="备注")
@@ -122,7 +123,8 @@ class TeacherExternalCertificate(models.Model):
         upload_to=certificate_upload_path,
         verbose_name="证书文件",
         help_text="支持图片(JPG, PNG)或PDF格式",
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])]
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf']),],
+        blank=True, null=True
     )
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="上传时间")
     notes = models.TextField(blank=True, verbose_name="备注")
@@ -145,3 +147,47 @@ class TeacherExternalCertificate(models.Model):
     
     def is_pdf(self):
         return self.file_extension() == '.pdf'
+    
+    
+    
+# 副班主任经历模型
+class DeputyHeadTeacherExperience(models.Model):
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='deputy_head_teacher_experiences',
+        verbose_name="教师"
+    )
+    school_year = models.CharField(max_length=200, verbose_name="学年")
+    remark = models.TextField(verbose_name="备注", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "副班主任经历"
+        verbose_name_plural = "副班主任经历"
+        ordering = ['-school_year']
+
+    def __str__(self):
+        return f"{self.teacher} - {self.school_year}"
+    
+    
+    
+# 年度考核模型
+class AnnualAssessment(models.Model):
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='annual_assessments',
+        verbose_name="教师"
+    )
+    year = models.CharField(max_length=200, verbose_name="年度")
+    # 当年是否记功，默认是否
+    merit = models.BooleanField(default=False, verbose_name="记功")
+    remark = models.TextField(verbose_name="备注", blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "年度考核"
+        verbose_name_plural = "年度考核"
+        ordering = ['-year']
+
+    def __str__(self):
+        return f"{self.teacher} - {self.year}"
