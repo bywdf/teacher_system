@@ -20,6 +20,9 @@ accounts/migrations/** -diff -merge -checkout
 assessments/migrations/** export-ignore
 assessments/migrations/** -diff -merge -checkout
 
+certificate/migrations/** export-ignore
+certificate/migrations/** -diff -merge -checkout
+
 # 添加新应用的配置
 # /new_app/migrations/** export-ignore
 # /new_app/migrations/** -diff -merge -checkout
