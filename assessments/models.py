@@ -681,6 +681,7 @@ class GroupLeaderBase(models.Model):
         verbose_name='教学水平(教学常规薄本评价)得分', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
     rank = models.FloatField(verbose_name='名次', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
         abstract = True
