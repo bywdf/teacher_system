@@ -767,6 +767,7 @@ class HeadTeacherBase(models.Model):
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
     rank = models.FloatField(verbose_name='名次', blank=True, null=True)
     remark = models.TextField(verbose_name='备注', blank=True, null=True)
+    is_published = models.BooleanField(verbose_name="是否公布", default=False)
 
     class Meta:
         abstract = True
