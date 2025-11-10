@@ -149,6 +149,12 @@ class TeacherExternalCertificate(models.Model):
         return self.file_extension() == '.pdf'
     
     
+
+class Year(models.Model):
+    '''放副班主任经历的学年和年度考核的年度'''
+    school_year = models.CharField(max_length=200, verbose_name="学年")
+    year = models.CharField(max_length=200, verbose_name="年度")
+    
     
 # 副班主任经历模型
 class DeputyHeadTeacherExperience(models.Model):
@@ -158,7 +164,7 @@ class DeputyHeadTeacherExperience(models.Model):
         related_name='deputy_head_teacher_experiences',
         verbose_name="教师"
     )
-    school_year = models.CharField(max_length=200, verbose_name="学年")
+    school_year = models.ForeignKey(Year, on_delete=models.CASCADE, verbose_name="学年")
     remark = models.TextField(verbose_name="备注", blank=True, null=True)
 
     class Meta:
@@ -179,7 +185,7 @@ class AnnualAssessment(models.Model):
         related_name='annual_assessments',
         verbose_name="教师"
     )
-    year = models.CharField(max_length=200, verbose_name="年度")
+    year = models.ForeignKey(Year, on_delete=models.CASCADE, verbose_name="年度")
     # 当年是否记功，默认是否
     merit = models.BooleanField(default=False, verbose_name="记功")
     remark = models.TextField(verbose_name="备注", blank=True, null=True)
