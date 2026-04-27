@@ -934,13 +934,15 @@ class DeputyHeadTeacher(models.Model):
     assess_time = models.CharField(
         max_length=50, verbose_name='考核时间', blank=True, null=True)
     class_number = models.IntegerField(
-        verbose_name='班级', blank=True, null=True)
-    # 问卷评价得分
-    questionnaire_score = models.FloatField(
-        verbose_name='问卷评价得分', blank=True, null=True)
-    # 工作过程评价
-    work_process_score = models.FloatField(
-        verbose_name='工作过程评价', blank=True, null=True)
+        verbose_name='任职班级', blank=True, null=True)
+    # 会议及集体活动（5）
+    participation_score = models.FloatField(
+        verbose_name='会议及集体活动', blank=True, null=True)
+    # 值班得分
+    duty_score = models.FloatField(
+        verbose_name='值班', blank=True, null=True)
+    edge_student_score = models.FloatField(
+        verbose_name='班级边缘生帮扶评价', blank=True, null=True)
     # 工作心得
     work_experience_score = models.FloatField(
         verbose_name='工作心得', blank=True, null=True)
@@ -948,8 +950,6 @@ class DeputyHeadTeacher(models.Model):
     democratic_score = models.FloatField(
         verbose_name='民主评议得分', blank=True, null=True)
     # 班级边缘生帮扶评价
-    edge_student_score = models.FloatField(
-        verbose_name='班级边缘生帮扶评价', blank=True, null=True)
     class_score = models.FloatField(
         verbose_name='班级综合管理考核成绩', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)
