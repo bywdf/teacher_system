@@ -938,18 +938,21 @@ class DeputyHeadTeacher(models.Model):
     # 会议及集体活动（5）
     participation_score = models.FloatField(
         verbose_name='会议及集体活动', blank=True, null=True)
-    # 值班得分
+    # 值班得分（20）
     duty_score = models.FloatField(
         verbose_name='值班', blank=True, null=True)
+    # 加班或志愿服务（5）
+    service_score = models.FloatField( verbose_name="加班或志愿服务工作", blank=True, null=True)
+    # 边缘生帮扶评价（40）
     edge_student_score = models.FloatField(
         verbose_name='班级边缘生帮扶评价', blank=True, null=True)
-    # 工作心得
+    # 工作心得（10）
     work_experience_score = models.FloatField(
         verbose_name='工作心得', blank=True, null=True)
-    # 民主评议得分
+    # 民主评议得分（10）
     democratic_score = models.FloatField(
         verbose_name='民主评议得分', blank=True, null=True)
-    # 班级边缘生帮扶评价
+    # 班级边缘生帮扶评价（10）
     class_score = models.FloatField(
         verbose_name='班级综合管理考核成绩', blank=True, null=True)
     total_score = models.FloatField(verbose_name='总成绩', blank=True, null=True)

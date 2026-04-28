@@ -127,12 +127,13 @@
                         <th>姓名</th>
                         <th>学科</th>
                         <th>任职班级</th>
-                        <th>问卷评价5%</th>
-                        <th>工作过程评价20%</th>
-                        <th>工作心得5%</th>
-                        <th>民主评议20%</th>
-                        <th>班级边缘生帮扶评价25%</th>
-                        <th>班级综合管理考核成绩25%</th>
+                        <th>会议及集体活动5%</th>
+                        <th>值班20%</th>
+                        <th>加班或志愿服务工作5%</th>
+                        <th>边缘生帮扶40%</th>
+                        <th>工作心得10%</th>
+                        <th>民主评议10%</th>
+                        <th>班级综合管理考核成绩10%</th>
                         <th>总成绩</th>
                         <th>名次</th>
                         <th>公示完成</th>
@@ -150,11 +151,12 @@
                           <td>{{ obj.teacher.name }}</td>
                           <td>{{ obj.teacher.subject }}</td>
                           <td>{{ obj.class_number }}</td>
-                          <td>{{ obj.questionnaire_score }}</td>
-                          <td>{{ obj.work_process_score }}</td>
+                          <td>{{ obj.participation_score }}</td>
+                          <td>{{ obj.duty_score }}</td>
+                          <td>{{ obj.service_score }}</td>
+                          <td>{{ obj.edge_student_score }}</td>
                           <td>{{ obj.work_experience_score }}</td>
                           <td>{{ obj.democratic_score }}</td>
-                          <td>{{ obj.edge_student_score }}</td>
                           <td>{{ obj.class_score }}</td>
                           <td>{{ obj.total_score }}</td>
                           <td>{{ obj.rank | default:"" }}</td>
